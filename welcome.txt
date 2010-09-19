@@ -1,0 +1,10 @@
+Hi team!
+
+This is your CS 251 SVN repository for the term.  You will, no doubt,
+come to love subversion, Scheme, C, and segmentation faults over the
+course of the term.  But, first, to get yourself in an appropriately
+CS 251-y mood, go google "recursion".  
+
+Good job!  Welcome, and enjoy the term.
+
+-- dln
