@@ -2,6 +2,6 @@ This is a text file in the smithc folder.
 
 Carl edited here.
 
-DAN EDITED HEREE
+DAN EDITED HEREE -- hihihihi
 
 I'm editing this file. -Evan
