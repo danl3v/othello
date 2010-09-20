@@ -1,1 +1,3 @@
 This is a text file in the smithc folder.
+
+I'm editing this file. -Evan
