@@ -1,7 +1,11 @@
+;; Team Othello
+;; math.ss
+;; September 24, 2010
+
 (define my-zero?
   (lambda (x)
     (= 0 x)))
-
+         
 (define my-positive?
   (lambda (x) 
     (> x 0)))
@@ -26,11 +30,15 @@
 
 (define my-even?
   (lambda (x)
-    (= (my-mod x 2) 0)))
+    (if (my-integer? x)
+        (= (my-mod x 2) 0)
+         "oops!")))
 
 (define my-odd?
   (lambda (x)
-    (= (my-mod x 2) 1)))
+    (if (my-integer? x)
+        (= (my-mod x 2) 1)
+        "oops!")))
 
 (define my-floor
   (lambda (x)
@@ -49,6 +57,10 @@
         (my-floor x)
         (my-ceiling x))))
 
+(define my-integer?
+  (lambda (x)
+    (= (truncate x) x)))
+
 (define my-round
   (lambda (x)
     (define y (my-mod x 1))
@@ -63,5 +75,65 @@
 (define my-div
   (lambda (x y)
     (if (my-positive? x)
-        (my-floor (/ x y))
-        (my-ceiling (/ x y)))))
+        (if (my-positive? y)
+            (my-floor (/ x y))
+            (- 0 (my-floor (/ x (my-abs y)))))
+        (if (my-positive? y)
+            (- 0 (my-ceiling (/ (my-abs x) y)))
+            (my-ceiling (/ x y))))))
+  
+
+(define my-max
+  (lambda (x . y)
+    (my-max-helper x y)))
+
+(define my-max-helper
+  (lambda (x y)
+    (if (equal? y '())
+        x
+        (if (< x (car y))
+            (my-max-helper (car y) (cdr y))
+            (my-max-helper x (cdr y))))))
+
+(define my-min
+  (lambda (x . y)
+    (my-min-helper x y)))
+
+(define my-min-helper
+  (lambda (x y)
+    (if (equal? y '())
+        x
+        (if (> x (car y))
+            (my-min-helper (car y) (cdr y))
+            (my-min-helper x (cdr y))))))
+
+(define my-gcd
+  (lambda (x . y)
+    (my-gcd-helper x y)))
+
+(define my-gcd-helper
+  (lambda (x y)
+    (if (equal? y '())
+        (my-abs x)
+        (if (= (my-abs x) (my-abs (car y)))
+            (my-gcd-helper x (cdr y))
+            (if (< (my-abs x) (my-abs (car y)))
+               (my-gcd-helper (- (my-abs (car y)) (my-abs x)) (cons x (cdr y)))
+               (my-gcd-helper (- (my-abs x) (my-abs (car y))) y))))))
+(define my-lcm
+  (lambda (x . y)
+    (my-lcm-helper x y)))
+
+(define my-lcm-helper
+  (lambda (x y)
+    (if (equal? y '())
+        x
+        (my-lcm-helper (/ (my-abs (* x (car y))) (my-gcd x (car y))) (cdr y)))))
+
+(define my-expt
+  (lambda (x y)
+    (if (my-positive? y)
+        (* x (my-expt x (- y 1)))
+        (if (my-zero? y)
+            1
+            (/ (my-expt x (+ y 1)) x)))))
