@@ -66,7 +66,9 @@
         result
         (my-reverse-helper (cdr L) (cons (car L) result)))))
 
-;; (define my-list?
+(define my-list?
+  (lambda (L)
+    (or (null? L) (and (pair? L) (my-list? (cdr L))))))
 
 (define my-list-ref
   (lambda (L i)
