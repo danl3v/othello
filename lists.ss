@@ -1,3 +1,7 @@
+;; Team Othello
+;; lists.ss
+;; October 4, 2010
+
 (define my-caar
   (lambda (L)
     (car (car L))))
@@ -225,33 +229,3 @@
         (if (f (my-caar L))
             (car L)
             (my-assp f (cdr L))))))
-
-(define othello-list-tester
-  (list '((my-caar '((1 2) (3 4) (5 6) (7 8))) 1)
-        '((my-cadr '((1 2) (3 4) (5 6) (7 8))) '(3 4))
-        '((my-cadar '((1 2 3) (4 5 6) (7 8 9))) 2)
-        '((my-cdddar '((1 2 3 4) (4 5 6) (7 8))) '(4)) ;we also have all permutations up to 4 car/cdr
-        '((my-list 1 2 3) '(1 2 3))
-        '((my-list) '())
-        '((my-length '(1 2 3 4)) 4)
-        '((my-length '()) 0)
-        '((my-list-tail '(0 1 2 3 4) 3) '(3 4))
-        '((my-member 'a '(1 2 3 a b c)) '(a b c))
-        '((my-member 'z '(1 2 3 a b c)) #f)
-        '((my-assq 2 '((0 a) (1 b) (2 c) (3 d))) '(2 c))
-        '((my-assq -3 '((0 a) (1 b) (2 c) (3 d))) #f)
-        '((my-map (lambda (x) (* x x)) '(1 2 3)) '(1 4 9))
-        '((my-append '(a b) '(c d)) '(a b c d))
-        '((my-append '(a b) 'c) '(a b . c))
-        '((my-reverse '(1 2 3)) '(3 2 1))
-        '((my-list? (cons 1 2)) #f)
-        '((my-list? (cons 1 '(2 3))) #t)
-        '((my-list-ref '(1 2 3 4 5) 3) 4)
-        '((my-cons* 1 2 3 '(4 5)) '(1 2 3 4 5))
-        '((my-cons* 3) 3)
-        '((my-memp even? '(1 2 3)) '(2 3))
-        '((my-remq 2 '(1 2 3 2 4 5)) '(1 3 4 5))
-        '((my-remp even? '(1 2 3 4 5)) '(1 3 5))
-        '((my-filter even? '(1 2 3 4 5)) '(2 4))
-        '((my-find even? '(1 2 3 4 5)) 2)
-        '((my-assp even? '((1 a) (2 b) (3 c))) '(2 b))))
