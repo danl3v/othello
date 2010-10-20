@@ -28,6 +28,7 @@ int pushToken(LinkedList *tokenList, int type, char * string) {
 		token->type = type;
 		switch (type) {
 			case booleanType:
+			   /* token->val.boolValue = (!strcmp(string,"T") || !strcmp(string,"t")); */
 				if (strcmp(string, "T") == 0 || strcmp(string, "t") == 0) {
 					token->val.boolValue = 1;
 				}
@@ -40,9 +41,11 @@ int pushToken(LinkedList *tokenList, int type, char * string) {
 				break;
 			case floatType:
 				token->val.floatValue = strtod(string, &pEnd);
+				/* free string! */
 				break;
 			case stringType: //CLEAN UP MEMORY *********
-				token->val.stringValue = malloc(strlen(string)*sizeof(char)+1);
+			   /* don't malloc here! you're leaking memory! */
+				token->val.stringValue = malloc(strlen(string)*sizeof(char)+1); 
 				token->val.stringValue = string;
 				break;
 			case symbolType:

@@ -94,3 +94,16 @@ void printList(LinkedList *list) {
    }
 }
 
+/* void freeValue(Value *value) { */
+/*    switch (value->type) { */
+/*    case stringType: */
+/*       free("the string"); */
+/*       break; */
+/*    case symbolType: */
+/*       free("the name"); */
+/*       break; */
+/*    ... */
+/*    } */
+   
+/*    free(value); */
+/* } */
