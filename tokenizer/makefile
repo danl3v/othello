@@ -1,13 +1,13 @@
 all: tester.c lists.c tokenizer.c
 	gcc -o tokenizer tester.c lists.c tokenizer.c
 
-test1:
+test0:
 	cat token-test.input.00 | ./tokenizer | diff token-test.output.00 -
 
 test1:
 	cat token-test.input.01 | ./tokenizer | diff token-test.output.01 -
 
-testt2:
+test2:
 	cat token-test.input.02 | ./tokenizer | diff token-test.output.02 -
 
 test3:
