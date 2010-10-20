@@ -1,0 +1,2098 @@
+!!! Disagreement on ./hamlet/tokenizer/token-test.input.3:
+      ------- INPUT FILE -------------
+     ("here's a float" .5 1.5 1111.55ad.43))
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (:open                        
+  !!      ):close                        "here's a float":string       
+  !!      1111.55ad.43:symbol            0.5:float                     
+  !!      1.500000:float                 1.5:float                     
+  !!      0.500000:float                 1111.55ad.43:symbol           
+  !!      "here's a float":string        ):close                       
+  !!      (:open                         ):close                       
+!!! Disagreement on ./hamlet/tokenizer/token-test.input.14:
+      ------- INPUT FILE -------------
+     (/stuff "string" boo +123 = blah)))
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (:open                        
+  !!      ):close                        /stuff:symbol                 
+  !!      ):close                        "string":string               
+  !!      blah:symbol                    boo:symbol                    
+  !!      =:symbol                       +123:symbol                   
+  !!      123:integer                    =:symbol                      
+  !!      boo:symbol                     blah:symbol                   
+  !!      "string":string                ):close                       
+  !!      /stuff:symbol                  ):close                       
+  !!      (:open                         ):close                       
+!!! Disagreement on ./hamlet/tokenizer/token-test.input.13:
+      ------- INPUT FILE -------------
+     | # what now (8888823)23r2)
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      error - no t or f after #      |:symbol                      
+  !!      error - no t or f after #      #:symbol                      
+  !!      error - no t or f after #      what:symbol                   
+  !!      error - no t or f after #      now:symbol                    
+  !!      ):close                        (:open                        
+  !!      23r2:symbol                    8888823:integer               
+          ):close                        ):close                       
+  !!      8888823:integer                23r2:symbol                   
+  !!      (:open                         ):close                       
+  !!      now:symbol                                                   
+  !!      #f:boolean                                                   
+  !!      |:symbol                                                     
+!!! Disagreement on ./hamlet/tokenizer/token-test.input.6:
+      ------- INPUT FILE -------------
+     (+gh 2a3)(     +      "wee"      6;comment
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      6:integer                      (:open                        
+  !!      "wee":string                   +gh:symbol                    
+  !!      +:symbol                       2a3:symbol                    
+  !!      (:open                         ):close                       
+  !!      ):close                        (:open                        
+  !!      2a3:symbol                     +:symbol                      
+  !!      +gh:symbol                     "wee":string                  
+  !!      (:open                         6:integer                     
+                                                                       
+!!! Disagreement on ./hamlet/tokenizer/token-test.input.7:
+      ------- INPUT FILE -------------
+     "more string ;; and comment testing" ;;real comment
+     
+     
+     
+     
+     
+     what about now huh? ; 
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+          "more string ;; and comment testing":string "more string ;; and comment testing":string
+  !!      huh?:symbol                    what:symbol                   
+  !!      now:symbol                     about:symbol                  
+  !!      about:symbol                   now:symbol                    
+  !!      what:symbol                    huh?:symbol                   
+!!! Disagreement on ./hamlet/tokenizer/token-test.input.8:
+      ------- INPUT FILE -------------
+     "foo 'quote time still string"
+     ' that was a single quote 
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+          "foo 'quote time still string":string "foo 'quote time still string":string
+  !!      quote:symbol                   ':quote                       
+  !!      single:symbol                  that:symbol                   
+  !!      a:symbol                       was:symbol                    
+  !!      was:symbol                     a:symbol                      
+  !!      that:symbol                    single:symbol                 
+  !!      ':quote                        quote:symbol                  
+!!! CRASH on ./hamlet/tokenizer/token-test.input.9
+      ------- INPUT FILE -------------
+     (
+!!! Disagreement on ./hamlet/tokenizer/token-test.input.11:
+      ------- INPUT FILE -------------
+     .a235 000.3643.0 boo.ya 
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      boo.ya:symbol                  .a235:symbol                  
+          000.3643.0:symbol              000.3643.0:symbol             
+  !!      .a235:symbol                   boo.ya:symbol                 
+!!! CRASH on ./hamlet/tokenizer/token-test.input.10
+      ------- INPUT FILE -------------
+     "oo what now?
+!!! Disagreement on ./hamlet/tokenizer/token-test.input.2:
+      ------- INPUT FILE -------------
+     (#t "is true" ;; blarg what now?)
+     (andNow "nbd, we got this" (#f ));or not
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      "is true":string               (:open                        
+          #t:boolean                     #t:boolean                    
+  !!      (:open                         "is true":string              
+  !!      ):close                        (:open                        
+  !!      ):close                        andNow:symbol                 
+  !!      #f:boolean                     "nbd, we got this":string     
+          (:open                         (:open                        
+  !!      "nbd, we got this":string      #f:boolean                    
+  !!      andNow:symbol                  ):close                       
+  !!      (¡                            P¡                           
+!!! Disagreement on ./hamlet/tokenizer/token-test.input.5:
+      ------- INPUT FILE -------------
+     '(wassup this is a bunch of symbols quote) ;;peace
+     
+     
+     
+     
+     
+     one more 
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        ':quote                       
+  !!      quote:symbol                   (:open                        
+  !!      symbols:symbol                 wassup:symbol                 
+  !!      of:symbol                      this:symbol                   
+  !!      bunch:symbol                   is:symbol                     
+          a:symbol                       a:symbol                      
+  !!      is:symbol                      bunch:symbol                  
+  !!      this:symbol                    of:symbol                     
+  !!      wassup:symbol                  symbols:symbol                
+  !!      (:open                         quote:symbol                  
+  !!      ':quote                        ):close                       
+  !!      moreêsg                        :symbol                       
+  !!      one                            êrg                           
+!!! Disagreement on ./hamlet/tokenizer/token-test.input.12:
+      ------- INPUT FILE -------------
+     running out of ideas ;daf ;dafdsa 
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ideas:symbol                   running:symbol                
+  !!      of:symbol                      out:symbol                    
+  !!      out:symbol                     of:symbol                     
+  !!      running:symbol                 ideas:symbol                  
+!!! Disagreement on ./hamlet/tokenizer/token-test.input.15:
+      ------- INPUT FILE -------------
+            (wha         blac( teh)
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (:open                        
+  !!      teh:symbol                     wha:symbol                    
+  !!      (:open                         blac:symbol                   
+  !!      blac:symbol                    (:open                        
+  !!      wha:symbol                     teh:symbol                    
+  !!      (:open                         ):close                       
+!!! Disagreement on ./hamlet/tokenizer/token-test.input.1:
+      ------- INPUT FILE -------------
+     (+ 1 (concat 7 addd5) "sttring blach") ;;comment ftw
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (:open                        
+  !!      "sttring blach":string         +:symbol                      
+  !!      ):close                        1:integer                     
+  !!      addd5:symbol                   (:open                        
+  !!      7:integer                      concat:symbol                 
+  !!      concat:symbol                  7:integer                     
+  !!      (:open                         addd5:symbol                  
+  !!      1:integer                      ):close                       
+  !!      +:symbol                       "sttring blach":string        
+  !!      (:open                         ):close                       
+!!! Disagreement on ./hamlet/tokenizer/token-test.input.4:
+      ------- INPUT FILE -------------
+     ((
+     
+     
+     
+     hi
+     
+     
+     
+     .553
+     
+     #trrrrruuuue))
+     
+     ;;booya
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+          (:open                         (:open                        
+          (:open                         (:open                        
+          hi:symbol                      hi:symbol                     
+  !!      0.553000:float                 0.553:float                   
+  !!      ):close                        #t:boolean                    
+  !!      ):close                        rrrrruuuue:symbol             
+  !!      rrrrruuuue:symbol              ):close                       
+  !!      #t:boolean                     ):close                       
+!!! Disagreement on ./hamlet/tokenizer/token-test.input.16:
+      ------- INPUT FILE -------------
+     and "we're" s0000 d.ne )
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        and:symbol                    
+  !!      d.ne:symbol                    "we're":string                
+          s0000:symbol                   s0000:symbol                  
+  !!      "we're":string                 d.ne:symbol                   
+  !!      and:symbol                     ):close                       
+!!! Disagreement on ./king-lear/tokenizer/token-test.input.3:
+      ------- INPUT FILE -------------
+     (map + '(2 3 x 4) '(2 1 y a))
+     
+     
+     
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (:open                        
+  !!      ):close                        map:symbol                    
+  !!      a:symbol                       +:symbol                      
+  !!      y:symbol                       ':quote                       
+  !!      1:integer                      (:open                        
+          2:integer                      2:integer                     
+  !!      (:open                         3:integer                     
+  !!      ':quote                        x:symbol                      
+  !!      ):close                        4:integer                     
+  !!      4:integer                      ):close                       
+  !!      x:symbol                       ':quote                       
+  !!      3:integer                      (:open                        
+          2:integer                      2:integer                     
+  !!      (:open                         1:integer                     
+  !!      ':quote                        y:symbol                      
+  !!      +:symbol                       a:symbol                      
+  !!      map:symbol                     ):close                       
+  !!      (:open                         ):close                       
+!!! Disagreement on ./king-lear/tokenizer/token-test.input.14:
+      ------- INPUT FILE -------------
+     (if #t
+     	(append 3 '(4 5.23))
+     	(print "I'm sorry"))
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      :symbol                       (:open                        
+  !!      #t:boolean                     if:symbol                     
+  !!      if:symbol                      #t:boolean                    
+          (:open                         (:open                        
+  !!      :symbol                       append:symbol                 
+  !!      ):close                        3:integer                     
+  !!      ):close                        ':quote                       
+  !!      5.230000:float                 (:open                        
+          4:integer                      4:integer                     
+  !!      (:open                         5.23:float                    
+  !!      ':quote                        ):close                       
+  !!      3:integer                      ):close                       
+  !!      append:symbol                  (:open                        
+  !!      (:open                         print:symbol                  
+  !!                                     !˙P!˙:symbol                
+          ):close                        ):close                       
+          ):close                        ):close                       
+  !!      "I'm sorry":string                                           
+  !!      print#˙:symbol                                              
+  !!      (#˙:open                                                    
+  !!                                     "˙"˙:symbol                
+!!! Disagreement on ./king-lear/tokenizer/token-test.input.13:
+      ------- INPUT FILE -------------
+     (define my-even? (lambda (n)  (if (my-zero? (my-mod n 2)) #t #f)))
+     
+     
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (:open                        
+  !!      ):close                        define:symbol                 
+  !!      ):close                        my-even?:symbol               
+  !!      #f:boolean                     (:open                        
+  !!      #t:boolean                     lambda:symbol                 
+  !!      ):close                        (:open                        
+  !!      ):close                        n:symbol                      
+  !!      2:integer                      ):close                       
+  !!      n:symbol                       (:open                        
+  !!      my-mod:symbol                  if:symbol                     
+          (:open                         (:open                        
+          my-zero?:symbol                my-zero?:symbol               
+          (:open                         (:open                        
+  !!      if:symbol                      my-mod:symbol                 
+  !!      (:open                         n:symbol                      
+  !!      ):close                        2:integer                     
+  !!      n:symbol                       ):close                       
+  !!      (:open                         ):close                       
+  !!      lambda:symbol                  #t:boolean                    
+  !!      (:open                         #f:boolean                    
+  !!      my-even?:symbol                ):close                       
+  !!      define:symbol                  ):close                       
+  !!      (:open                         ):close                       
+!!! Disagreement on ./king-lear/tokenizer/token-test.input.08:
+      ------- INPUT FILE -------------
+     (define sumlist
+       (lambda (L)
+         (if (null? L)
+             0
+             (+ (car L) (sumlist (cdr L))))))
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      sumlist:symbol                (:open                        
+          define:symbol                  define:symbol                 
+  !!      (:open                         sumlist:symbol                
+  !!      :symbol                       (:open                        
+  !!      ):close                        lambda:symbol                 
+  !!      L:symbol                       (:open                        
+  !!      (:open                         L:symbol                      
+  !!      lambda:symbol                  ):close                       
+  !!      (Ò5                            PÒ5                           
+  !!      :symbol                       if:symbol                     
+  !!      ):close                        (:open                        
+  !!      L:symbol                       null?:symbol                  
+  !!      null?:symbol                   L:symbol                      
+  !!      (:open                         ):close                       
+  !!      if:symbol                      0:integer                     
+  !!      (Ú5                            Ò5                           
+  !!      05                            Ú5                           
+  !!      :symbol                       (:open                        
+  !!      ):close                        car:symbol                    
+  !!      ):close                        L:symbol                      
+          ):close                        ):close                       
+  !!      ):close                        (:open                        
+  !!      ):close                        sumlist:symbol                
+  !!      ):close                        (:open                        
+  !!      L:symbol                       cdr:symbol                    
+  !!      cdr:symbol                     L:symbol                      
+  !!      (:open                         ):close                       
+  !!      sumlist:symbol                 ):close                       
+  !!      (:open                         ):close                       
+          ):close                        ):close                       
+  !!      L:symbol                       ):close                       
+  !!      car:symbol                     ):close                       
+  !!      (:open                                                       
+  !!      +:symbol                                                     
+  !!      (Ù5                             Ù5                           
+!!! Disagreement on ./king-lear/tokenizer/token-test.input.7:
+      ------- INPUT FILE -------------
+     (- "helloxasd" x 2. 234 (+ (* x 2) (- 3.00 323)))
+     
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (:open                        
+  !!      ):close                        -:symbol                      
+  !!      ):close                        "helloxasd":string            
+  !!      323:integer                    x:symbol                      
+  !!      3.000000:float                 2.:float                      
+  !!      -:symbol                       234:integer                   
+          (:open                         (:open                        
+  !!      ):close                        +:symbol                      
+  !!      2:integer                      (:open                        
+  !!      x:symbol                       *:symbol                      
+  !!      *:symbol                       x:symbol                      
+  !!      (:open                         2:integer                     
+  !!      +:symbol                       ):close                       
+          (:open                         (:open                        
+  !!      234:integer                    -:symbol                      
+  !!      2.000000:float                 3.00:float                    
+  !!      x:symbol                       323:integer                   
+  !!      "helloxasd":string             ):close                       
+  !!      -:symbol                       ):close                       
+  !!      (:open                         ):close                       
+!!! Disagreement on ./king-lear/tokenizer/token-test.input.04:
+      ------- INPUT FILE -------------
+     (define square (lambda (x y) 
+     	(if (> x y)
+     		(print "72")
+     		'(3 5.9))))
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (:open                        
+  !!      y:symbol                       define:symbol                 
+  !!      x:symbol                       square:symbol                 
+          (:open                         (:open                        
+          lambda:symbol                  lambda:symbol                 
+          (:open                         (:open                        
+  !!      square:symbol                  x:symbol                      
+  !!      define:symbol                  y:symbol                      
+  !!      (:open                         ):close                       
+  !!      ):close                        (:open                        
+  !!      y:symbol                       if:symbol                     
+  !!      x:symbol                       (:open                        
+          >:symbol                       >:symbol                      
+  !!      (:open                         x:symbol                      
+  !!      if:symbol                      y:symbol                      
+  !!      (ÚPÚ:open                  ):close                       
+  !!                                     ÒPÒ:symbol                
+  !!      ):close                        print:symbol                  
+          "72":string                    "72":string                   
+  !!      print:symbol                   ):close                       
+  !!      (ÙÙ:open                  ':quote                       
+                                                                       
+  !!      ):close                        3:integer                     
+  !!      ):close                        5.9:float                     
+          ):close                        ):close                       
+          ):close                        ):close                       
+  !!      5.900000:float                 ):close                       
+  !!      3:integer                      ):close                       
+  !!      (:open                                                       
+  !!      ':quote                                                      
+                                                                       
+!!! Disagreement on ./king-lear/tokenizer/token-test.input.02:
+      ------- INPUT FILE -------------
+     (+  2 (* x 3) (ceiling 3.14))
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (:open                        
+  !!      ):close                        +:symbol                      
+  !!      3.140000:float                 2:integer                     
+  !!      ceiling:symbol                 (:open                        
+  !!      (:open                         *:symbol                      
+  !!      ):close                        x:symbol                      
+          3:integer                      3:integer                     
+  !!      x:symbol                       ):close                       
+  !!      *:symbol                       (:open                        
+  !!      (:open                         ceiling:symbol                
+  !!      2:integer                      3.14:float                    
+  !!      +:symbol                       ):close                       
+  !!      (:open                         ):close                       
+!!! Disagreement on ./king-lear/tokenizer/token-test.input.9:
+      ------- INPUT FILE -------------
+     (+ (if #t (= x 3) "asd#f" y x 3323.01))
+     
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (:open                        
+  !!      ):close                        +:symbol                      
+  !!      3323.010000:float              (:open                        
+  !!      x:symbol                       if:symbol                     
+  !!      y:symbol                       #t:boolean                    
+  !!      "asd#f":string                 (:open                        
+  !!      ):close                        =:symbol                      
+  !!      3:integer                      x:symbol                      
+  !!      x:symbol                       3:integer                     
+  !!      =:symbol                       ):close                       
+  !!      (:open                         "asd#f":string                
+  !!      #t:boolean                     y:symbol                      
+  !!      if:symbol                      x:symbol                      
+  !!      (:open                         3323.01:float                 
+  !!      +:symbol                       ):close                       
+  !!      (:open                         ):close                       
+!!! Disagreement on ./king-lear/tokenizer/token-test.input.06:
+      ------- INPUT FILE -------------
+     (let ((x 3)			;;a definition
+     	  (y "any string with 3 and ;;a comment")
+     	  (x2 #t))
+     	 (if x2
+     	 	(print y)
+     	 	(print x)))
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+                                                                       
+  !!      ):close                        let:symbol                    
+  !!      3:integer                      (:open                        
+  !!      x:symbol                       (:open                        
+  !!      (:open                         x:symbol                      
+  !!      (:open                         3:integer                     
+  !!      let:symbol                     ):close                       
+          (:open                         (:open                        
+  !!      ):close                        y:symbol                      
+          "any string with 3 and ;;a comment":string "any string with 3 and ;;a comment":string
+  !!      y:symbol                       ):close                       
+  !!      (Úñ                            PÚñ                           
+  !!                                     Òñ                            
+  !!      ):close                        #t:boolean                    
+          ):close                        ):close                       
+  !!      #t:boolean                     ):close                       
+  !!      x2:symbol                      (:open                        
+  !!      (:open                         if:symbol                     
+  !!                                     Ûñ                            
+  !!      x2:symbol                      (:open                        
+  !!      if:symbol                      print:symbol                  
+  !!      (:open                         y:symbol                      
+  !!                                     Ùñ                            
+  !!      ):close                        (:open                        
+  !!      y:symbol                       print:symbol                  
+  !!      print:symbol                   x:symbol                      
+  !!      (:open                         ):close                       
+  !!                                     :symbol                       
+  !!                                     ıñ                            
+  !!      ):close                                                      
+  !!      ):close                                                      
+  !!      ):close                                                      
+  !!      x:symbol                                                     
+  !!      print:symbol                                                 
+  !!      (:open                                                       
+  !!                                     :symbol                       
+  !!                                     ˆñ                            
+!!! Disagreement on ./king-lear/tokenizer/token-test.input.11:
+      ------- INPUT FILE -------------
+     (cdr (car '3 2 xyx 4 5))
+     
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (:open                        
+  !!      ):close                        cdr:symbol                    
+  !!      5:integer                      (:open                        
+  !!      4:integer                      car:symbol                    
+  !!      xyx:symbol                     ':quote                       
+  !!      2:integer                      3:integer                     
+  !!      3:integer                      2:integer                     
+  !!      ':quote                        xyx:symbol                    
+  !!      car:symbol                     4:integer                     
+  !!      (:open                         5:integer                     
+  !!      cdr:symbol                     ):close                       
+  !!      (:open                         ):close                       
+!!! Disagreement on ./king-lear/tokenizer/token-test.input.10:
+      ------- INPUT FILE -------------
+     (define mysort (lambda (predicate list) 
+                      (if (null? (cdr list))            ;one-element lists
+                          list
+                          (if (null? (cdr (cdr list)))        ;two-element lists.  This is technically covered by the null- and one-element-lists, plus recursion, but treating it separately saves several steps.
+                              (print "#t")
+                              #f))))
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      :symbol                       (:open                        
+  !!      ):close                        define:symbol                 
+  !!      list:symbol                    mysort:symbol                 
+  !!      predicate:symbol               (:open                        
+  !!      (:open                         lambda:symbol                 
+  !!      lambda:symbol                  (:open                        
+  !!      (:open                         predicate:symbol              
+  !!      mysort:symbol                  list:symbol                   
+  !!      define:symbol                  ):close                       
+          (:open                         (:open                        
+  !!      ):close                        if:symbol                     
+  !!      ):close                        (:open                        
+  !!      list:symbol                    null?:symbol                  
+  !!      cdr:symbol                     (:open                        
+  !!      (:open                         cdr:symbol                    
+  !!      null?:symbol                   list:symbol                   
+  !!      (:open                         ):close                       
+  !!      ifJ                            PJ                           
+  !!      (J                            PJ                           
+  !!      listJ                        :symbol                       
+  !!      ):close                        if:symbol                     
+  !!      ):close                        (:open                        
+  !!      ):close                        null?:symbol                  
+  !!      list:symbol                    (:open                        
+          cdr:symbol                     cdr:symbol                    
+          (:open                         (:open                        
+          cdr:symbol                     cdr:symbol                    
+  !!      (:open                         list:symbol                   
+  !!      null?:symbol                   ):close                       
+  !!      (:open                         ):close                       
+  !!      if:symbol                      ):close                       
+  !!      (J                            @J                           
+  !!      :symbol                       print:symbol                  
+  !!      ):close                        "#t":string                   
+  !!      "#t"@J                        :string                       
+  !!      printJ                        :symbol                       
+  !!      (J                            @J                           
+          ):close                        ):close                       
+          ):close                        ):close                       
+          ):close                        ):close                       
+  !!      ):close                                                      
+  !!      #t:boolean                                                   
+!!! Disagreement on ./king-lear/tokenizer/token-test.input.5:
+      ------- INPUT FILE -------------
+     (* 2xy 34'asd' ("stop") cons (5 (car 3)))
+     
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (:open                        
+  !!      ):close                        *:symbol                      
+  !!      ):close                        2xy:symbol                    
+  !!      3:integer                      34:integer                    
+  !!      car:symbol                     ':quote                       
+  !!      (:open                         asd:symbol                    
+  !!      5:integer                      ':quote                       
+          (:open                         (:open                        
+  !!      cons:symbol                    "stop":string                 
+          ):close                        ):close                       
+  !!      "stop":string                  cons:symbol                   
+          (:open                         (:open                        
+  !!      ':quote                        5:integer                     
+  !!      asd:symbol                     (:open                        
+  !!      ':quote                        car:symbol                    
+  !!      34:integer                     3:integer                     
+  !!      2xy:symbol                     ):close                       
+  !!      *:symbol                       ):close                       
+  !!      (:open                         ):close                       
+!!! Disagreement on ./king-lear/tokenizer/token-test.input.12:
+      ------- INPUT FILE -------------
+     (if (> 5.67 10.01)
+     	#t
+     	(print "a string with lots of stuff: 3 #t ;"))
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      :symbol                       (:open                        
+  !!      ):close                        if:symbol                     
+  !!      10.010000:float                (:open                        
+  !!      5.670000:float                 >:symbol                      
+  !!      >:symbol                       5.67:float                    
+  !!      (:open                         10.01:float                   
+  !!      if:symbol                      ):close                       
+  !!      (:open                         #t:boolean                    
+  !!                                     #tP:symbol                
+  !!      ):close                        print:symbol                  
+  !!      ):close                        "a string with lots of stuff: 3 #t ;":string
+  !!      "a string with lots of stuff: 3 #t ;":string ):close                       
+  !!      print:symbol                   ):close                       
+  !!      (:open                                                       
+  !!                                     @:symbol                
+!!! Disagreement on ./king-lear/tokenizer/token-test.input.15:
+      ------- INPUT FILE -------------
+     (define my-abs (lambda (n) (if (#te n (* -1 n))))
+     
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (:open                        
+  !!      ):close                        define:symbol                 
+  !!      ):close                        my-abs:symbol                 
+  !!      ):close                        (:open                        
+  !!      n:symbol                       lambda:symbol                 
+  !!      -1:integer                     (:open                        
+  !!      *:symbol                       n:symbol                      
+  !!      (:open                         ):close                       
+  !!      n:symbol                       (:open                        
+  !!      e:symbol                       if:symbol                     
+  !!      #t:boolean                     (:open                        
+  !!      (:open                         #t:boolean                    
+  !!      if:symbol                      e:symbol                      
+  !!      (:open                         n:symbol                      
+  !!      ):close                        (:open                        
+  !!      n:symbol                       *:symbol                      
+  !!      (:open                         -1:integer                    
+  !!      lambda:symbol                  n:symbol                      
+  !!      (:open                         ):close                       
+  !!      my-abs:symbol                  ):close                       
+  !!      define:symbol                  ):close                       
+  !!      (:open                         ):close                       
+!!! Disagreement on ./king-lear/tokenizer/token-test.input.1:
+      ------- INPUT FILE -------------
+     (define (lambda (x y) 5)
+     
+     
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (:open                        
+  !!      5:integer                      define:symbol                 
+  !!      ):close                        (:open                        
+  !!      y:symbol                       lambda:symbol                 
+  !!      x:symbol                       (:open                        
+  !!      (:open                         x:symbol                      
+  !!      lambda:symbol                  y:symbol                      
+  !!      (:open                         ):close                       
+  !!      define:symbol                  5:integer                     
+  !!      (:open                         ):close                       
+!!! Disagreement on ./king-lear/tokenizer/token-test.input.16:
+      ------- INPUT FILE -------------
+     (let* ((a 7.3)
+     	   (b #t)
+     	   (c "a string"))
+     	  (print "do something crazy"))
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      :symbol                       (:open                        
+  !!      ):close                        let*:symbol                   
+  !!      7.300000:float                 (:open                        
+  !!      a:symbol                       (:open                        
+  !!      (:open                         a:symbol                      
+  !!      (:open                         7.3:float                     
+  !!      let*:symbol                    ):close                       
+          (:open                         (:open                        
+  !!      :symbol                       b:symbol                      
+  !!      ):close                        #t:boolean                    
+  !!      #t:boolean                     ):close                       
+  !!      b:symbol                       (:open                        
+  !!      (≤ÕP≤Õ:open                  c:symbol                      
+  !!                                     ±ÕP±Õ:symbol                
+  !!      :symbol                       ):close                       
+          ):close                        ):close                       
+  !!      ):close                        (:open                        
+  !!      "a string":string              print:symbol                  
+  !!      c:symbol                       "do something crazy":string   
+  !!      (:open                         ):close                       
+  !!                                     ≥ÕP≤Õ:symbol                
+  !!      ):close                                                      
+  !!      ):close                                                      
+  !!      "do something crazy":string                                  
+  !!      print:symbol                                                 
+  !!      (µÕ¥Õ:open                                                
+  !!                                     ¥Õ¿≥Õ:symbol                
+!!! Disagreement on ./henry-vi-part-3/tokenizer/token-test.input.03:
+      ------- INPUT FILE -------------
+     ( cons
+     	'(1 2 3)
+     	( cdr (quote (a b))))
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      cons:symbol                    (:open                        
+  !!      (:open                         cons:symbol                   
+  !!      ):close                        ':quote                       
+  !!      3:integer                      (:open                        
+  !!      2:integer                      1:integer                     
+  !!      1:integer                      2:integer                     
+  !!      (:open                         3:integer                     
+  !!      ':quote                        ):close                       
+  !!                                     :symbol                       
+  !!      ):close                        cdr:symbol                    
+  !!      ):close                        (:open                        
+  !!      ):close                        quote:quote                   
+  !!      ):close                        (:open                        
+  !!      b:symbol                       a:symbol                      
+  !!      a:symbol                       b:symbol                      
+  !!      (:open                         ):close                       
+  !!      quote:symbol                   ):close                       
+  !!      (:open                         ):close                       
+  !!      cdr:symbol                     ):close                       
+  !!      (C˜†B˜:open                                                
+  !!                                     B˜¿A˜:symbol                
+!!! Disagreement on ./henry-vi-part-3/tokenizer/token-test.input.14:
+      ------- INPUT FILE -------------
+     ; spaces after quote shouldn't matter
+     (cons 'watching_yankees '())
+     (cons ' watching_yankees '())
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (:open                        
+  !!      ):close                        cons:symbol                   
+  !!      (:open                         ':quote                       
+  !!      ':quote                        watching_yankees:symbol       
+  !!      watching_yankees:symbol        ':quote                       
+  !!      ':quote                        (:open                        
+  !!      cons:symbol                    ):close                       
+  !!      (:open                         ):close                       
+  !!      ):close                        (:open                        
+  !!      ):close                        cons:symbol                   
+  !!      (:open                         ':quote                       
+  !!      ':quote                        watching_yankees:symbol       
+  !!      watching_yankees:symbol        ':quote                       
+  !!      ':quote                        (:open                        
+  !!      conspá:symbol                ):close                       
+  !!      (á`á:open                  ):close                       
+!!! Disagreement on ./henry-vi-part-3/tokenizer/token-test.input.13:
+      ------- INPUT FILE -------------
+     (define running list)
+     (running"out""of'steam" '())
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (:open                        
+  !!      list:symbol                    define:symbol                 
+          running:symbol                 running:symbol                
+  !!      define:symbol                  list:symbol                   
+  !!      (:open                         ):close                       
+  !!      ):close                        (:open                        
+  !!      ):close                        running:symbol                
+  !!      (:open                         "out":string                  
+  !!      ':quote                        "of'steam":string             
+  !!      "of'steam":string              ':quote                       
+  !!      "out":string                   (:open                        
+  !!      running:symbol                 ):close                       
+  !!      (—ã                            P—ã                           
+!!! Disagreement on ./henry-vi-part-3/tokenizer/token-test.input.08:
+      ------- INPUT FILE -------------
+     (someFxn "foo; b\"ar" "oh;yea?" "(paren)"(someOtherFxn))
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (:open                        
+  !!      ):close                        someFxn:symbol                
+  !!      someOtherFxn:symbol            "foo; b\"ar":string           
+  !!      (:open                         "oh;yea?":string              
+          "(paren)":string               "(paren)":string              
+  !!      "oh;yea?":string               (:open                        
+  !!      "foo; b\"ar":string            someOtherFxn:symbol           
+  !!      someFxn:symbol                 ):close                       
+  !!      (:open                         ):close                       
+!!! Disagreement on ./henry-vi-part-3/tokenizer/token-test.input.04:
+      ------- INPUT FILE -------------
+     (define tjfAbs
+       (lambda (x)
+         (if (< x 0)
+             (* x -1)
+             x)))
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      tjfAbs:symbol                  (:open                        
+          define:symbol                  define:symbol                 
+  !!      (:open                         tjfAbs:symbol                 
+  !!      ):close                        (:open                        
+  !!      x:symbol                       lambda:symbol                 
+          (:open                         (:open                        
+  !!      lambda:symbol                  x:symbol                      
+  !!      (qJ                            PqJ                           
+  !!      ):close                        (:open                        
+  !!      0:integer                      if:symbol                     
+  !!      x:symbol                       (:open                        
+          <:symbol                       <:symbol                      
+  !!      (:open                         x:symbol                      
+  !!      if:symbol                      0:integer                     
+  !!      (rJ                            qJ                           
+  !!      ):close                        (:open                        
+  !!      -1:integer                     *:symbol                      
+          x:symbol                       x:symbol                      
+  !!      *tJ                            sJ                           
+  !!      (sJ                            rJ                           
+  !!      ):close                        x:symbol                      
+          ):close                        ):close                       
+          ):close                        ):close                       
+  !!      xtJ                            sJ                           
+!!! Disagreement on ./henry-vi-part-3/tokenizer/token-test.input.02:
+      ------- INPUT FILE -------------
+     (- 1.3 -2.3 12.3/5 6 -20 20.3.4 4/5 -9/4 2/3/4)
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (:open                        
+  !!      2/3/4:symbol                   -:symbol                      
+  !!      -9/4:symbol                    1.300000:float                
+  !!      4/5:symbol                     -2.300000:float               
+  !!      20.3.4:symbol                  12.3/5:symbol                 
+  !!      -20:integer                    6:integer                     
+  !!      6:integer                      -20:integer                   
+  !!      12.3/5:symbol                  20.3.4:symbol                 
+  !!      -2.300000:float                4/5:fraction                  
+  !!      1.300000:float                 -9/4:fraction                 
+  !!      -:symbol                       2/3/4:symbol                  
+  !!      (:open                         ):close                       
+!!! Disagreement on ./henry-vi-part-3/tokenizer/token-test.input.09:
+      ------- INPUT FILE -------------
+     '(confusing 23.0.0 - -2 -- --2 #tblah #right)
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      error - no t or f after #      ':quote                       
+  !!      error - no t or f after #      (:open                        
+  !!      error - no t or f after #      confusing:symbol              
+  !!      error - no t or f after #      23.0.0:symbol                 
+  !!      ):close                        -:symbol                      
+  !!      #f:boolean                     -2:integer                    
+  !!      blah:symbol                    --:symbol                     
+  !!      #t:boolean                     --2:symbol                    
+  !!      --2:symbol                     1:boolean                     
+  !!      --:symbol                      blah:symbol                   
+  !!      -2:integer                     #r:syntax-err                 
+  !!      -:symbol                       ight:symbol                   
+  !!      23.0.0:symbol                  ):close                       
+  !!      confusing:symbol                                             
+  !!      (:open                                                       
+  !!      ':quote                                                      
+!!! Disagreement on ./henry-vi-part-3/tokenizer/token-test.input.05:
+      ------- INPUT FILE -------------
+     (define numericList '(3 5 9 1 125 2 34 1 16 1 14 61 61))
+     (define antonyList '("friends" "romans" "countrymen" "lend" "me" "your" "ears"))
+     (begin
+     	(display "sort via 'always true' predicate, input list is: ") (display numericList) (display "\n")
+     	)
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (:open                        
+  !!      ):close                        define:symbol                 
+  !!      61:integer                     numericList:symbol            
+  !!      61:integer                     ':quote                       
+  !!      14:integer                     (:open                        
+  !!      1:integer                      3:integer                     
+  !!      16:integer                     5:integer                     
+  !!      1:integer                      9:integer                     
+  !!      34:integer                     1:integer                     
+  !!      2:integer                      125:integer                   
+  !!      125:integer                    2:integer                     
+  !!      1:integer                      34:integer                    
+  !!      9:integer                      1:integer                     
+  !!      5:integer                      16:integer                    
+  !!      3:integer                      1:integer                     
+  !!      (:open                         14:integer                    
+  !!      ':quote                        61:integer                    
+  !!      numericList:symbol             61:integer                    
+  !!      define:symbol                  ):close                       
+  !!      (:open                         ):close                       
+  !!      ):close                        (:open                        
+  !!      ):close                        define:symbol                 
+  !!      "ears":string                  antonyList:symbol             
+  !!      "your":string                  ':quote                       
+  !!      "me":string                    (:open                        
+  !!      "lend":string                  "friends":string              
+  !!      "countrymen":string            "romans":string               
+  !!      "romans":string                "countrymen":string           
+  !!      "friends":string               "lend":string                 
+  !!      (.ê.:open                  "me":string                   
+  !!      '.–.:quote                 "your":string                 
+  !!      antonyList:symbol              "ears":string                 
+  !!      define.:symbol                ):close                       
+  !!      (.P.:open                  ):close                       
+  !!      begin.:symbol                (:open                        
+  !!      (.P.:open                  begin:symbol                  
+  !!      ):close                        (:open                        
+  !!      "\n":string                    display:symbol                
+  !!      display:symbol                 "sort via 'always true' predicate, input list is: ":string
+  !!      (:open                         ):close                       
+  !!      ):close                        (:open                        
+  !!      numericList:symbol             display:symbol                
+  !!      display:symbol                 numericList:symbol            
+  !!      (:open                         ):close                       
+  !!      ):close                        (:open                        
+  !!      "sort via 'always true' predicate, input list is: ":string display:symbol                
+  !!      display:symbol                 "\n":string                   
+  !!      (. .:open                  ):close                       
+  !!                                     .P.:symbol                
+  !!      )                              .–.:close                  
+  !!                                     . .:symbol                
+!!! Disagreement on ./henry-vi-part-3/tokenizer/token-test.input.01:
+      ------- INPUT FILE -------------
+     (+ x2 ( + '( quote x ) "foo;; still a string" 323)) ;; now it's a comment!
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (:open                        
+  !!      ):close                        +:symbol                      
+  !!      323:integer                    x2:symbol                     
+  !!      "foo;; still a string":string  (:open                        
+  !!      ):close                        +:symbol                      
+  !!      x:symbol                       ':quote                       
+  !!      quote:symbol                   (:open                        
+  !!      (:open                         quote:quote                   
+  !!      ':quote                        x:symbol                      
+  !!      +:symbol                       ):close                       
+  !!      (:open                         "foo;; still a string":string 
+  !!      x2:symbol                      323:integer                   
+  !!      +:symbol                       ):close                       
+  !!      (:open                         ):close                       
+!!! Disagreement on ./henry-vi-part-3/tokenizer/token-test.input.06:
+      ------- INPUT FILE -------------
+     ; ok to use null? and equal? I assume?
+     (define my-list
+       (lambda items
+         (letrec ([helper
+                   (lambda (L rv)
+                     (if (null? L)
+                         rv
+                         (helper (cdr L) (cons (car L) rv))))])
+     ;                    non-tail-recursive technique, but doesn't require the call to my-reverse
+     ;                    ()
+     ;                    (cons (car L) (helper (cdr L) rv))))])
+           (helper (my-reverse items) '()))))
+     
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      my-list:symbol                 (:open                        
+          define:symbol                  define:symbol                 
+  !!      (:open                         my-list:symbol                
+  !!      items:symbol                   (:open                        
+          lambda:symbol                  lambda:symbol                 
+  !!      (è                            `è                           
+  !!      [helper:symbol                 (:open                        
+  !!      (:open                         letrec:symbol                 
+  !!      letrec:symbol                  (:open                        
+  !!      (è                            :open                         
+  !!      ):close                        helper:symbol                 
+  !!      rv:symbol                      (:open                        
+  !!      L:symbol                       lambda:symbol                 
+          (:open                         (:open                        
+  !!      lambda:symbol                  L:symbol                      
+  !!      (è                            †è                           
+          ):close                        ):close                       
+  !!      L:symbol                       (:open                        
+  !!      null?:symbol                   if:symbol                     
+          (:open                         (:open                        
+  !!      if:symbol                      null?:symbol                  
+  !!      (è                            pè                           
+  !!      rvè                            pè                           
+  !!      ):close                        rv:symbol                     
+  !!      ]:symbol                       (:open                        
+  !!      ):close                        helper:symbol                 
+  !!      ):close                        (:open                        
+  !!      ):close                        cdr:symbol                    
+  !!      ):close                        L:symbol                      
+  !!      rv:symbol                      ):close                       
+  !!      ):close                        (:open                        
+  !!      L:symbol                       cons:symbol                   
+  !!      car:symbol                     (:open                        
+  !!      (:open                         car:symbol                    
+  !!      cons:symbol                    L:symbol                      
+  !!      (:open                         ):close                       
+  !!      ):close                        rv:symbol                     
+  !!      L:symbol                       ):close                       
+  !!      cdr:symbol                     ):close                       
+  !!      (:open                         ):close                       
+  !!      helper:symbol                  ):close                       
+  !!      (:open                         ]:close                       
+          ):close                        ):close                       
+  !!      ):close                        (:open                        
+  !!      ):close                        helper:symbol                 
+  !!      ):close                        (:open                        
+  !!      ):close                        my-reverse:symbol             
+  !!      (:open                         items:symbol                  
+  !!      ':quote                        ):close                       
+  !!      ):close                        ':quote                       
+  !!      items:symbol                   (:open                        
+  !!      my-reverse:symbol              ):close                       
+  !!      (è                            –è                           
+  !!      helperè                        :symbol                       
+  !!      (è                            –è                           
+  !!                                     ):close                       
+!!! Disagreement on ./henry-vi-part-3/tokenizer/token-test.input.11:
+      ------- INPUT FILE -------------
+     (define indexOfCharHelper
+       (lambda (haystack needle idx)
+         (if (>= idx (string-length haystack))
+             -1
+             (let ([firstChar (string-ref haystack idx)])
+               (if (equal? firstChar needle)
+                   idx
+                   (indexOfCharHelper haystack needle (+ idx 1)))))))
+     
+     (define indexOfChar
+       (lambda (haystack needle)
+         (indexOfCharHelper haystack needle 0)))	
+     
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      indexOfCharHelper:symbol       (:open                        
+          define:symbol                  define:symbol                 
+  !!      (:open                         indexOfCharHelper:symbol      
+  !!      ):close                        (:open                        
+  !!      idx:symbol                     lambda:symbol                 
+  !!      needle:symbol                  (:open                        
+          haystack:symbol                haystack:symbol               
+  !!      (:open                         needle:symbol                 
+  !!      lambda:symbol                  idx:symbol                    
+  !!      (1ùP1ù:open                  ):close                       
+  !!      ):close                        (:open                        
+  !!      ):close                        if:symbol                     
+  !!      haystack:symbol                (:open                        
+  !!      string-length:symbol           >=:symbol                     
+  !!      (:open                         idx:symbol                    
+  !!      idx:symbol                     (:open                        
+  !!      >=:symbol                      string-length:symbol          
+  !!      (:open                         haystack:symbol               
+  !!      ifù:symbol                    ):close                       
+  !!      (2ù:open                      ):close                       
+          -1:integer                     -1:integer                    
+  !!      ):close                        (:open                        
+  !!      ]:symbol                       let:symbol                    
+  !!      ):close                        (:open                        
+  !!      idx:symbol                     [:open                        
+  !!      haystack:symbol                firstChar:symbol              
+  !!      string-ref:symbol              (:open                        
+  !!      (:open                         string-ref:symbol             
+  !!      [firstChar:symbol              haystack:symbol               
+  !!      (:open                         idx:symbol                    
+  !!      let05ù:symbol                ):close                       
+  !!      (4ù 4ù:open                  ]:close                       
+          ):close                        ):close                       
+  !!      needle:symbol                  (:open                        
+  !!      firstChar:symbol               if:symbol                     
+  !!      equal?:symbol                  (:open                        
+  !!      (8ùê7ù:open                  equal?:symbol                 
+  !!      ifùê6ù:symbol                firstChar:symbol              
+  !!      (6ù05ù:open                  needle:symbol                 
+  !!      idxê6ù:symbol                ):close                       
+  !!      ):close                        idx:symbol                    
+  !!      ):close                        (:open                        
+  !!      ):close                        indexOfCharHelper:symbol      
+  !!      ):close                        haystack:symbol               
+  !!      ):close                        needle:symbol                 
+  !!      ):close                        (:open                        
+  !!      ):close                        +:symbol                      
+  !!      1:integer                      idx:symbol                    
+  !!      idx:symbol                     1:integer                     
+  !!      +:symbol                       ):close                       
+  !!      (:open                         ):close                       
+  !!      needle:symbol                  ):close                       
+  !!      haystack:symbol                ):close                       
+  !!      indexOfCharHelper:symbol       ):close                       
+  !!      (9ù∞8ù:open                  ):close                       
+  !!      indexOfChar:symbol             ):close                       
+  !!      defineù:symbol                (:open                        
+  !!      (:ù†9ù:open                  define:symbol                 
+  !!      ):close                        indexOfChar:symbol            
+  !!      needle:symbol                  (:open                        
+  !!      haystack:symbol                lambda:symbol                 
+          (:open                         (:open                        
+  !!      lambda:symbol                  haystack:symbol               
+  !!      (<ù†:ù:open                  needle:symbol                 
+  !!                                     :symbol                       
+  !!      ):close                        (:open                        
+  !!      ):close                        indexOfCharHelper:symbol      
+  !!      ):close                        haystack:symbol               
+  !!      0:integer                      needle:symbol                 
+  !!      needle:symbol                  0:integer                     
+  !!      haystack:symbol                ):close                       
+  !!      indexOfCharHelper:symbol       ):close                       
+  !!      (=ù‡<ù:open                  ):close                       
+!!! Disagreement on ./henry-vi-part-3/tokenizer/token-test.input.10:
+      ------- INPUT FILE -------------
+     "quote's ok here but nospace?"parens aren't always needed and it\'s ok here
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      here:symbol                    "quote's ok here but nospace?":string
+  !!      ok:symbol                      parens:symbol                 
+  !!      s:symbol                       aren:symbol                   
+          ':quote                        ':quote                       
+  !!      it\:symbol                     t:symbol                      
+  !!      and:symbol                     always:symbol                 
+          needed:symbol                  needed:symbol                 
+  !!      always:symbol                  and:symbol                    
+  !!      t:symbol                       it\'s:symbol                  
+  !!      ':quote                        ok:symbol                     
+  !!      aren:symbol                    here:symbol                   
+  !!      parens:symbol                                                
+  !!      "quote's ok here but nospace?":string                               
+!!! Disagreement on ./henry-vi-part-3/tokenizer/token-test.input.07:
+      ------- INPUT FILE -------------
+     (define explainSingleError
+     	(lambda (sourceList predicted actual problemSlot)
+     		(display "\nat slot ") (display problemSlot)
+     		(display ", assertion was: ") (display (car (list-ref sourceList problemSlot))) (display " <==> ") (display (cadr (list-ref sourceList problemSlot)))
+     		(display "\n\tmy code actually returned ") (display (list-ref actual problemSlot)) (display " <==> predicted ") (display (list-ref predicted problemSlot)) (display "\n")
+     		))
+     
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      explainSingleError:symbol      (:open                        
+          define:symbol                  define:symbol                 
+  !!      (:open                         explainSingleError:symbol     
+  !!      ):close                        (:open                        
+  !!      problemSlot:symbol             lambda:symbol                 
+  !!      actual:symbol                  (:open                        
+  !!      predicted:symbol               sourceList:symbol             
+  !!      sourceList:symbol              predicted:symbol              
+  !!      (:open                         actual:symbol                 
+  !!      lambda:symbol                  problemSlot:symbol            
+  !!      (:open                         ):close                       
+  !!                                     Qõ                            
+  !!      ):close                        display:symbol                
+  !!      problemSlot:symbol             "\nat slot ":string           
+  !!      display:symbol                 ):close                       
+          (:open                         (:open                        
+  !!      ):close                        display:symbol                
+  !!      "\nat slot ":string            problemSlot:symbol            
+  !!      display:symbol                 ):close                       
+  !!      (Sõ                            :open                         
+                                                                       
+  !!      ):close                        ", assertion was: ":string    
+          ):close                        ):close                       
+  !!      ):close                        (:open                        
+  !!      problemSlot:symbol             display:symbol                
+  !!      sourceList:symbol              (:open                        
+  !!      list-ref:symbol                car:symbol                    
+          (:open                         (:open                        
+  !!      cadr:symbol                    list-ref:symbol               
+  !!      (:open                         sourceList:symbol             
+  !!      display:symbol                 problemSlot:symbol            
+  !!      (:open                         ):close                       
+          ):close                        ):close                       
+  !!      " <==> ":string                ):close                       
+  !!      display:symbol                 (:open                        
+  !!      (:open                         display:symbol                
+  !!      ):close                        " <==> ":string               
+          ):close                        ):close                       
+  !!      ):close                        (:open                        
+  !!      problemSlot:symbol             display:symbol                
+  !!      sourceList:symbol              (:open                        
+  !!      list-ref:symbol                cadr:symbol                   
+          (:open                         (:open                        
+  !!      car:symbol                     list-ref:symbol               
+  !!      (:open                         sourceList:symbol             
+  !!      display:symbol                 problemSlot:symbol            
+  !!      (:open                         ):close                       
+          ):close                        ):close                       
+  !!      ", assertion was: ":string     ):close                       
+  !!      display:symbol                 (:open                        
+  !!      (Uõ                            –Tõ                           
+                                                                       
+          ):close                        ):close                       
+  !!      "\n":string                    (:open                        
+          display:symbol                 display:symbol                
+          (:open                         (:open                        
+  !!      ):close                        list-ref:symbol               
+  !!      ):close                        actual:symbol                 
+          problemSlot:symbol             problemSlot:symbol            
+  !!      predicted:symbol               ):close                       
+  !!      list-ref:symbol                ):close                       
+          (:open                         (:open                        
+          display:symbol                 display:symbol                
+  !!      (:open                         " <==> predicted ":string     
+          ):close                        ):close                       
+  !!      " <==> predicted ":string      (:open                        
+          display:symbol                 display:symbol                
+          (:open                         (:open                        
+  !!      ):close                        list-ref:symbol               
+  !!      ):close                        predicted:symbol              
+          problemSlot:symbol             problemSlot:symbol            
+  !!      actual:symbol                  ):close                       
+  !!      list-ref:symbol                ):close                       
+  !!      (\õ                             \õ                           
+  !!      display                        :symbol                       
+  !!      (Zõ                             Zõ                           
+  !!      )Yõ                             Yõ                           
+  !!      "\n\tmy code actually returned ":string ):close                       
+  !!      display                        :symbol                       
+  !!      (Wõ                            †Võ                           
+                                                                       
+  !!      )^õ                            ∞]õ                           
+  !!      )\õ                             Zõ                           
+                                                                       
+!!! Disagreement on ./henry-vi-part-3/tokenizer/token-test.input.12:
+      ------- INPUT FILE -------------
+     (define getListSubset
+       (lambda (L startIndex endIndex)
+         (letrec
+             ([helper
+               (lambda (L startIdx endIdx rv depth)
+                 (begin
+                   ; (display (make-string depth #\*)) (display "start: ") (display startIdx)
+                   ; (display "...end: ") (display endIdx)
+                   ; (display "...") (display L) (display "\n")
+                   (if (= startIdx 0)
+                       (if (< endIdx 0)
+                           (begin
+                             (reverse rv))
+                           (helper (cdr L) 0 (- endIdx 1) (cons (car L) rv) (+ depth 1)))
+                       (helper (cdr L) (- startIdx 1) (- endIdx 1) rv (+ depth 1)))))])
+           (if (or (< startIndex 0) (> endIndex (- (length L) 1)) (> startIndex endIndex))
+               '()
+               (helper L startIndex endIndex '() 0)))))
+     
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      getListSubset:symbol           (:open                        
+          define:symbol                  define:symbol                 
+  !!      (:open                         getListSubset:symbol          
+  !!      ):close                        (:open                        
+  !!      endIndex:symbol                lambda:symbol                 
+  !!      startIndex:symbol              (:open                        
+          L:symbol                       L:symbol                      
+  !!      (:open                         startIndex:symbol             
+  !!      lambda:symbol                  endIndex:symbol               
+  !!      (Ò/PÒ/:open                  ):close                       
+  !!      letrec/:symbol                (:open                        
+  !!      (Ú/:open                      letrec:symbol                 
+  !!      [helper:symbol                 (:open                        
+  !!      (:open                         [:open                        
+  !!      ):close                        helper:symbol                 
+  !!      depth:symbol                   (:open                        
+  !!      rv:symbol                      lambda:symbol                 
+  !!      endIdx:symbol                  (:open                        
+  !!      startIdx:symbol                L:symbol                      
+  !!      L:symbol                       startIdx:symbol               
+  !!      (:open                         endIdx:symbol                 
+  !!      lambda:symbol                  rv:symbol                     
+  !!      (:open                         depth:symbol                  
+  !!      beginı/:symbol                ):close                       
+  !!      (Ù/@Ù/:open                  (:open                        
+  !!      ):close                        begin:symbol                  
+  !!      0:integer                      (:open                        
+  !!      startIdx:symbol                if:symbol                     
+  !!      =:symbol                       (:open                        
+  !!      (:open                         =:symbol                      
+  !!      if:symbol                      startIdx:symbol               
+  !!      (:open                         0:integer                     
+          ):close                        ):close                       
+  !!      0:integer                      (:open                        
+  !!      endIdx:symbol                  if:symbol                     
+  !!      <:symbol                       (:open                        
+  !!      (:open                         <:symbol                      
+  !!      if/†˜/:symbol                endIdx:symbol                 
+  !!      (˜/†ˆ/:open                  0:integer                     
+  !!      begin¯/:symbol                ):close                       
+  !!      (¯/†˜/:open                  (:open                        
+  !!      ):close                        begin:symbol                  
+  !!      ):close                        (:open                        
+  !!      rv:symbol                      reverse:symbol                
+  !!      reverse:symbol                 rv:symbol                     
+  !!      (:open                         ):close                       
+          ):close                        ):close                       
+  !!      ):close                        (:open                        
+  !!      ):close                        helper:symbol                 
+  !!      1:integer                      (:open                        
+  !!      depth:symbol                   cdr:symbol                    
+  !!      +:symbol                       L:symbol                      
+  !!      (:open                         ):close                       
+  !!      ):close                        0:integer                     
+  !!      rv:symbol                      (:open                        
+  !!      ):close                        -:symbol                      
+  !!      L:symbol                       endIdx:symbol                 
+  !!      car:symbol                     1:integer                     
+  !!      (:open                         ):close                       
+  !!      cons:symbol                    (:open                        
+  !!      (:open                         cons:symbol                   
+  !!      ):close                        (:open                        
+  !!      1:integer                      car:symbol                    
+  !!      endIdx:symbol                  L:symbol                      
+  !!      -:symbol                       ):close                       
+  !!      (:open                         rv:symbol                     
+  !!      0:integer                      ):close                       
+  !!      ):close                        (:open                        
+  !!      L:symbol                       +:symbol                      
+  !!      cdr:symbol                     depth:symbol                  
+  !!      (:open                         1:integer                     
+  !!      helper:symbol                  ):close                       
+  !!      (˙/∞˘/:open                  ):close                       
+          ):close                        ):close                       
+  !!      ]:symbol                       (:open                        
+  !!      ):close                        helper:symbol                 
+  !!      ):close                        (:open                        
+  !!      ):close                        cdr:symbol                    
+  !!      ):close                        L:symbol                      
+          ):close                        ):close                       
+  !!      1:integer                      (:open                        
+  !!      depth:symbol                   -:symbol                      
+  !!      +:symbol                       startIdx:symbol               
+  !!      (:open                         1:integer                     
+  !!      rv:symbol                      ):close                       
+  !!      ):close                        (:open                        
+  !!      1:integer                      -:symbol                      
+          endIdx:symbol                  endIdx:symbol                 
+  !!      -:symbol                       1:integer                     
+  !!      (:open                         ):close                       
+  !!      ):close                        rv:symbol                     
+  !!      1:integer                      (:open                        
+  !!      startIdx:symbol                +:symbol                      
+  !!      -:symbol                       depth:symbol                  
+  !!      (:open                         1:integer                     
+          ):close                        ):close                       
+  !!      Lˇ/ê˛/:symbol                ):close                       
+  !!      cdrê˝/:symbol                ):close                       
+  !!      (˝/†¸/:open                  ):close                       
+  !!      helper/:symbol                ):close                       
+  !!      (˚/∞˙/:open                  ]:close                       
+          ):close                        ):close                       
+  !!      ):close                        (:open                        
+  !!      endIndex:symbol                if:symbol                     
+  !!      startIndex:symbol              (:open                        
+  !!      >:symbol                       or:symbol                     
+          (:open                         (:open                        
+  !!      ):close                        <:symbol                      
+  !!      ):close                        startIndex:symbol             
+  !!      1:integer                      0:integer                     
+          ):close                        ):close                       
+  !!      L:symbol                       (:open                        
+  !!      length:symbol                  >:symbol                      
+  !!      (:open                         endIndex:symbol               
+  !!      -:symbol                       (:open                        
+  !!      (:open                         -:symbol                      
+  !!      endIndex:symbol                (:open                        
+  !!      >:symbol                       length:symbol                 
+  !!      (:open                         L:symbol                      
+          ):close                        ):close                       
+  !!      0:integer                      1:integer                     
+  !!      startIndex:symbol              ):close                       
+  !!      <0p0:symbol                ):close                       
+  !!      (0Ä0:open                  (:open                        
+  !!      or0ê0:symbol                >:symbol                      
+  !!      (0†0:open                  startIndex:symbol             
+  !!      if0êˇ/:symbol                endIndex:symbol               
+  !!      (˝/∞˚/:open                  ):close                       
+  !!      )0∞0:close                 ):close                       
+  !!      (0p0:open                  ':quote                       
+  !!      '0êˇ/:quote                 (:open                        
+          ):close                        ):close                       
+  !!      ):close                        (:open                        
+  !!      ):close                        helper:symbol                 
+  !!      ):close                        L:symbol                      
+  !!      ):close                        startIndex:symbol             
+  !!      0:integer                      endIndex:symbol               
+  !!      ):close                        ':quote                       
+          (:open                         (:open                        
+  !!      ':quote                        ):close                       
+  !!      endIndex:symbol                0:integer                     
+  !!      startIndex:symbol              ):close                       
+  !!      L                              0                            
+  !!      helper0:symbol                ):close                       
+  !!      (0p0:open                  ):close                       
+  !!                                     ):close                       
+!!! Disagreement on ./henry-vi-part-3/tokenizer/token-test.input.15:
+      ------- INPUT FILE -------------
+     ; do i handle escaped single characters right?
+     ("i don't\;?")
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (:open                        
+          "i don't\;?":string            "i don't\;?":string           
+  !!      (:open                         ):close                       
+!!! Disagreement on ./henry-vi-part-3/tokenizer/token-test.input.16:
+      ------- INPUT FILE -------------
+     (volleyball shouldn't hurt my arms but! ! !); it does
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (:open                        
+  !!      !:symbol                       volleyball:symbol             
+  !!      !:symbol                       shouldn:symbol                
+  !!      but!:symbol                    ':quote                       
+  !!      arms:symbol                    t:symbol                      
+  !!      my:symbol                      hurt:symbol                   
+  !!      hurt:symbol                    my:symbol                     
+  !!      t:symbol                       arms:symbol                   
+  !!      ':quote                        but!:symbol                   
+  !!      shouldn:symbol                 !:symbol                      
+  !!      volleyball:symbol              !:symbol                      
+  !!      (:open                         ):close                       
+!!! Disagreement on ./the-tempest/tokenizer/testfiles/token-test.input.03:
+      ------- INPUT FILE -------------
+     ;; A legitimate scheme program
+     (define myprint (lambda (x) x))
+     (myprint 3)
+     (myprint "I'm a string")
+     (myprint #t)
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (: open                       
+  !!      ):close                        define: symbol                
+  !!      x:symbol                       myprint: symbol               
+  !!      ):close                        (: open                       
+  !!      x:symbol                       lambda: symbol                
+  !!      (:open                         (: open                       
+  !!      lambda:symbol                  x: symbol                     
+  !!      (:open                         ): close                      
+  !!      myprint:symbol                 x: symbol                     
+  !!      define:symbol                  ): close                      
+  !!      (:open                         ): close                      
+  !!      ):close                        (: open                       
+  !!      3:integer                      myprint: symbol               
+  !!      myprint                        :symbol                       
+  !!      (–                            `–                           
+  !!      ):close                        (: open                       
+  !!      "I'm a string":string          myprint: symbol               
+  !!      myprint:symbol                 "I'm a string": string        
+  !!      (–                            `–                           
+  !!      ):close                        (: open                       
+  !!      #t:boolean                     myprint: symbol               
+  !!      myprint:symbol                 #t: boolean                   
+  !!      (–                            @–                           
+!!! Disagreement on ./the-tempest/tokenizer/testfiles/token-test.input.14:
+      ------- INPUT FILE -------------
+     (define plus (lambda (x y) (+ x y)))
+     (plus 3 5.0)
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (: open                       
+  !!      ):close                        define: symbol                
+  !!      ):close                        plus: symbol                  
+  !!      y:symbol                       (: open                       
+  !!      x:symbol                       lambda: symbol                
+  !!      +:symbol                       (: open                       
+  !!      (:open                         x: symbol                     
+  !!      ):close                        y: symbol                     
+  !!      y:symbol                       ): close                      
+  !!      x:symbol                       (: open                       
+  !!      (:open                         +: symbol                     
+  !!      lambda:symbol                  x: symbol                     
+  !!      (:open                         y: symbol                     
+  !!      plus:symbol                    ): close                      
+  !!      define:symbol                  ): close                      
+  !!      (:open                         ): close                      
+  !!      ):close                        (: open                       
+  !!      5.000000:float                 plus: symbol                  
+  !!      3:integer                      3: integer                    
+  !!      plusP¬ú                        :symbol                       
+  !!      (¡ú                            P¡ú                           
+!!! Disagreement on ./the-tempest/tokenizer/testfiles/token-test.input.13:
+      ------- INPUT FILE -------------
+     ';
+     ;
+     a
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ':quote                        ': quote                      
+  !!      a:symbol                       a: symbol                     
+!!! Disagreement on ./the-tempest/tokenizer/testfiles/token-test.input.08:
+      ------- INPUT FILE -------------
+     ;; A faulty C program, but tokenizable without errors
+     int main() {
+       printf("Hello, world!");
+       return 0;
+     }
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      {:symbol                       int: symbol                   
+  !!      ):close                        main: symbol                  
+  !!      (:open                         (: open                       
+  !!      main:symbol                    ): close                      
+  !!      int:symbol                     {: symbol                     
+  !!      ):close                        printf: symbol                
+  !!      "Hello, world!":string         (: open                       
+  !!      (:open                         "Hello, world!": string       
+  !!      printf                        :symbol                       
+  !!      0:integer                      return: symbol                
+  !!      return                        :symbol                       
+  !!      }:symbol                       }: symbol                     
+!!! Disagreement on ./the-tempest/tokenizer/testfiles/token-test.input.04:
+      ------- INPUT FILE -------------
+     ;; A Python program, throws error by use of single-quotes
+     def pythonfunc(var1, var2):
+       print var1
+       print "%s" % (var2)
+     if __name__=='__main__':pythonfunc('a','b')
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ::symbol                       def: symbol                   
+  !!      ):close                        pythonfunc: symbol            
+  !!      var2:symbol                    (: open                       
+  !!      var1,:symbol                   var1,: symbol                 
+  !!      (:open                         var2: symbol                  
+  !!      pythonfunc:symbol              ): close                      
+  !!      def:symbol                     :: symbol                     
+  !!      var1`Úπ                        :symbol                       
+  !!      printÒπ                        :symbol                       
+  !!      ):close                        print: symbol                 
+  !!      var2:symbol                    "%s": string                  
+  !!      (:open                         %: symbol                     
+  !!      %:symbol                       (: open                       
+  !!      "%s":string                    var2: symbol                  
+  !!      printÚπ                        :symbol                       
+  !!      ):close                                                      
+  !!      ':quote                                                      
+  !!      b:symbol                                                     
+  !!      ':quote                                                      
+  !!      ,:symbol                                                     
+  !!      ':quote                                                      
+  !!      a:symbol                                                     
+  !!      ':quote                                                      
+  !!      (:open                                                       
+  !!      :pythonfunc:symbol                                           
+  !!      ':quote                                                      
+  !!      __main__:symbol                                              
+  !!      ':quote                                                      
+  !!      __name__==:symbol                                            
+  !!      ifπ                            0Ûπ                           
+!!! Disagreement on ./the-tempest/tokenizer/testfiles/token-test.input.02:
+      ------- INPUT FILE -------------
+     37#t #ta #t 37#f #fa #f "escaping a string \"here\" more string"
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      "escaping a string \"here\" more string":string 37#t: symbol                  
+  !!      #f:boolean                     #t: boolean                   
+  !!      a:symbol                       a: symbol                     
+  !!      #f:boolean                     #t: boolean                   
+  !!      37#f:symbol                    37#f: symbol                  
+  !!      #t:boolean                     #f: boolean                   
+  !!      a:symbol                       a: symbol                     
+  !!      #t:boolean                     #f: boolean                   
+  !!      37#t:symbol                    "escaping a string \"here\" more string": string
+!!! Disagreement on ./the-tempest/tokenizer/testfiles/token-test.input.09:
+      ------- INPUT FILE -------------
+     ;; "Hello World" in Chef, taken from en.wikipedia.org/wiki/Chef_(programming_language) 
+      Hello World Souffle.
+      
+      Ingredients.
+      72 g haricot beans
+      101 eggs
+      108 g lard
+      111 cups oil
+      32 zucchinis
+      119 ml water
+      114 g red salmon
+      100 g dijon mustard
+      33 potatoes
+      
+      Method.
+      Put potatoes into the mixing bowl.
+      Put dijon mustard into the mixing bowl.
+      Put lard into the mixing bowl.
+      Put red salmon into the mixing bowl.
+      Put oil into the mixing bowl.
+      Put water into the mixing bowl.
+      Put zucchinis into the mixing bowl.
+      Put oil into the mixing bowl.
+      Put lard into the mixing bowl.
+      Put lard into the mixing bowl.
+      Put eggs into the mixing bowl.
+      Put haricot beans into the mixing bowl.
+      Liquefy contents of the mixing bowl.
+      Pour contents of the mixing bowl into the baking dish.
+      
+      Serves 1.
+     
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      Souffle.:symbol                Hello: symbol                 
+  !!      World:symbol                   World: symbol                 
+  !!      Hello:symbol                   Souffle.: symbol              
+  !!      Ingredients.:symbol            Ingredients.: symbol          
+  !!      beans:symbol                   72: integer                   
+  !!      haricot:symbol                 g: symbol                     
+  !!      g:symbol                       haricot: symbol               
+  !!      72:integer                     beans: symbol                 
+  !!      eggs:symbol                    101: integer                  
+  !!      101:integer                    eggs: symbol                  
+  !!      lard:symbol                    108: integer                  
+  !!      g:symbol                       g: symbol                     
+  !!      108:integer                    lard: symbol                  
+  !!      oil:symbol                     111: integer                  
+  !!      cups:symbol                    cups: symbol                  
+  !!      111:integer                    oil: symbol                   
+  !!      zucchinis:symbol               32: integer                   
+  !!      32:integer                     zucchinis: symbol             
+  !!      water:symbol                   119: integer                  
+  !!      ml:symbol                      ml: symbol                    
+  !!      119:integer                    water: symbol                 
+  !!      salmon:symbol                  114: integer                  
+  !!      red:symbol                     g: symbol                     
+  !!      g:symbol                       red: symbol                   
+  !!      114:integer                    salmon: symbol                
+  !!      mustard:symbol                 100: integer                  
+  !!      dijon:symbol                   g: symbol                     
+  !!      g:symbol                       dijon: symbol                 
+  !!      100:integer                    mustard: symbol               
+  !!      potatoes:symbol                33: integer                   
+  !!      33:integer                     potatoes: symbol              
+  !!      Method.:symbol                 Method.: symbol               
+  !!      bowl.:symbol                   Put: symbol                   
+  !!      mixing:symbol                  potatoes: symbol              
+  !!      the:symbol                     into: symbol                  
+  !!      into:symbol                    the: symbol                   
+  !!      potatoes:symbol                mixing: symbol                
+  !!      Put:symbol                     bowl.: symbol                 
+  !!      bowl.:symbol                   Put: symbol                   
+  !!      mixing:symbol                  dijon: symbol                 
+  !!      the:symbol                     mustard: symbol               
+  !!      into:symbol                    into: symbol                  
+  !!      mustard:symbol                 the: symbol                   
+  !!      dijonÿı:symbol                mixing: symbol                
+  !!      Put¿◊ı:symbol                bowl.: symbol                 
+  !!      bowl.:symbol                   Put: symbol                   
+  !!      mixing:symbol                  lard: symbol                  
+  !!      the:symbol                     into: symbol                  
+  !!      into:symbol                    the: symbol                   
+  !!      lardŸı:symbol                mixing: symbol                
+  !!      Put¿ÿı:symbol                bowl.: symbol                 
+  !!      bowl.:symbol                   Put: symbol                   
+  !!      mixing:symbol                  red: symbol                   
+  !!      the:symbol                     salmon: symbol                
+  !!      into:symbol                    into: symbol                  
+  !!      salmon:symbol                  the: symbol                   
+  !!      red:symbol                     mixing: symbol                
+  !!      PutŸı:symbol                bowl.: symbol                 
+  !!      bowl.:symbol                   Put: symbol                   
+  !!      mixing:symbol                  oil: symbol                   
+  !!      the:symbol                     into: symbol                  
+  !!      into:symbol                    the: symbol                   
+  !!      oilÄ‹ı:symbol                mixing: symbol                
+  !!      PutP€ı:symbol                bowl.: symbol                 
+  !!      bowl.:symbol                   Put: symbol                   
+  !!      mixing:symbol                  water: symbol                 
+  !!      the:symbol                     into: symbol                  
+  !!      into:symbol                    the: symbol                   
+  !!      water›ı:symbol                mixing: symbol                
+  !!      PutÄ‹ı:symbol                bowl.: symbol                 
+  !!      bowl.:symbol                   Put: symbol                   
+  !!      mixing:symbol                  zucchinis: symbol             
+  !!      the:symbol                     into: symbol                  
+  !!      into:symbol                    the: symbol                   
+  !!      zucchinis:symbol               mixing: symbol                
+  !!      Put‡›ı:symbol                bowl.: symbol                 
+  !!      bowl.:symbol                   Put: symbol                   
+  !!      mixing:symbol                  oil: symbol                   
+  !!      the:symbol                     into: symbol                  
+  !!      into:symbol                    the: symbol                   
+  !!      oil:symbol                     mixing: symbol                
+  !!      Putﬂı:symbol                bowl.: symbol                 
+  !!      bowl.:symbol                   Put: symbol                   
+  !!      mixing:symbol                  lard: symbol                  
+  !!      the:symbol                     into: symbol                  
+  !!      into:symbol                    the: symbol                   
+  !!      lardp·ı:symbol                mixing: symbol                
+  !!      Put@‡ı:symbol                bowl.: symbol                 
+  !!      bowl.:symbol                   Put: symbol                   
+  !!      mixing:symbol                  lard: symbol                  
+  !!      the:symbol                     into: symbol                  
+  !!      into:symbol                    the: symbol                   
+  !!      lard†‚ı:symbol                mixing: symbol                
+  !!      Putp·ı:symbol                bowl.: symbol                 
+  !!      bowl.:symbol                   Put: symbol                   
+  !!      mixing:symbol                  eggs: symbol                  
+  !!      the:symbol                     into: symbol                  
+  !!      into:symbol                    the: symbol                   
+  !!      eggs–„ı:symbol                mixing: symbol                
+  !!      Put†‚ı:symbol                bowl.: symbol                 
+  !!      bowl.:symbol                   Put: symbol                   
+  !!      mixing:symbol                  haricot: symbol               
+  !!      the:symbol                     beans: symbol                 
+  !!      into:symbol                    into: symbol                  
+  !!      beans:symbol                   the: symbol                   
+  !!      haricot:symbol                mixing: symbol                
+  !!      Put–„ı:symbol                bowl.: symbol                 
+  !!      bowl.:symbol                   Liquefy: symbol               
+  !!      mixing:symbol                  contents: symbol              
+  !!      the:symbol                     of: symbol                    
+  !!      of:symbol                      the: symbol                   
+  !!      contents:symbol                mixing: symbol                
+  !!      Liquefy:symbol                bowl.: symbol                 
+  !!      dish.:symbol                   Pour: symbol                  
+  !!      baking:symbol                  contents: symbol              
+  !!      the:symbol                     of: symbol                    
+  !!      into:symbol                    the: symbol                   
+  !!      bowl:symbol                    mixing: symbol                
+  !!      mixing:symbol                  bowl: symbol                  
+  !!      the:symbol                     into: symbol                  
+  !!      of:symbol                      the: symbol                   
+  !!      contents:symbol                baking: symbol                
+  !!      Pour0Êı:symbol                dish.: symbol                 
+  !!      1.000000:float                 Serves: symbol                
+  !!      Servesı:symbol                1.000000: float               
+!!! Disagreement on ./the-tempest/tokenizer/testfiles/token-test.input.05:
+      ------- INPUT FILE -------------
+     ;; A non-error-generating Python program
+     def pythonfunc(var1, var2):
+       print var1
+       print "%s" % (var2)
+     if __name__=="__main__":pythonfunc("a","b")
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ::symbol                       def: symbol                   
+  !!      ):close                        pythonfunc: symbol            
+  !!      var2:symbol                    (: open                       
+  !!      var1,:symbol                   var1,: symbol                 
+  !!      (:open                         var2: symbol                  
+  !!      pythonfunc:symbol              ): close                      
+  !!      def:symbol                     :: symbol                     
+  !!      var1`@:symbol                print: symbol                 
+  !!      print@:symbol                var1: symbol                  
+  !!      ):close                        print: symbol                 
+  !!      var2:symbol                    "%s": string                  
+  !!      (:open                         %: symbol                     
+  !!      %:symbol                       (: open                       
+  !!      "%s":string                    var2: symbol                  
+  !!      print@:symbol                ): close                      
+  !!      ):close                        if: symbol                    
+  !!      "b":string                     __name__==: symbol            
+  !!      ,:symbol                       "__main__": string            
+  !!      "a":string                     :pythonfunc: symbol           
+  !!      (:open                         (: open                       
+  !!      :pythonfunc:symbol             "a": string                   
+  !!      "__main__":string              ,: symbol                     
+  !!      __name__==:symbol              "b": string                   
+  !!      if@0@:symbol                ): close                      
+!!! Disagreement on ./the-tempest/tokenizer/testfiles/token-test.input.01:
+      ------- INPUT FILE -------------
+     ("this s a string \n " haha 3.3.3 3.0 3 .3) () ( 
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      (:open                         (: open                       
+  !!      ):close                        "this s a string \n ": string 
+  !!      (:open                         haha: symbol                  
+  !!      ):close                        3.3.3: symbol                 
+  !!      0.300000:float                 3.000000: float               
+  !!      3:integer                      3: integer                    
+  !!      3.000000:float                 0.300000: float               
+  !!      3.3.3:symbol                   ): close                      
+  !!      haha:symbol                    (: open                       
+  !!      "this s a string \n ":string   ): close                      
+  !!      (:open                         (: open                       
+!!! Disagreement on ./the-tempest/tokenizer/testfiles/token-test.input.00:
+      ------- INPUT FILE -------------
+     (+ x2 ( + quote x ) "foo;; still a string" 323) ;; now it's a comment!
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (: open                       
+  !!      323:integer                    +: symbol                     
+  !!      "foo;; still a string":string  x2: symbol                    
+  !!      ):close                        (: open                       
+  !!      x:symbol                       +: symbol                     
+  !!      quote:symbol                   quote: symbol                 
+  !!      +:symbol                       x: symbol                     
+  !!      (:open                         ): close                      
+  !!      x2:symbol                      "foo;; still a string": string
+  !!      +:symbol                       323: integer                  
+  !!      (:open                         ): close                      
+!!! Disagreement on ./the-tempest/tokenizer/testfiles/token-test.input.06:
+      ------- INPUT FILE -------------
+     ()
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (: open                       
+  !!      (:open                         ): close                      
+!!! CRASH on ./the-tempest/tokenizer/testfiles/token-test.input.11
+      ------- INPUT FILE -------------
+     ;;now I have commented out everything
+     ;; and everything
+!!! Disagreement on ./the-tempest/tokenizer/testfiles/token-test.input.10:
+      ------- INPUT FILE -------------
+     +- -- +. +0.3 -0.3 -.3 +.33 -10 +10 +. +.567
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      0.567000:float                 +-: symbol                    
+  !!      0.000000:float                 --: symbol                    
+  !!      10:integer                     +.: symbol                    
+  !!      -10:integer                    0.300000: float               
+  !!      0.330000:float                 -0.300000: float              
+  !!      -0.300000:float                -0.300000: float              
+  !!      -0.300000:float                0.330000: float               
+  !!      0.300000:float                 -10: integer                  
+  !!      0.000000:float                 10: integer                   
+  !!      --:symbol                      +.: symbol                    
+  !!      +-:symbol                      0.567000: float               
+!!! Disagreement on ./the-tempest/tokenizer/testfiles/token-test.input.07:
+      ------- INPUT FILE -------------
+     ;; A legitimate C program, will throw error by #include line
+     #include <stdio.h>
+     
+     int main() {
+       printf("Hello, world!");
+       return 0;
+     }
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      error - no t or f after #                                    
+  !!      error - no t or f after #                                    
+  !!      error - no t or f after #                                    
+  !!      error - no t or f after #                                    
+  !!      error - no t or f after #                                    
+  !!      error - no t or f after #                                    
+  !!      error - no t or f after #                                    
+  !!      error - no t or f after #                                    
+  !!      error - no t or f after #                                    
+  !!      error - no t or f after #                                    
+  !!      dio.h>:symbol                                                
+  !!      #f:boolean                                                   
+  !!      {:symbol                                                     
+  !!      ):close                                                      
+  !!      (:open                                                       
+  !!      main:symbol                                                  
+  !!      int:symbol                                                   
+  !!      ):close                                                      
+  !!      "Hello, world!":string                                       
+  !!      (:open                                                       
+  !!      printf`                        :symbol                       
+  !!      0:integer                                                    
+  !!      return`                        :symbol                       
+  !!      }:symbol                                                     
+!!! Disagreement on ./the-tempest/tokenizer/testfiles/token-test.input.12:
+      ------- INPUT FILE -------------
+     '(a b c d e)
+     '(1 2 3)
+     'abcde
+     '123
+     
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        ': quote                      
+  !!      e:symbol                       (: open                       
+  !!      d:symbol                       a: symbol                     
+  !!      c:symbol                       b: symbol                     
+  !!      b:symbol                       c: symbol                     
+  !!      a:symbol                       d: symbol                     
+  !!      (:open                         e: symbol                     
+  !!      ':quote                        ): close                      
+  !!      ):close                        ': quote                      
+  !!      3:integer                      (: open                       
+  !!      2:integer                      1: integer                    
+  !!      1:integer                      2: integer                    
+  !!      (≤                            P≤                           
+  !!      '±                            P±                           
+  !!      abcde≥                        :symbol                       
+  !!      '≥                            P≤                           
+  !!      123:integer                    ': quote                      
+  !!      ':quote                        123: integer                  
+!!! Disagreement on ./the-tempest/tokenizer/testfiles/token-test.input.15:
+      ------- INPUT FILE -------------
+     () ibj "string ;; this is a \"string\" with #f stuff in 123 it.'" #t ;;
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      #t:boolean                     (: open                       
+  !!      "string ;; this is a \"string\" with #f stuff in 123 it.'":string ): close                      
+  !!      ibj:symbol                     ibj: symbol                   
+  !!      ):close                        "string ;; this is a \"string\" with #f stuff in 123 it.'": string
+  !!      (:open                         #t: boolean                   
+!!! Disagreement on ./comedy-of-errors/tokenizer/testcase/token-test.input.03:
+      ------- INPUT FILE -------------
+     (define test (lambda (x) (+ x x x)))
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (:open                        
+  !!      ):close                        define:symbol                 
+  !!      ):close                        test:symbol                   
+  !!      x:symbol                       (:open                        
+  !!      x:symbol                       lambda:open                   
+  !!      x:symbol                       (:open                        
+  !!      +:symbol                       x:symbol                      
+  !!      (:open                         ):close                       
+  !!      ):close                        (:open                        
+  !!      x:symbol                       +:symbol                      
+  !!      (:open                         x:open                        
+  !!      lambda:symbol                  x:open                        
+  !!      (:open                         x:open                        
+  !!      test:symbol                    ):close                       
+  !!      define:symbol                  ):close                       
+  !!      (:open                         ):close                       
+!!! Disagreement on ./comedy-of-errors/tokenizer/testcase/token-test.input.14:
+      ------- INPUT FILE -------------
+     (define
+     x
+     "This is string \"")
+     x
+     'x
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      define:symbol                  (:open                        
+  !!      (:open                         define:symbol                 
+          x:symbol                       x:symbol                      
+  !!      ):close                        "This is string \"":string    
+  !!      "This is string \"":string     ):close                       
+          x:symbol                       x:symbol                      
+  !!      ':quote                        ':symbol                      
+  !!                                     x:symbol                      
+!!! Disagreement on ./comedy-of-errors/tokenizer/testcase/token-test.input.13:
+      ------- INPUT FILE -------------
+     (append '(1 2 3 4) (quote (5 6 7 8)) '((1.2 5.4)))
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (:open                        
+  !!      ):close                        append:symbol                 
+  !!      ):close                        ':symbol                      
+  !!      5.400000:float                 (:open                        
+  !!      1.200000:float                 1:integer                     
+  !!      (:open                         2:integer                     
+  !!      (:open                         3:integer                     
+  !!      ':quote                        4:integer                     
+          ):close                        ):close                       
+  !!      ):close                        (:open                        
+  !!      8:integer                      quote:symbol                  
+  !!      7:integer                      (:open                        
+  !!      6:integer                      5:integer                     
+  !!      5:integer                      6:integer                     
+  !!      (:open                         ):close                       
+  !!      quote:symbol                   ):close                       
+  !!      (:open                         ':symbol                      
+  !!      ):close                        (:open                        
+  !!      4:integer                      (:open                        
+  !!      3:integer                      1.2:float                     
+  !!      2:integer                      5.4:float                     
+  !!      1:integer                      ):close                       
+  !!      (:open                         ):close                       
+  !!      ':quote                        ):close                       
+  !!      append:symbol                                                
+  !!      (:open                                                       
+!!! Disagreement on ./comedy-of-errors/tokenizer/testcase/token-test.input.08:
+      ------- INPUT FILE -------------
+     (define x1 3)
+     (define x2 5.0)
+     (= x1 (- x2 2))
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (:open                        
+  !!      3:integer                      define:symbol                 
+          x1:symbol                      x1:symbol                     
+  !!      define:symbol                  3:integer                     
+  !!      (:open                         ):close                       
+  !!      ):close                        (:open                        
+  !!      5.000000:float                 define:symbol                 
+          x2:symbol                      x2:symbol                     
+  !!      define:symbol                  5.0:float                     
+  !!      (aL                            PaL                           
+  !!      ):close                        (:open                        
+  !!      ):close                        =:symbol                      
+  !!      2:integer                      (:open                        
+  !!      x2:symbol                      -:symbol                      
+  !!      -:symbol                       x2:symbol                     
+  !!      (:open                         2:integer                     
+  !!      x1:symbol                      ):close                       
+  !!      =:symbol                       ):close                       
+  !!      (bL                            @bL                           
+!!! Disagreement on ./comedy-of-errors/tokenizer/testcase/token-test.input.04:
+      ------- INPUT FILE -------------
+     (if (= 3.0 (+ 1.0 2.0)) "#t" #f)
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (:open                        
+  !!      #f:boolean                     if:symbol                     
+  !!      "#t":string                    (:open                        
+  !!      ):close                        =:symbol                      
+  !!      ):close                        3.0:float                     
+  !!      2.000000:float                 (:open                        
+  !!      1.000000:float                 +:symbol                      
+  !!      +:symbol                       1.0:float                     
+  !!      (:open                         2.0:float                     
+  !!      3.000000:float                 ):close                       
+  !!      =:symbol                       ):close                       
+  !!      (:open                         "#t":string                   
+  !!      if:symbol                      #f:boolean                    
+  !!      (:open                         ):close                       
+!!! Disagreement on ./comedy-of-errors/tokenizer/testcase/token-test.input.02:
+      ------- INPUT FILE -------------
+     (= (+ 1 2.5 (* 3 2)) 15)
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (:open                        
+  !!      15:integer                     =:symbol                      
+  !!      ):close                        (:open                        
+  !!      ):close                        +:symbol                      
+  !!      2:integer                      1:integer                     
+  !!      3:integer                      2.5:float                     
+  !!      *:symbol                       (:open                        
+  !!      (:open                         *:symbol                      
+  !!      2.500000:float                 3:integer                     
+  !!      1:integer                      2:integer                     
+  !!      +:symbol                       ):close                       
+  !!      (:open                         ):close                       
+  !!      =:symbol                       15:integer                    
+  !!      (:open                         ):close                       
+!!! Disagreement on ./comedy-of-errors/tokenizer/testcase/token-test.input.09:
+      ------- INPUT FILE -------------
+     (define aString "This is \" still a string")
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (:open                        
+  !!      "This is \" still a string":string define:symbol                 
+          aString:symbol                 aString:symbol                
+  !!      define:symbol                  "This is \" stil a string":string
+  !!      (:open                         ):close                       
+!!! Disagreement on ./comedy-of-errors/tokenizer/testcase/token-test.input.05:
+      ------- INPUT FILE -------------
+     (list '(1 2 34 5) '(1 2 3) 3 "This is string")
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (:open                        
+  !!      "This is string":string        list:symbol                   
+  !!      3:integer                      ':quote                       
+  !!      ):close                        (:open                        
+  !!      3:integer                      1:integer                     
+          2:integer                      2:integer                     
+  !!      1:integer                      34:integer                    
+  !!      (:open                         5:integer                     
+  !!      ':quote                        ):close                       
+  !!      ):close                        ':quote                       
+  !!      5:integer                      (:open                        
+  !!      34:integer                     1:integer                     
+          2:integer                      2:integer                     
+  !!      1:integer                      3:integer                     
+  !!      (:open                         ):close                       
+  !!      ':quote                        3:integer                     
+  !!      list:symbol                    "This is string":string       
+  !!      (:open                         ):close                       
+!!! Disagreement on ./comedy-of-errors/tokenizer/testcase/token-test.input.01:
+      ------- INPUT FILE -------------
+     (+ x2 ( + ( quote x ) "foo;; still a astring" 323) ;; comment!
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (:open                        
+  !!      323:integer                    +:symbol                      
+  !!      "foo;; still a astring":string x2:symbol                     
+  !!      ):close                        (:open                        
+  !!      x:symbol                       +:symbol                      
+  !!      quote:symbol                   (:open                        
+  !!      (:open                         quote:symbol                  
+  !!      +:symbol                       x:symbol                      
+  !!      (:open                         ):close                       
+  !!      x2:symbol                      "foo;; still a string":string 
+  !!      +:symbol                       323:integer                   
+  !!      (:open                         ):close                       
+!!! Disagreement on ./comedy-of-errors/tokenizer/testcase/token-test.input.06:
+      ------- INPUT FILE -------------
+     (define createList
+         (lambda x x))
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      createList:symbol              (:open                        
+          define:symbol                  define:symbol                 
+  !!      (:open                         createList:symbol             
+  !!      ):close                        (:open                        
+  !!      ):close                        lambda:symbol                 
+          x:symbol                       x:symbol                      
+          x:symbol                       x:symbol                      
+  !!      lambda:symbol                  ):close                       
+  !!      (q)Pq):open                  ):close                       
+!!! Disagreement on ./comedy-of-errors/tokenizer/testcase/token-test.input.11:
+      ------- INPUT FILE -------------
+     (+ 3 (* 2 (- 5 (* 2.0 12)  ) ) ) 
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (:open                        
+  !!      ):close                        +:symbol                      
+  !!      ):close                        3:integer                     
+  !!      ):close                        (:open                        
+  !!      12:integer                     *:symbol                      
+  !!      2.000000:float                 2:integer                     
+  !!      *:symbol                       (:open                        
+  !!      (:open                         -:symbol                      
+          5:integer                      5:integer                     
+  !!      -:symbol                       (:open                        
+  !!      (:open                         *:symbol                      
+  !!      2:integer                      2.0:float                     
+  !!      *:symbol                       12:integer                    
+  !!      (:open                         ):close                       
+  !!      3:integer                      ):close                       
+  !!      +:symbol                       ):close                       
+  !!      (:open                         ):close                       
+!!! Disagreement on ./comedy-of-errors/tokenizer/testcase/token-test.input.10:
+      ------- INPUT FILE -------------
+     (equal "string \"" "Test string! '(1 2 34)")
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (:open                        
+  !!      "Test string! '(1 2 34)":string equal:symbol                  
+          "string \"":string             "string \"":string            
+  !!      equal:symbol                   "Test string! '(1 2 34)":string
+  !!      (:open                         ):close                       
+!!! Disagreement on ./comedy-of-errors/tokenizer/testcase/token-test.input.07:
+      ------- INPUT FILE -------------
+     (if #f 
+         (+ 1 2 3) "#f") ;; Comments abc def
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      #f:boolean                     (:open                        
+          if:symbol                      if:symbol                     
+  !!      (:open                         #f:boolean                    
+  !!      ):close                        (:open                        
+  !!      "#f":string                    +:symbol                      
+  !!      ):close                        1:integer                     
+  !!      3:integer                      2:integer                     
+  !!      2:integer                      3:integer                     
+  !!      1:integer                      ):close                       
+  !!      +:symbol                       "#f":string                   
+  !!      (¡ıP¡ı:open                  ):close                       
+!!! Disagreement on ./comedy-of-errors/tokenizer/testcase/token-test.input.12:
+      ------- INPUT FILE -------------
+     (define factorial (lambda (x)
+         (if (= x 0)
+             1
+             (* x (factorial (- x 1))))))
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (:open                        
+  !!      x:symbol                       define:symbol                 
+  !!      (:open                         factorial:symbol              
+  !!      lambda:symbol                  (:open                        
+  !!      (:open                         lambda:open                   
+  !!      factorial:symbol               (:open                        
+  !!      define:symbol                  x:symbol                      
+  !!      (:open                         ):close                       
+  !!      ):close                        (:open                        
+  !!      0:integer                      if:symbol                     
+  !!      x:symbol                       (:open                        
+          =:symbol                       =:symbol                      
+  !!      (:open                         x:symbol                      
+  !!      ifäPBä:symbol                0:integer                     
+  !!      (AäPAä:open                  ):close                       
+          1:integer                      1:integer                     
+  !!      ):close                        (:open                        
+  !!      ):close                        *:symbol                      
+  !!      ):close                        x:sumbol                      
+  !!      ):close                        (:open                        
+  !!      ):close                        factorial:symbol              
+  !!      ):close                        (:open                        
+  !!      1:integer                      -:symbol                      
+          x:symbol                       x:symbol                      
+  !!      -:symbol                       1:integer                     
+  !!      (:open                         ):close                       
+  !!      factorial:symbol               ):close                       
+  !!      (:open                         ):close                       
+  !!      x:symbol                       ):close                       
+  !!      *:symbol                       ):close                       
+  !!      (Dä†Cä:open                  ):close                       
+                                                                       
+!!! Disagreement on ./comedy-of-errors/tokenizer/testcase/token-test.input.15:
+      ------- INPUT FILE -------------
+     (equal "This not a quote '" #f)
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (:open                        
+  !!      #f:boolean                     equal:symbol                  
+  !!      "This not a quote '":string    "This is not a quote '":string
+  !!      equal:symbol                   #f: boolean                   
+  !!      (:open                         ):close                       
+!!! Disagreement on ./comedy-of-errors/tokenizer/testcase/token-test.input.16:
+      ------- INPUT FILE -------------
+     (list 1 1.2 1.5 '(1 2 3) ";;this is not a comment")
+      -------- YOUR OUTPUT --------  -------- TEST-WRITERS' OUTPUT --------
+  !!      ):close                        (:open                        
+  !!      ";;this is not a comment":string list:symbol                   
+  !!      ):close                        1:integer                     
+  !!      3:integer                      1.2:float                     
+  !!      2:integer                      1.5:float                     
+  !!      1:integer                      ':quote                       
+          (:open                         (:open                        
+  !!      ':quote                        1:integer                     
+  !!      1.500000:float                 2:integer                     
+  !!      1.200000:float                 3:integer                     
+  !!      1:integer                      ):close                       
+  !!      list:symbol                    ";;this is not a comment":string
+  !!      (:open                         ):close                       
