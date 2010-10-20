@@ -37,7 +37,7 @@ void reverse(LinkedList *list) {
     while (current) {
         Node *next = current->next;
         push(new_list, current->value);
-        free(current); // frees the current node
+        free(current);
         current = next;
     }
     list->head = new_list->head; // think about memory
@@ -46,11 +46,12 @@ void reverse(LinkedList *list) {
 void destroy(LinkedList *list) {
    Node *current = list->head;
    while(current) {
-      Node *next = current->next; // also want to free the values
+      Node *next = current->next;
       free(current);
       current = next;
    }
-   list->head = NULL;
+   // also want to free the values -- want to loop through value list and free each value
+   list->head = NULL; // think about memory
 }
 
 void printList(LinkedList *list) {
@@ -59,10 +60,10 @@ void printList(LinkedList *list) {
    	  switch(current->value->type) {
  	  	case booleanType:
  	  		if (current->value->val.boolValue) {
- 	  			printf("#t:boolean\n", current->value->val.boolValue);
+ 	  			printf("#t:boolean\n");
  	  		}
  	  		else {
- 	  			printf("#f:boolean\n", current->value->val.boolValue);
+ 	  			printf("#f:boolean\n");
  	  		}
 			break;
 		case integerType:
@@ -90,26 +91,7 @@ void printList(LinkedList *list) {
 			printf("invalid type for value structure");
 			break;
    	  }
-      current = (*current).next;
+      current = (*current).next; // be consistent with all this
    }
 }
-
-
-// have a lst of malloced values and then free all that at the end
-// freeing values after we hit enter
-// in destroy we want to free the values
-
-/* void freeValue(Value *value) { */
-/*    switch (value->type) { */
-/*    case stringType: */
-/*       free("the string"); */
-/*       break; */
-/*    case symbolType: */
-/*       free("the name"); */
-/*       break; */
-/*    ... */
-/*    } */
-   
-/*    free(value); */
-/* } */
 

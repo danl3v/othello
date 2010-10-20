@@ -19,10 +19,42 @@ char *substr(char *string, int start, int end) {
 
 // write a freeValue function
 
+
+// have a lst of malloced values and then free all that at the end
+// freeing values after we hit enter
+// in destroy we want to free the values
+
+void freeValue(Value *value) {
+	switch (value->type) {
+	
+		case stringType:
+		   free(value->val.stringValue);
+		   break;
+		   
+		case symbolType:
+		   free(value->val.symbolValue);
+		   break;
+		   
+		case openType:
+		   free(value->val.openValue);
+		   break;
+		   
+	    case closeType:
+		   free(value->val.closeValue);
+		   break;
+		   
+	    case quoteType:
+		   free(value->val.quoteValue);
+		   break;
+    }
+    free(value);
+}
+
 int pushToken(LinkedList *tokenList, int type, char *string) {
 	Value *token = malloc(sizeof(Value));
+	// add value to a list of malloc'ed values to free in destroy
 	char * str;
-	char * pEnd;
+	char * pEnd; // can we just use * str????
 	
 	if (token) {
 		token->type = type;
