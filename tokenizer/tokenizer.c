@@ -3,6 +3,8 @@
 #include <string.h>
 #include "tokenizer.h"
 
+// deal with tabs
+
 char* substr(char* string, int start, int end) {
 	char *result = malloc(sizeof(char)*(end - start + 1));
 	strncpy(result, &string[start], end-start);
@@ -14,16 +16,6 @@ enum TOKEN_TYPE {
 };
 
 enum STATE_TYPE {
-	/*
-	inBetween - blah blah
-	inBool
-	inInteger
-	inFloat
-	inString
-	inPreNumber
-	inEscaped
-	inComment
-	*/
 	inBetween, inBool, inInteger, inFloat, inString, inSymbol, inPreNumber, inEscaped, inComment
 };
 
@@ -49,19 +41,24 @@ int pushToken(LinkedList *tokenList, int type, char * string) {
 			case floatType:
 				token->val.floatValue = strtod(string, &pEnd);
 				break;
-			case stringType:
+			case stringType: //CLEAN UP MEMORY *********
+				token->val.stringValue = malloc(strlen(string)*sizeof(char)+1);
 				token->val.stringValue = string;
 				break;
 			case symbolType:
+				token->val.stringValue = malloc(strlen(string)*sizeof(char)+1);
 				token->val.symbolValue = string;
 				break;
 			case openType:
+				token->val.stringValue = malloc(strlen(string)*sizeof(char)+1);
 				token->val.openValue = string;
 				break;
 			case closeType:
+				token->val.stringValue = malloc(strlen(string)*sizeof(char)+1);
 				token->val.closeValue = string;
 				break;
 			case quoteType:
+				token->val.stringValue = malloc(strlen(string)*sizeof(char)+1);
 				token->val.quoteValue = string;
 				break;
 		}
