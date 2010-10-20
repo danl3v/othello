@@ -3,14 +3,6 @@
 #include <string.h>
 #include "tokenizer.h"
 
-// deal with tabs
-
-char* substr(char* string, int start, int end) {
-	char *result = malloc(sizeof(char)*(end - start + 1));
-	strncpy(result, &string[start], end-start);
-	return result;
-}
-
 enum TOKEN_TYPE {
 	booleanType, integerType, floatType, stringType, symbolType, openType, closeType, quoteType
 };
@@ -19,7 +11,15 @@ enum STATE_TYPE {
 	inBetween, inBool, inInteger, inFloat, inString, inSymbol, inPreNumber, inEscaped, inComment
 };
 
-int pushToken(LinkedList *tokenList, int type, char * string) {
+char *substr(char *string, int start, int end) {
+	char *result = malloc(sizeof(char)*(end - start + 1));
+	strncpy(result, &string[start], end-start);
+	return result;
+}
+
+// write a freeValue function
+
+int pushToken(LinkedList *tokenList, int type, char *string) {
 	Value *token = malloc(sizeof(Value));
 	char * str;
 	char * pEnd;
@@ -28,40 +28,30 @@ int pushToken(LinkedList *tokenList, int type, char * string) {
 		token->type = type;
 		switch (type) {
 			case booleanType:
-			   /* token->val.boolValue = (!strcmp(string,"T") || !strcmp(string,"t")); */
-				if (strcmp(string, "T") == 0 || strcmp(string, "t") == 0) {
-					token->val.boolValue = 1;
-				}
-				if (strcmp(string, "F") == 0 || strcmp(string, "f") == 0) {
-					token->val.boolValue = 0;
-				}
+			    token->val.boolValue = (!strcmp(string,"T") || !strcmp(string,"t"));
+				free(string);
 				break;
 			case integerType:
-				token->val.integerValue = strtol(string, &str, 0);; 
+				token->val.integerValue = strtol(string, &str, 0);
+				free(string);
 				break;
 			case floatType:
 				token->val.floatValue = strtod(string, &pEnd);
-				/* free string! */
+				free(string);
 				break;
-			case stringType: //CLEAN UP MEMORY *********
-			   /* don't malloc here! you're leaking memory! */
-				token->val.stringValue = malloc(strlen(string)*sizeof(char)+1); 
+			case stringType:
 				token->val.stringValue = string;
 				break;
 			case symbolType:
-				token->val.stringValue = malloc(strlen(string)*sizeof(char)+1);
 				token->val.symbolValue = string;
 				break;
 			case openType:
-				token->val.stringValue = malloc(strlen(string)*sizeof(char)+1);
 				token->val.openValue = string;
 				break;
 			case closeType:
-				token->val.stringValue = malloc(strlen(string)*sizeof(char)+1);
 				token->val.closeValue = string;
 				break;
 			case quoteType:
-				token->val.stringValue = malloc(strlen(string)*sizeof(char)+1);
 				token->val.quoteValue = string;
 				break;
 		}
@@ -70,7 +60,7 @@ int pushToken(LinkedList *tokenList, int type, char * string) {
 	return 0;
 }
 
-LinkedList* tokenize (char *expression) {
+LinkedList *tokenize (char *expression) {
 	int currentState = inBetween;
 	int tokenStartIndex = 0;
 	int tokenCurrentIndex = 0;
@@ -90,8 +80,7 @@ LinkedList* tokenize (char *expression) {
 						break;
 						
 					case ' ':
-						break;
-					
+					case '\t':
 					case '\n':
 						break;
 					
@@ -153,7 +142,7 @@ LinkedList* tokenize (char *expression) {
 						currentState = inBetween;
 						break;
 						
-					default:
+					default: // maybe transition to inbetween state?
 						printf("error - no t or f after #\n");
 						break;
 				}
@@ -179,6 +168,7 @@ LinkedList* tokenize (char *expression) {
 						break;
 						
 					case ' ':
+					case '\t':
 					case '\n':
 						pushToken(tokenList, symbolType, substr(expression, tokenStartIndex, tokenCurrentIndex));
 						currentState = inBetween;
@@ -238,6 +228,7 @@ LinkedList* tokenize (char *expression) {
 						break;
 						
 					case ' ':
+					case '\t':
 					case '\n':
 						pushToken(tokenList, integerType, substr(expression, tokenStartIndex, tokenCurrentIndex));
 						currentState = inBetween;
@@ -293,6 +284,7 @@ LinkedList* tokenize (char *expression) {
 						break;
 						
 					case ' ':
+					case '\t':
 					case '\n':
 						pushToken(tokenList, floatType, substr(expression, tokenStartIndex, tokenCurrentIndex));
 						currentState = inBetween;
@@ -336,6 +328,7 @@ LinkedList* tokenize (char *expression) {
 			case inSymbol:
 				switch (expression[tokenCurrentIndex]) {
 					case ' ':
+					case '\t':
 					case '\n':
 						pushToken(tokenList, symbolType, substr(expression, tokenStartIndex, tokenCurrentIndex));
 						currentState = inBetween;
@@ -407,7 +400,7 @@ LinkedList* tokenize (char *expression) {
 			break;
 			
 			default:
-				printf("what do i do???\n");
+				printf("error: current state error\n");
 				break;
 		}
 		

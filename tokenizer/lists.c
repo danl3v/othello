@@ -7,7 +7,7 @@ enum TOKEN_TYPE {
 };
 
 void create(LinkedList *list) {
-   list->head = NULL;
+   list->head = NULL; // why do we do it this way again??
 }
 
 int push(LinkedList *list, Value *value) {
@@ -20,11 +20,11 @@ int push(LinkedList *list, Value *value) {
       return (node != NULL);
 }
 
-
-Value* pop(LinkedList *list) {
+Value *pop(LinkedList *list) {
 	Value *value = list->head->value;
 	Node *head = list->head;
 	list->head = list->head->next;
+	// free(head->value); need to free the malloc-ed data in the union
 	free(head);
 	return value;
 }
@@ -33,11 +33,11 @@ void reverse(LinkedList *list) {
     LinkedList *new_list = malloc(sizeof(*new_list));
     create(new_list);
     
-    Node *current = (*list).head;
+    Node *current = list->head;
     while (current) {
         Node *next = current->next;
         push(new_list, current->value);
-        //free(current);
+        free(current); // frees the current node
         current = next;
     }
     list->head = new_list->head; // think about memory
@@ -46,7 +46,7 @@ void reverse(LinkedList *list) {
 void destroy(LinkedList *list) {
    Node *current = list->head;
    while(current) {
-      Node *next = current->next;
+      Node *next = current->next; // also want to free the values
       free(current);
       current = next;
    }
@@ -94,6 +94,11 @@ void printList(LinkedList *list) {
    }
 }
 
+
+// have a lst of malloced values and then free all that at the end
+// freeing values after we hit enter
+// in destroy we want to free the values
+
 /* void freeValue(Value *value) { */
 /*    switch (value->type) { */
 /*    case stringType: */
@@ -107,3 +112,4 @@ void printList(LinkedList *list) {
    
 /*    free(value); */
 /* } */
+

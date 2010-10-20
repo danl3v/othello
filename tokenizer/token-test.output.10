@@ -1,5 +1,5 @@
-123d:symbol
+':quote
+':quote
+0.123400:float
 +:symbol
-.1234:float
-':quote
-':quote
+123d:symbol

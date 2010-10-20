@@ -21,18 +21,11 @@ typedef struct __LinkedList__ {
    Node *head;
 } LinkedList;
 
-
 void create(LinkedList *list);
 
 int push(LinkedList *list, Value *value);
 
-Value* pop(LinkedList *list);
-
-/*int *lookup(LinkedList *list, int index);
-
-int length(LinkedList *list);
-
-int isEmpty(LinkedList *list); */
+Value *pop(LinkedList *list);
 
 void reverse(LinkedList *list);
 

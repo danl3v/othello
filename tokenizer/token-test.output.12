@@ -1,3 +1,2 @@
--2:integer
-+symbol
 #t:boolean
++-2:symbol

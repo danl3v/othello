@@ -1,4 +1,4 @@
-hello:symbol
-):close
-"'\"#c":string
 (:open
+"'\"#c":string
+):close
+hello:symbol
