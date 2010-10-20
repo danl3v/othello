@@ -1,1 +1,3 @@
-void tokenizer (char *expression);
+#include "lists.h"
+
+LinkedList* tokenize (char *expression);
