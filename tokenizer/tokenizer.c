@@ -411,6 +411,7 @@ LinkedList* tokenize (char *expression) {
 		tokenCurrentIndex++;
 	}
 	
+	reverse(tokenList);
 	return tokenList;
 	
 }

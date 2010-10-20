@@ -34,6 +34,8 @@ int length(LinkedList *list);
 
 int isEmpty(LinkedList *list); */
 
+void reverse(LinkedList *list);
+
 void destroy(LinkedList *list);
 
 void printList(LinkedList *list);

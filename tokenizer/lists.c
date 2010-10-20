@@ -29,6 +29,20 @@ Value* pop(LinkedList *list) {
 	return value;
 }
 
+void reverse(LinkedList *list) {
+    LinkedList *new_list = malloc(sizeof(*new_list));
+    create(new_list);
+    
+    Node *current = (*list).head;
+    while (current) {
+        Node *next = current->next;
+        push(new_list, current->value);
+        //free(current);
+        current = next;
+    }
+    list->head = new_list->head; // think about memory
+}
+
 void destroy(LinkedList *list) {
    Node *current = list->head;
    while(current) {
