@@ -1,0 +1,12 @@
+):close
+323:integer
+"foo;; still a string":string
+):close
+x:symbol
+quote:symbol
+(:open
++:symbol
+(:open
+x2:symbol
++:symbol
+(:open

@@ -1,0 +1,16 @@
+):close
+):close
+):close
+x:symbol
+x:symbol
++:symbol
+(:open
+2:integer
+1:integer
++:symbol
+(:open
+):close
+x:symbol
+(:open
+lambda:symbol
+(:open

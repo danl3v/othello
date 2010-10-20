@@ -1,0 +1,9 @@
+newline:symbol
+"\n":string
+\n:symbol
+14q:symbol
+3:integer
+3.:float
+a32:symbol
+':quote
+=far#h:symbol

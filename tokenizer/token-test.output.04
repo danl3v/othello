@@ -1,0 +1,9 @@
+.1234.123:symbol
+1234:integer
+':quote
+asdf:symbol
+asdf:symbol
+':quote
+.1234:float
+"\n()":string
+1234:integer
