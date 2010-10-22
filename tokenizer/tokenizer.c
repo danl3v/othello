@@ -12,13 +12,10 @@ enum STATE_TYPE {
 };
 
 char *substr(char *string, int start, int end) {
-	char *result = malloc(sizeof(char)*(end - start + 1));
+	char *result = malloc(sizeof(char)*(end - start + 1)); // i think we are adding 1 extra size here for the null character right??****
 	strncpy(result, &string[start], end-start);
 	return result;
 }
-
-// write a freeValue function
-
 
 // have a lst of malloced values and then free all that at the end
 // freeing values after we hit enter
