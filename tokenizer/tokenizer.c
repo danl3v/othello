@@ -1,6 +1,6 @@
-/*to think about: free Value objects is done (we didn't use a list to store malloc'ed values, but ours works?? yes)
+/*to think about: free Value objects (but we need to consider if we have two lists point to same value, so maybe we want a list of malloc'ed values, or we store the number of the object is referenced, number of pointers to the object in the value struct)
  		 on errors, we should print list and then return to stop tokenizing, consider how we want to handle errors
-		 fix ? stuff*/
+		 store line numbers in value struct */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,10 +15,13 @@ enum STATE_TYPE {
 	inBetween, inBool, inInteger, inFloat, inString, inSymbol, inPreNumber, inPreFloat, inComment
 };
 
-char *substr(char *string, int start, int end) { //3 and 7 character symbols    
-    //are adding extra characters
-	char *result = malloc(sizeof(char)*(end - start + 1)); // i think we are adding 1 extra size here for the null character right??****
-	strncpy(result, &string[start], end-start);
+char *substr(char *string, int start, int end) { // copies from string from index start to end-1   
+	int i;
+	char *result = malloc(sizeof(char)*(end - start + 1));
+	for (i=0;i<end-start;i++) {
+		result[i] = string[start+i];
+	}
+	result[end-start] = 0;
 	return result;
 }
 
