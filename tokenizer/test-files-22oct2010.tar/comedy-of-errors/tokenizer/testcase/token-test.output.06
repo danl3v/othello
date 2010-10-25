@@ -1,0 +1,9 @@
+(:open
+define:symbol
+createList:symbol
+(:open
+lambda:symbol
+x:symbol
+x:symbol
+):close
+):close

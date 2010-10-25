@@ -1,0 +1,16 @@
+(:open
+define:symbol
+test:symbol
+(:open
+lambda:open
+(:open
+x:symbol
+):close
+(:open
++:symbol
+x:open
+x:open
+x:open
+):close
+):close
+):close

@@ -1,0 +1,14 @@
+(:open
+=:symbol
+(:open
++:symbol
+1:integer
+2.5:float
+(:open
+*:symbol
+3:integer
+2:integer
+):close
+):close
+15:integer
+):close

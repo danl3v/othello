@@ -1,0 +1,5 @@
+;; A non-error-generating Python program
+def pythonfunc(var1, var2):
+  print var1
+  print "%s" % (var2)
+if __name__=="__main__":pythonfunc("a","b")

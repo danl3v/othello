@@ -1,3 +1,7 @@
+/*to think about: free Value objects is done (we didn't use a list to store malloc'ed values, but ours works?? yes)
+ 		 on errors, we should print list and then return to stop tokenizing, consider how we want to handle errors
+		 fix ? stuff*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,50 +12,20 @@ enum TOKEN_TYPE {
 };
 
 enum STATE_TYPE {
-	inBetween, inBool, inInteger, inFloat, inString, inSymbol, inPreNumber, inEscaped, inComment
+	inBetween, inBool, inInteger, inFloat, inString, inSymbol, inPreNumber, inPreFloat, inComment
 };
 
-char *substr(char *string, int start, int end) {
+char *substr(char *string, int start, int end) { //3 and 7 character symbols    
+    //are adding extra characters
 	char *result = malloc(sizeof(char)*(end - start + 1)); // i think we are adding 1 extra size here for the null character right??****
 	strncpy(result, &string[start], end-start);
 	return result;
 }
 
-// have a lst of malloced values and then free all that at the end
-// freeing values after we hit enter
-// in destroy we want to free the values
-
-void freeValue(Value *value) {
-	switch (value->type) {
-	
-		case stringType:
-		   free(value->val.stringValue);
-		   break;
-		   
-		case symbolType:
-		   free(value->val.symbolValue);
-		   break;
-		   
-		case openType:
-		   free(value->val.openValue);
-		   break;
-		   
-	    case closeType:
-		   free(value->val.closeValue);
-		   break;
-		   
-	    case quoteType:
-		   free(value->val.quoteValue);
-		   break;
-    }
-    free(value);
-}
-
 int pushToken(LinkedList *tokenList, int type, char *string) {
 	Value *token = malloc(sizeof(Value));
-	// add value to a list of malloc'ed values to free in destroy
+	//push(allValueObjects, token);
 	char * str;
-	char * pEnd; // can we just use * str????
 	
 	if (token) {
 		token->type = type;
@@ -65,7 +39,7 @@ int pushToken(LinkedList *tokenList, int type, char *string) {
 				free(string);
 				break;
 			case floatType:
-				token->val.floatValue = strtod(string, &pEnd);
+				token->val.floatValue = strtod(string, &str);
 				free(string);
 				break;
 			case stringType:
@@ -93,10 +67,12 @@ LinkedList *tokenize (char *expression) {
 	int currentState = inBetween;
 	int tokenStartIndex = 0;
 	int tokenCurrentIndex = 0;
-	Value *token;
-	char* token_value;
+	//Value *token;
+	//char* token_value;
 	LinkedList *tokenList = malloc(sizeof(*tokenList));
+	//LinkedList *allValueObjects = malloc(sizeof(*allValueObjects));
 	create(tokenList);
+	//create(allValueObjects);
 
 	while (expression[tokenCurrentIndex]) {
 		switch (currentState) {
@@ -111,13 +87,16 @@ LinkedList *tokenize (char *expression) {
 					case ' ':
 					case '\t':
 					case '\n':
+					case '\r':
 						break;
 					
 					case '(':
+					case '[':
 						pushToken(tokenList, openType, substr(expression, tokenStartIndex, tokenCurrentIndex+1));
 						break;
 						
 					case ')':
+					case ']':
 						pushToken(tokenList, closeType, substr(expression, tokenStartIndex, tokenCurrentIndex+1));
 						break;
 						
@@ -154,6 +133,11 @@ LinkedList *tokenize (char *expression) {
 					case '\'':
 						pushToken(tokenList, quoteType, substr(expression, tokenStartIndex, tokenCurrentIndex+1));
 						break;
+					
+					case '\\':
+						tokenCurrentIndex++;
+						currentState = inSymbol;
+						break;
 						
 					default:
 						currentState = inSymbol;
@@ -173,6 +157,7 @@ LinkedList *tokenize (char *expression) {
 						
 					default: // maybe transition to inbetween state?
 						printf("error - no t or f after #\n");
+						return reverse(tokenList);
 						break;
 				}
 			break;
@@ -193,23 +178,26 @@ LinkedList *tokenize (char *expression) {
 						break;
 						
 					case '.':
-						currentState = inFloat;
+						currentState = inPreFloat;
 						break;
 						
 					case ' ':
 					case '\t':
 					case '\n':
+					case '\r':
 						pushToken(tokenList, symbolType, substr(expression, tokenStartIndex, tokenCurrentIndex));
 						currentState = inBetween;
 						break;
 						
 					case ')':
+					case ']':
 						pushToken(tokenList, symbolType, substr(expression, tokenStartIndex, tokenCurrentIndex));
 						pushToken(tokenList, openType, substr(expression, tokenCurrentIndex, tokenCurrentIndex+1));
 						currentState = inBetween;
 						break;
 						
 					case '(':
+					case '[':
 						pushToken(tokenList, symbolType, substr(expression, tokenStartIndex, tokenCurrentIndex));
 						pushToken(tokenList, closeType, substr(expression, tokenCurrentIndex, tokenCurrentIndex+1));
 						currentState = inBetween;
@@ -230,13 +218,83 @@ LinkedList *tokenize (char *expression) {
 					case ';':
 						pushToken(tokenList, symbolType, substr(expression, tokenStartIndex, tokenCurrentIndex));
 						currentState = inComment;
-						break;	
+						break;
+					
+					case '\\':
+						tokenCurrentIndex++;
+						currentState = inSymbol;
+						break;
 						
 					default:
 						currentState=inSymbol;
 						break;
 				}
 			break;
+			
+			case inPreFloat:
+				switch (expression[tokenCurrentIndex]) {
+					case '0':
+					case '1':
+					case '2':
+					case '3':
+					case '4':
+					case '5':
+					case '6':
+					case '7':
+					case '8':
+					case '9':
+						currentState = inFloat;
+						break;
+						
+					case ' ':
+					case '\t':
+					case '\n':
+					case '\r':
+						pushToken(tokenList, symbolType, substr(expression, tokenStartIndex, tokenCurrentIndex));
+						currentState = inBetween;
+						break;
+					
+					case '(':
+					case '[':
+						pushToken(tokenList, symbolType, substr(expression, tokenStartIndex, tokenCurrentIndex));
+						pushToken(tokenList, openType, substr(expression, tokenCurrentIndex, tokenCurrentIndex+1));
+						currentState = inBetween;
+						break;
+						
+					case ')':
+					case ']':
+						pushToken(tokenList, symbolType, substr(expression, tokenStartIndex, tokenCurrentIndex));
+						pushToken(tokenList, closeType, substr(expression, tokenCurrentIndex, tokenCurrentIndex+1));
+						currentState = inBetween;
+						break;
+					
+					case '"':
+						pushToken(tokenList, symbolType, substr(expression, tokenStartIndex, tokenCurrentIndex));
+						tokenStartIndex = tokenCurrentIndex;
+						currentState = inString;
+						break;
+						
+					case '\'':
+						pushToken(tokenList, symbolType, substr(expression, tokenStartIndex, tokenCurrentIndex));
+						pushToken(tokenList, quoteType, substr(expression, tokenCurrentIndex, tokenCurrentIndex+1));
+						currentState = inBetween;
+						break;
+						
+					case ';':
+						pushToken(tokenList, symbolType, substr(expression, tokenStartIndex, tokenCurrentIndex));
+						currentState = inComment;
+						break;
+
+					case '\\':
+						tokenCurrentIndex++;
+						currentState = inSymbol;
+						break;
+						
+					default:
+						currentState = inSymbol;
+						break;
+				}
+			break;	
 			
 			case inInteger:
 				switch (expression[tokenCurrentIndex]) {
@@ -259,17 +317,20 @@ LinkedList *tokenize (char *expression) {
 					case ' ':
 					case '\t':
 					case '\n':
+					case '\r':
 						pushToken(tokenList, integerType, substr(expression, tokenStartIndex, tokenCurrentIndex));
 						currentState = inBetween;
 						break;
 					
 					case '(':
+					case '[':
 						pushToken(tokenList, integerType, substr(expression, tokenStartIndex, tokenCurrentIndex));
 						pushToken(tokenList, openType, substr(expression, tokenCurrentIndex, tokenCurrentIndex+1));
 						currentState = inBetween;
 						break;
 						
 					case ')':
+					case ']':
 						pushToken(tokenList, integerType, substr(expression, tokenStartIndex, tokenCurrentIndex));
 						pushToken(tokenList, closeType, substr(expression, tokenCurrentIndex, tokenCurrentIndex+1));
 						currentState = inBetween;
@@ -290,7 +351,12 @@ LinkedList *tokenize (char *expression) {
 					case ';':
 						pushToken(tokenList, integerType, substr(expression, tokenStartIndex, tokenCurrentIndex));
 						currentState = inComment;
-						break;	
+						break;
+						
+					case '\\':
+						tokenCurrentIndex++;
+						currentState = inSymbol;
+						break;
 						
 					default:
 						currentState = inSymbol;
@@ -315,17 +381,20 @@ LinkedList *tokenize (char *expression) {
 					case ' ':
 					case '\t':
 					case '\n':
+					case '\r':
 						pushToken(tokenList, floatType, substr(expression, tokenStartIndex, tokenCurrentIndex));
 						currentState = inBetween;
 						break;
 					
 					case '(':
+					case '[':
 						pushToken(tokenList, floatType, substr(expression, tokenStartIndex, tokenCurrentIndex));
 						pushToken(tokenList, openType, substr(expression, tokenCurrentIndex, tokenCurrentIndex+1));
 						currentState = inBetween;
 						break;
 						
 					case ')':
+					case ']':
 						pushToken(tokenList, floatType, substr(expression, tokenStartIndex, tokenCurrentIndex));
 						pushToken(tokenList, closeType, substr(expression, tokenCurrentIndex, tokenCurrentIndex+1));
 						currentState = inBetween;
@@ -346,7 +415,12 @@ LinkedList *tokenize (char *expression) {
 					case ';':
 						pushToken(tokenList, floatType, substr(expression, tokenStartIndex, tokenCurrentIndex));
 						currentState = inComment;
-						break;	
+						break;
+						
+					case '\\':
+						tokenCurrentIndex++;
+						currentState = inSymbol;
+						break;
 						
 					default:
 						currentState = inSymbol;
@@ -359,17 +433,20 @@ LinkedList *tokenize (char *expression) {
 					case ' ':
 					case '\t':
 					case '\n':
+					case '\r':
 						pushToken(tokenList, symbolType, substr(expression, tokenStartIndex, tokenCurrentIndex));
 						currentState = inBetween;
 						break;
 						
 					case '(':
+					case '[':
 						pushToken(tokenList, symbolType, substr(expression, tokenStartIndex, tokenCurrentIndex));
 						pushToken(tokenList, openType, substr(expression, tokenCurrentIndex, tokenCurrentIndex+1));
 						currentState = inBetween;
 						break;
 							
 					case ')':
+					case ']':
 						pushToken(tokenList, symbolType, substr(expression, tokenStartIndex, tokenCurrentIndex));
 						pushToken(tokenList, closeType, substr(expression, tokenCurrentIndex, tokenCurrentIndex+1));
 						currentState = inBetween;
@@ -391,7 +468,11 @@ LinkedList *tokenize (char *expression) {
 						pushToken(tokenList, symbolType, substr(expression, tokenStartIndex, tokenCurrentIndex));
 						currentState = inComment;
 						break;
-						
+				
+					case '\\':
+						tokenCurrentIndex++;
+						break;
+					
 					default:
 						break;
 				}
@@ -405,17 +486,13 @@ LinkedList *tokenize (char *expression) {
 						break;
 					
 					case '\\':
-						currentState = inEscaped;
+						tokenCurrentIndex++;
 						break;
 					
 					default:
 						break;			
 				}
 			break;
-			
-			case inEscaped:
-				currentState = inString;
-				break;
 			
 			case inComment:
 				switch (expression[tokenCurrentIndex]) {
@@ -430,13 +507,13 @@ LinkedList *tokenize (char *expression) {
 			
 			default:
 				printf("error: current state error\n");
+				return reverse(tokenList);
 				break;
 		}
 		
 		tokenCurrentIndex++;
 	}
 	
-	reverse(tokenList);
-	return tokenList;
+	return reverse(tokenList);
 	
 }

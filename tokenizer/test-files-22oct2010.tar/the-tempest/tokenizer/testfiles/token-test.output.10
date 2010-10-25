@@ -1,0 +1,11 @@
++-:symbol
+--:symbol
++.:symbol
+0.300000:float
+-0.300000:float
+-0.300000:float
+0.330000:float
+-10:integer
+10:integer
++.:symbol
+0.567000:float

@@ -29,7 +29,7 @@ Value *pop(LinkedList *list) {
 	return value;
 }
 
-void reverse(LinkedList *list) {
+LinkedList* reverse(LinkedList *list) {
     LinkedList *new_list = malloc(sizeof(*new_list));
     create(new_list);
     
@@ -41,12 +41,46 @@ void reverse(LinkedList *list) {
         current = next;
     }
     list->head = new_list->head; // think about memory
+    return list;
+}
+
+// have a lst of malloced values and then free all that at the end
+// freeing values after we hit enter
+// in destroy we want to free the values
+void freeValue(Value *value) {
+	switch (value->type) {
+	
+		case stringType:
+		   free(value->val.stringValue);
+		   break;
+		   
+		case symbolType:
+		   free(value->val.symbolValue);
+		   break;
+		   
+		case openType:
+		   free(value->val.openValue);
+		   break;
+		   
+	    case closeType:
+		   free(value->val.closeValue);
+		   break;
+		   
+	    case quoteType:
+		   free(value->val.quoteValue);
+		   break;
+		   
+		default:
+			break;
+    }
+    free(value);
 }
 
 void destroy(LinkedList *list) {
    Node *current = list->head;
    while(current) {
       Node *next = current->next;
+      freeValue(current->value);
       free(current);
       current = next;
    }
@@ -69,27 +103,34 @@ void printList(LinkedList *list) {
 		case integerType:
 			printf("%d:integer\n", current->value->val.integerValue);
 			break;
+			
 		case floatType:
 			printf("%f:float\n", current->value->val.floatValue);
 			break;
 		case stringType:
 			printf("%s:string\n", current->value->val.stringValue);
 			break;
+			
 		case symbolType:
 			printf("%s:symbol\n", current->value->val.symbolValue);
 			break;
+			
    	  	case openType:
    	  		printf("%s:open\n", current->value->val.openValue);
    	  		break;
+   	  		
    	  	case closeType:
    	  		printf("%s:close\n", current->value->val.closeValue);
    	  		break;
+   	  		
    	  	case quoteType:
    	  		printf("%s:quote\n", current->value->val.quoteValue);
 			break;
+			
 		default:
 			printf("invalid type for value structure");
 			break;
+			
    	  }
       current = (*current).next; // be consistent with all this
    }

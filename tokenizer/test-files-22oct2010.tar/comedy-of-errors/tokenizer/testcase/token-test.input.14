@@ -1,0 +1,5 @@
+(define
+x
+"This is string \"")
+x
+'x

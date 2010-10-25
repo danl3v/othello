@@ -1,0 +1,2 @@
+(define my-abs (lambda (n) (if (#te n (* -1 n))))
+

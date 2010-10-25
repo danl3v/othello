@@ -1,0 +1,13 @@
+(:open
+if:symbol
+(:open
+>:symbol
+5.67:float
+10.01:float
+):close
+#t:boolean
+(:open
+print:symbol
+"a string with lots of stuff: 3 #t ;":string
+):close
+):close

@@ -1,0 +1,9 @@
+(:open
+someFxn:symbol
+"foo; b\"ar":string
+"oh;yea?":string
+"(paren)":string
+(:open
+someOtherFxn:symbol
+):close
+):close

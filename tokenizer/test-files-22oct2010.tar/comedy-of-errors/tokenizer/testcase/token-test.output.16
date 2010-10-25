@@ -1,0 +1,13 @@
+(:open
+list:symbol
+1:integer
+1.2:float
+1.5:float
+':quote
+(:open
+1:integer
+2:integer
+3:integer
+):close
+";;this is not a comment":string
+):close

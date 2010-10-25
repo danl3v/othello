@@ -1,0 +1,5 @@
+(:open
+):close
+ibj:symbol
+"string ;; this is a \"string\" with #f stuff in 123 it.'":string
+#t:boolean

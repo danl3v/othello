@@ -1,0 +1,3 @@
+(if #t
+	(append 3 '(4 5.23))
+	(print "I'm sorry"))

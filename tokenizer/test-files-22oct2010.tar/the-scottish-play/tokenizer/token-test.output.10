@@ -1,0 +1,10 @@
+(:open
+16:integer
+seems:symbol
+"pretty high":string
+#t:boolean
+"certainly":string
+#t:boolean
+NOT:symbol
+#f:boolean
+):close

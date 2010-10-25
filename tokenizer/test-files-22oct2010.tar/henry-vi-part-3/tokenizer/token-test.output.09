@@ -1,0 +1,13 @@
+':quote
+(:open
+confusing:symbol
+23.0.0:symbol
+-:symbol
+-2:integer
+--:symbol
+--2:symbol
+#t:boolean
+blah:symbol
+#r:syntax-err
+ight:symbol
+):close

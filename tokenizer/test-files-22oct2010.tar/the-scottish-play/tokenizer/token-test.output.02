@@ -1,0 +1,8 @@
+(:open
+):close
+#t:boolean
+#f:boolean
+symbol:symbol
+"string":string
+123:integer
+123.450000:float

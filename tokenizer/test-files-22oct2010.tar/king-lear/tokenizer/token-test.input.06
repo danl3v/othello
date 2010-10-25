@@ -1,0 +1,6 @@
+(let ((x 3)			;;a definition
+	  (y "any string with 3 and ;;a comment")
+	  (x2 #t))
+	 (if x2
+	 	(print y)
+	 	(print x)))

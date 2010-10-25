@@ -1,0 +1,18 @@
+(:open
+list:symbol
+':quote
+(:open
+1:integer
+2:integer
+34:integer
+5:integer
+):close
+':quote
+(:open
+1:integer
+2:integer
+3:integer
+):close
+3:integer
+"This is string":string
+):close

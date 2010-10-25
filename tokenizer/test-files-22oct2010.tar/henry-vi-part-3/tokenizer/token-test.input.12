@@ -1,0 +1,19 @@
+(define getListSubset
+  (lambda (L startIndex endIndex)
+    (letrec
+        ([helper
+          (lambda (L startIdx endIdx rv depth)
+            (begin
+              ; (display (make-string depth #\*)) (display "start: ") (display startIdx)
+              ; (display "...end: ") (display endIdx)
+              ; (display "...") (display L) (display "\n")
+              (if (= startIdx 0)
+                  (if (< endIdx 0)
+                      (begin
+                        (reverse rv))
+                      (helper (cdr L) 0 (- endIdx 1) (cons (car L) rv) (+ depth 1)))
+                  (helper (cdr L) (- startIdx 1) (- endIdx 1) rv (+ depth 1)))))])
+      (if (or (< startIndex 0) (> endIndex (- (length L) 1)) (> startIndex endIndex))
+          '()
+          (helper L startIndex endIndex '() 0)))))
+

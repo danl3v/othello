@@ -1,0 +1,6 @@
+(:open
+(:open
+"this is a string":string
+THISISASYMBOL!:symbol
+):close
+):close

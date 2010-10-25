@@ -1,0 +1,5 @@
+(:open
+equal:symbol
+"This is not a quote '":string
+#f: boolean
+):close

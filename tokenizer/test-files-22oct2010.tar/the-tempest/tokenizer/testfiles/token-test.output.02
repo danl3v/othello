@@ -1,0 +1,9 @@
+37#t:symbol
+#t:boolean
+a:symbol
+#t:boolean
+37#f:symbol
+#f:boolean
+a:symbol
+#f:boolean
+"escaping a string \"here\" more string":string

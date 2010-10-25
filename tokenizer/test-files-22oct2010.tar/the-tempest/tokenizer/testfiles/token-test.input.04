@@ -1,0 +1,5 @@
+;; A Python program, throws error by use of single-quotes
+def pythonfunc(var1, var2):
+  print var1
+  print "%s" % (var2)
+if __name__=='__main__':pythonfunc('a','b')

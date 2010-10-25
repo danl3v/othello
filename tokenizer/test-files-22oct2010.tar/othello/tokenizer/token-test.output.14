@@ -1,0 +1,4 @@
+(:open
+"'\"#c":string
+):close
+hello:symbol

@@ -1,0 +1,8 @@
+(:open
+define:symbol
+x:symbol
+"This is string \"":string
+):close
+x:symbol
+':symbol
+x:symbol

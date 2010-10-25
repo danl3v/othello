@@ -1,0 +1,12 @@
+(:open
+-:symbol
+1.300000:float
+-2.300000:float
+12.3/5:symbol
+6:integer
+-20:integer
+20.3.4:symbol
+4/5:fraction
+-9/4:fraction
+2/3/4:symbol
+):close

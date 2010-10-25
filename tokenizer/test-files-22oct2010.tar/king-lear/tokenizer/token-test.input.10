@@ -1,0 +1,6 @@
+(define mysort (lambda (predicate list) 
+                 (if (null? (cdr list))            ;one-element lists
+                     list
+                     (if (null? (cdr (cdr list)))        ;two-element lists.  This is technically covered by the null- and one-element-lists, plus recursion, but treating it separately saves several steps.
+                         (print "#t")
+                         #f))))

@@ -1,0 +1,5 @@
+(:open
+define:symbol
+aString:symbol
+"This is \" stil a string":string
+):close

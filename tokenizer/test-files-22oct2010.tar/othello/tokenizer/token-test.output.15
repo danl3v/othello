@@ -1,0 +1,7 @@
+':quote
+quote:symbol
+"quote\\":string
+9073:integer
+(:open
+):close
+[]{}<>9073:symbol

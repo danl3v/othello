@@ -1,0 +1,13 @@
+; ok to use null? and equal? I assume?
+(define my-list
+  (lambda items
+    (letrec ([helper
+              (lambda (L rv)
+                (if (null? L)
+                    rv
+                    (helper (cdr L) (cons (car L) rv))))])
+;                    non-tail-recursive technique, but doesn't require the call to my-reverse
+;                    ()
+;                    (cons (car L) (helper (cdr L) rv))))])
+      (helper (my-reverse items) '()))))
+

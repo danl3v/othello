@@ -1,0 +1,5 @@
+(:open
+equal:symbol
+"string \"":string
+"Test string! '(1 2 34)":string
+):close

@@ -1,0 +1,13 @@
+(:open
+define:symbol
+squarer:symbol
+(:open
+lambda:symbol
+x:symbol
+(:open
+x:symbol
+*:symbol
+x:symbol
+):close
+):close
+):close

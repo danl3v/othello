@@ -1,0 +1,4 @@
+(define square (lambda (x y) 
+	(if (> x y)
+		(print "72")
+		'(3 5.9))))

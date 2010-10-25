@@ -1,0 +1,10 @@
+1234:integer
+':quote
+"\n()":string
+0.123400:float
+':quote
+asdf:symbol
+asdf:symbol
+':quote
+1234:integer
+.1234.123:symbol

@@ -1,0 +1,13 @@
+(:open
++:symbol
+2:integer
+(:open
+*:symbol
+x:symbol
+3:integer
+):close
+(:open
+ceiling:symbol
+3.14:float
+):close
+):close

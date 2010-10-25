@@ -1,0 +1,7 @@
+(define explainSingleError
+	(lambda (sourceList predicted actual problemSlot)
+		(display "\nat slot ") (display problemSlot)
+		(display ", assertion was: ") (display (car (list-ref sourceList problemSlot))) (display " <==> ") (display (cadr (list-ref sourceList problemSlot)))
+		(display "\n\tmy code actually returned ") (display (list-ref actual problemSlot)) (display " <==> predicted ") (display (list-ref predicted problemSlot)) (display "\n")
+		))
+

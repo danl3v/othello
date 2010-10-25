@@ -1,0 +1,10 @@
+(:open
+40.000000:float
+(:open
+40.000000:float
+"to be precise":string
+):close
+(:open
+"Did you know I can put ('s in strings?!":string
+")'s and #'s too!":string
+):close

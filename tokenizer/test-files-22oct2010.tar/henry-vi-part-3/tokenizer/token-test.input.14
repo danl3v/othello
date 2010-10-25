@@ -1,0 +1,3 @@
+; spaces after quote shouldn't matter
+(cons 'watching_yankees '())
+(cons ' watching_yankees '())

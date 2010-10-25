@@ -1,0 +1,21 @@
+(:open
+let*:symbol
+(:open
+(:open
+a:symbol
+7.3:float
+):close
+(:open
+b:symbol
+#t:boolean
+):close
+(:open
+c:symbol
+"a string":string
+):close
+):close
+(:open
+print:symbol
+"do something crazy":string
+):close
+):close

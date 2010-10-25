@@ -1,0 +1,14 @@
+(:open
+if:symbol
+(:open
+=:symbol
+3.0:float
+(:open
++:symbol
+1.0:float
+2.0:float
+):close
+):close
+"#t":string
+#f:boolean
+):close

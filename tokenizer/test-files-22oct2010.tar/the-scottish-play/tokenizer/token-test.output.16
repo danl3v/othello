@@ -1,0 +1,8 @@
+(:open
+define:symbol
+a\ b:symbol
+5:integer
+):close
+(:open
+"What a weird symbol!":string
+):close

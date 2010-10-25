@@ -1,0 +1,10 @@
+(:open
+/stuff:symbol
+"string":string
+boo:symbol
++123:symbol
+=:symbol
+blah:symbol
+):close
+):close
+):close

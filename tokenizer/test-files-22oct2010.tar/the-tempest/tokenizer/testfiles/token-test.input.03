@@ -1,0 +1,5 @@
+;; A legitimate scheme program
+(define myprint (lambda (x) x))
+(myprint 3)
+(myprint "I'm a string")
+(myprint #t)

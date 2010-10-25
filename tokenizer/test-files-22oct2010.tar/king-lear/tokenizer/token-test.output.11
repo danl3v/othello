@@ -1,0 +1,12 @@
+(:open
+cdr:symbol
+(:open
+car:symbol
+':quote
+3:integer
+2:integer
+xyx:symbol
+4:integer
+5:integer
+):close
+):close

@@ -1,0 +1,13 @@
+(:open
+/:symbol
+4:integer
+5:integer
+):close
+(:open
+"hungry hippies":string
+):close
+(:open
+BAM:symbol
+309:integer
+72.500000:float
+):close

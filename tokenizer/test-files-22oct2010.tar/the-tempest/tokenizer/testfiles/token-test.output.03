@@ -1,0 +1,23 @@
+(:open
+define:symbol
+myprint:symbol
+(:open
+lambda:symbol
+(:open
+x:symbol
+):close
+x:symbol
+):close
+):close
+(:open
+myprint:symbol
+3:integer
+):close
+(:open
+myprint:symbol
+"I'm a string":string
+):close
+(:open
+myprint:symbol
+#t:boolean
+):close

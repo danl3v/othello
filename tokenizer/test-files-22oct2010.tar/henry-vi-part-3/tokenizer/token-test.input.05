@@ -1,0 +1,5 @@
+(define numericList '(3 5 9 1 125 2 34 1 16 1 14 61 61))
+(define antonyList '("friends" "romans" "countrymen" "lend" "me" "your" "ears"))
+(begin
+	(display "sort via 'always true' predicate, input list is: ") (display numericList) (display "\n")
+	)

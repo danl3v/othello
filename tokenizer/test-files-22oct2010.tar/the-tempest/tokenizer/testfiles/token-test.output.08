@@ -1,0 +1,12 @@
+int:symbol
+main:symbol
+(:open
+):close
+{:symbol
+printf:symbol
+(:open
+"Hello, world!":string
+):close
+return:symbol
+0:integer
+}:symbol

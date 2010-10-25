@@ -1,0 +1,11 @@
+(:open
+"this s a string \n ":string
+haha:symbol
+3.3.3:symbol
+3.000000:float
+3:integer
+0.300000:float
+):close
+(:open
+):close
+(:open

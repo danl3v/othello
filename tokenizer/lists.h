@@ -27,8 +27,10 @@ int push(LinkedList *list, Value *value);
 
 Value *pop(LinkedList *list);
 
-void reverse(LinkedList *list);
+LinkedList* reverse(LinkedList *list);
 
 void destroy(LinkedList *list);
+
+void freeValue(Value *value);
 
 void printList(LinkedList *list);

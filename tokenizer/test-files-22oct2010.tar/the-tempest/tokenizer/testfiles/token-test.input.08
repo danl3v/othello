@@ -1,0 +1,5 @@
+;; A faulty C program, but tokenizable without errors
+int main() {
+  printf("Hello, world!");
+  return 0;
+}

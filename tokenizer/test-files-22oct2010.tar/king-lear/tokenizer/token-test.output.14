@@ -1,0 +1,17 @@
+(:open
+if:symbol
+#t:boolean
+(:open
+append:symbol
+3:integer
+':quote
+(:open
+4:integer
+5.23:float
+):close
+):close
+(:open
+print:symbol
+"I'm sorry":string
+):close
+):close

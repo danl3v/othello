@@ -1,0 +1,17 @@
+(:open
++:symbol
+3:integer
+(:open
+*:symbol
+2:integer
+(:open
+-:symbol
+5:integer
+(:open
+*:symbol
+2.0:float
+12:integer
+):close
+):close
+):close
+):close

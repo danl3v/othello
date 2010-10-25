@@ -1,0 +1,13 @@
+(:open
+define:symbol
+running:symbol
+list:symbol
+):close
+(:open
+running:symbol
+"out":string
+"of'steam":string
+':quote
+(:open
+):close
+):close

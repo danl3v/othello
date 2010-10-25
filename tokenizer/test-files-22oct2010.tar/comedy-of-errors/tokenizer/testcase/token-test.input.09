@@ -1,0 +1,1 @@
+(define aString "This is \" still a string")

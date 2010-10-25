@@ -1,0 +1,13 @@
+(define indexOfCharHelper
+  (lambda (haystack needle idx)
+    (if (>= idx (string-length haystack))
+        -1
+        (let ([firstChar (string-ref haystack idx)])
+          (if (equal? firstChar needle)
+              idx
+              (indexOfCharHelper haystack needle (+ idx 1)))))))
+
+(define indexOfChar
+  (lambda (haystack needle)
+    (indexOfCharHelper haystack needle 0)))	
+

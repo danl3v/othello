@@ -1,0 +1,1 @@
+(define squarer (lambda x (x * x)))

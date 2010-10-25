@@ -1,0 +1,10 @@
+(:open
+(:open
++:symbol
+341:integer
+-2:integer
+):close
+=:symbol
+339.000000:float
+):close
+#f:boolean
