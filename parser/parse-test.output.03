@@ -1,0 +1,1 @@
+(define my-zero? (lambda (x) (= 0 x)))

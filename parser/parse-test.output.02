@@ -1,0 +1,1 @@
+(define my-member (lambda (x L) (if (null? L) #f (if (eq? x (car L)) L (my-member x (cdr L))))))

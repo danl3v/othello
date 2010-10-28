@@ -1,0 +1,7 @@
+(define my-mod
+  (lambda (x y)
+    (if (or (my-positive? x) (my-zero? x))
+        (if (< x (my-abs y))
+            x
+            (my-mod (- x (my-abs y)) y))
+        (my-mod (+ x (my-abs y)) y))))

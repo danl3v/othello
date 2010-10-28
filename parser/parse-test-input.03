@@ -1,0 +1,6 @@
+;; math.ss
+;; September 24, 2010
+
+(define my-zero?
+  (lambda (x)
+    (= 0 x)))
