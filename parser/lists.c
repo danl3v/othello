@@ -14,7 +14,8 @@ void create(LinkedList *list) {
 int push(LinkedList *list, Value *value) {
 	Node *node = malloc(sizeof(Node));
 	if (node) {
-		if (list->tail == NULL) {
+		if (list->head == NULL && list->tail == NULL) {
+			//printf("setting tail for first time\n");
 			list->tail = node;
 		}
 		node->value = value;
@@ -30,29 +31,80 @@ Value *pop(LinkedList *list) {
 	if (list->head == list->tail) {
 		list->tail = NULL;
 	}
-	list->head = list->head->next;
+	list->head = list->head->next; // should be null when we remove the last item
 	//free(head);
 	return value; // does not free the value since we are returing a pointer to it
 }
 
-LinkedList* append(LinkedList *list0, LinkedList *list1) {
+// we can probs delete this function soon
+void printLast(LinkedList *list) {
+	Node *current = list->tail;
+	switch(current->value->type) {
+			case booleanType:
+				if (current->value->val.boolValue) {
+					printf("#t:boolean\n");
+				}
+				else {
+					printf("#f:boolean\n");
+				}
+				break;
+			case integerType:
+				printf("%d:integer\n", current->value->val.integerValue);
+				break;
+				
+			case floatType:
+				printf("%f:float\n", current->value->val.floatValue);
+				break;
+			case stringType:
+				printf("%s:string\n", current->value->val.stringValue);
+				break;
+				
+			case symbolType:
+				printf("%s:symbol\n", current->value->val.symbolValue);
+				break;
+				
+			case openType:
+				printf("%s:open\n", current->value->val.openValue);
+				break;
+				
+			case closeType:
+				printf("%s:close\n", current->value->val.closeValue);
+				break;
+				
+			case quoteType:
+				printf("%s:quote\n", current->value->val.quoteValue);
+				break;
+				
+			default:
+				printf("invalid type for value structure");
+				break;
+				
+		  }
+
+
+}
+
+LinkedList *append(LinkedList *list0, LinkedList *list1) {
 	if (list0) {
 		if (list1) {
-			printf("setting head\n");
+			//printf("setting head\n");
 			list0->tail->next = list1->head;
-			printf("setting tail\n");
+			//printf("setting tail\n");
 			list0->tail = list1->tail;
 			//free(list1);
 			return list0;
 		}
 		else {
+			//printf("list1 NULL\n");
 			return list0;
 		}
 	}
 	else if (list1) {
+		//printf("list0 NULL\n");
 		return list1;
 	}
 	else {
+		//printf("both lists NULL\n");
 		return NULL;
 	}
 }
@@ -60,7 +112,7 @@ LinkedList* append(LinkedList *list0, LinkedList *list1) {
 LinkedList* reverse(LinkedList *list) {
     LinkedList *new_list = malloc(sizeof(*new_list));
     create(new_list);
-    
+    //printf("reversing\n");
     Node *current = list->head;
     while (current) {
         Node *next = current->next;
@@ -68,7 +120,8 @@ LinkedList* reverse(LinkedList *list) {
         free(current);
         current = next;
     }
-    list->head = new_list->head; // think about memory
+    list->head = new_list->head; // think about memory, what do we need to free
+    list->tail = new_list->tail;
     return list;
 }
 

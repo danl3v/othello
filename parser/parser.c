@@ -14,7 +14,8 @@ Value* createValueObjectofListType(LinkedList *parseTree) {
 	while (parseTree->head->value->type != openType) {
 		push(list, pop(parseTree));
 		if (!parseTree->head) {
-			printf("error - too many close parens\n");
+			//destroy(list);
+			//free(value)
 			return NULL;
 		}
 	}
@@ -27,11 +28,12 @@ Value* createValueObjectofListType(LinkedList *parseTree) {
 }
 
 LinkedList* parse(LinkedList* tokenList, int* depth) {
-	printf("Entered Parse\n");
+	//printf("Entered Parse\n");
 	Value *valueObject;
 	Node* current;
 	LinkedList* parseTree = malloc(sizeof(*parseTree));
 	create(parseTree);
+	
 	if (tokenList && parseTree) {
 		current = tokenList->head;
 		while (current) {
@@ -40,11 +42,12 @@ LinkedList* parse(LinkedList* tokenList, int* depth) {
 				valueObject = createValueObjectofListType(parseTree);
 				if (valueObject) {
 					push(parseTree, valueObject);
+					(*depth)--;
 				}
 				else {
+					(*depth)--;
 					return NULL;
 				}
-				(*depth)--;
 			}
 			else if (current->value->type == openType){
 				(*depth)++;
@@ -56,7 +59,7 @@ LinkedList* parse(LinkedList* tokenList, int* depth) {
 	else {
 		return NULL;
 	}
-	printf("Done parsing");
+	//printf("Done parsing");
 }
 
 void printParseTree(Node* head) {
@@ -65,10 +68,10 @@ void printParseTree(Node* head) {
 		
 			case booleanType:
 				if (head->value->val.boolValue) {
-					printf("#t:boolean\n");
+					printf("#t");
 				}
 				else {
-					printf("#f:boolean\n");
+					printf("#f");
 				}
 				break;
 				
@@ -105,10 +108,15 @@ void printParseTree(Node* head) {
 				break;
 				
 			default:
-				printf("invalid type for value structure");
+				printf("invalid type for value structure\n");
 				break;
 				
 		}
+		
+		if (head->next && head->value->type != openType && head->next->value->type != closeType) {
+			printf(" ");
+		}
+		
 		head = head->next;
 	}
 }
