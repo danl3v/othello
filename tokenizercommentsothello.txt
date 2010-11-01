@@ -1,0 +1,5 @@
+Nice work all around. I can't find any major problems with your implementation and it seems to run smoothly.
+
+The only thing that could be even slightly an issue is the way you organize your code. Your switches handle many cases well, but without comments to help break it up and say what you're doing, it is not very readable. The other thing is that you have memory allocation and free statements spread across two files. This is not necessarily bad, but it can be a recipe for disaster if you are not extremely careful.
+
+I would like to see tests that are closer to scheme code than just random letters and numbers, since that's what you're hoping to parse correctly.
