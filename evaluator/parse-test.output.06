@@ -1,0 +1,1 @@
+(define my-gcd-helper (lambda (x y) (if (equal? y ' ()) (my-abs x) (if (= (my-abs x) (my-abs (car y))) (my-gcd-helper x (cdr y)) (if (< (my-abs x) (my-abs (car y))) (my-gcd-helper (- (my-abs (car y)) (my-abs x)) (cons x (cdr y))) (my-gcd-helper (- (my-abs x) (my-abs (car y))) y))))))

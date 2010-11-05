@@ -1,0 +1,1 @@
+(define my-lcm-helper (lambda (x y) (if (equal? y ' ()) x (my-lcm-helper (/ (my-abs (* x (car y))) (my-gcd x (car y))) (cdr y)))))

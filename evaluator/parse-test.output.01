@@ -1,0 +1,1 @@
+(define my-map (lambda (f L) (if (null? L) L (cons (f (car L)) (my-map f (cdr L))))))

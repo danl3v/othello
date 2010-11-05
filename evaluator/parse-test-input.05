@@ -1,0 +1,9 @@
+(define my-div
+  (lambda (x y)
+    (if (my-positive? x)
+        (if (my-positive? y)
+            (my-floor (/ x y))
+            (- 0 (my-floor (/ x (my-abs y)))))
+        (if (my-positive? y)
+            (- 0 (my-ceiling (/ (my-abs x) y)))
+            (my-ceiling (/ x y))))))

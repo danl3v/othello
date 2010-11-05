@@ -1,0 +1,8 @@
+(define my-member ;(member 'a '(1 2 3 a b c)) => (a b c)
+  (lambda (x L)   ;(member a '(1 2 3 a b c)) => Error
+    (if (null? L)
+        #f
+        (if (eq? x (car L))
+            L
+            (my-member x (cdr L))))))
+            
