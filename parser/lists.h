@@ -12,6 +12,8 @@ typedef struct __Value__ {
 		char *closeValue;
 		char *quoteValue;
 		struct __LinkedList__ *listValue;
+		struct __Closure__ *closureValue;
+		struct __Value__* (*primitiveValue)(struct __Value__*);
 	} val;
 } Value;
 
@@ -24,6 +26,17 @@ typedef struct __LinkedList__ {
    Node *head;
    Node *tail;
 } LinkedList;
+
+typedef struct __Environment__{
+	struct __Environment__ *parentFrame;
+	LinkedList *bindings;
+} Environment;
+
+typedef struct __Closure__{
+	LinkedList *formalArguments;
+	LinkedList *body;
+	Environment *environment;
+} Closure;
 
 void create(LinkedList *list);
 
@@ -40,3 +53,7 @@ void destroy(LinkedList *list);
 void freeValue(Value *value);
 
 void printList(LinkedList *list);
+
+Value *car(LinkedList *list);
+
+LinkedList *cdr(LinkedList *list);

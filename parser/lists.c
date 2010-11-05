@@ -224,3 +224,18 @@ void printList(LinkedList *list) {
 	}
 }
 
+Value* car(LinkedList *list){
+	return list->head->value;
+}
+
+LinkedList* cdr(LinkedList *list){
+	if(list->head->next){
+		LinkedList *newList;
+		create(newList);
+		newList->head=list->head->next;
+		newList->tail=list->tail;
+		return newList;
+	}
+	printf("Error: cdr of empty list");
+	return NULL;
+}
