@@ -3,7 +3,8 @@
 #include "lists.h"
 
 enum TOKEN_TYPE {
-	booleanType, integerType, floatType, stringType, symbolType, openType, closeType, quoteType, listType
+	booleanType, integerType, floatType, stringType, symbolType, openType, closeType, quoteType, 
+	listType, closureType, primitiveType, idType
 };
 
 void create(LinkedList *list) {

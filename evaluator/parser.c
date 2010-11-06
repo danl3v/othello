@@ -3,7 +3,8 @@
 #include "parser.h"
 
 enum TOKEN_TYPE {
-	booleanType, integerType, floatType, stringType, symbolType, openType, closeType, quoteType, listType
+	booleanType, integerType, floatType, stringType, symbolType, openType, closeType, quoteType, 
+	listType, closureType, primitiveType, idType
 };
 
 Value* createValueObjectofListType(LinkedList *parseTree) {	
@@ -19,7 +20,7 @@ Value* createValueObjectofListType(LinkedList *parseTree) {
 			return NULL;
 		}
 	}
-	push(list, pop(parseTree)); // the open paren
+	pop(parseTree); // get rid of the open paren
 	
 	value->type = listType;
 	value->lineNumber = -1;
@@ -39,6 +40,7 @@ LinkedList* parse(LinkedList* tokenList, int* depth) {
 		while (current) {
 			push(parseTree, current->value);
 			if (current->value->type == closeType) {
+				pop(parseTree);
 				valueObject = createValueObjectofListType(parseTree);
 				if (valueObject) {
 					push(parseTree, valueObject);
@@ -68,10 +70,10 @@ void printParseTree(Node* head) {
 		
 			case booleanType:
 				if (head->value->val.boolValue) {
-					printf("#t");
+					printf("#t ");
 				}
 				else {
-					printf("#f");
+					printf("#f ");
 				}
 				break;
 				
@@ -104,7 +106,9 @@ void printParseTree(Node* head) {
 				break;
 				
 			case listType:
+				printf("(");
 				printParseTree(head->value->val.listValue->head);
+				printf(")");
 				break;
 				
 			default:
@@ -113,10 +117,11 @@ void printParseTree(Node* head) {
 				
 		}
 		
-		if (head->next && head->value->type != openType && head->next->value->type != closeType) {
+		if (head->next) {
 			printf(" ");
 		}
 		
 		head = head->next;
 	}
+	
 }

@@ -14,6 +14,7 @@ typedef struct __Value__ {
 		struct __LinkedList__ *listValue;
 		struct __Closure__ *closureValue;
 		struct __Value__* (*primitiveValue)(struct __Value__*);
+		char *idValue;
 	} val;
 } Value;
 
@@ -33,7 +34,7 @@ typedef struct __Environment__{
 } Environment;
 
 typedef struct __Closure__{
-	LinkedList *formalArguments;
+	LinkedList *actualArgs;
 	LinkedList *body;
 	Environment *environment;
 } Closure;
