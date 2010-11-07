@@ -244,7 +244,7 @@ Value *divide(Value *args) {
 						return NULL;
 					}
 					result->type = floatType;
-					result->val->floatValue = 1 / current->value->val.floatValue;
+					result->val.floatValue = 1 / current->value->val.floatValue;
 					break;
 				default:
 					printf("Error: Attempted to divide non-number\n");
