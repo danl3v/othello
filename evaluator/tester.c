@@ -1,12 +1,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "evaluator.h"
-// hello!
+
+enum ERROR_TYPE {
+	NO_ERROR, SYNTAX_ERROR_UNTOKENIZABLE, SYNTAX_ERROR_TOO_MANY_CLOSE_PARENTHESES
+};
+
+enum TOKEN_TYPE {
+	booleanType, integerType, floatType, stringType, symbolType, openType, closeType, quoteType, 
+	listType, closureType, primitiveType, idType
+};
+
 int main(int argc, char *argv[]) {
+	Value *valueTree;
+	valueTree->type = listType;
 	int depth = 0;
 	Value *exprValue;
 	LinkedList *tokens = NULL;
-	LinkedList *parseTree = NULL;
+	//LinkedList *parseTree = NULL;
 	LinkedList *leftoverTokens = NULL;
 	Environment *topFrame = createTopFrame();
 	
@@ -27,9 +38,9 @@ int main(int argc, char *argv[]) {
 		
 		//printf("appended tokens\n");
 		//printList(tokens);
-		
-		parseTree = parse(tokens, &depth);
-		
+
+		valueTree->val.listValue = parse(tokens, &depth);
+
 		if (depth < 0) {
 			printf("syntax error: too many close parentheses\n");
 			return SYNTAX_ERROR_TOO_MANY_CLOSE_PARENTHESES;
@@ -40,11 +51,11 @@ int main(int argc, char *argv[]) {
 			depth = 0;
 		}
 		else {
-			if (parseTree) {
-				exprValue = eval(parseTreem, topFrame);
+			if (valueTree->val.listValue->head) {
+				exprValue = eval(valueTree, topFrame);
 				//printf("THE TREE:\n");
 				//printParseTree(parseTree->head);
-				printf("
+				printValue(exprValue);
 			}
 			else {
 				printf("null parse tree");

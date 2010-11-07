@@ -17,7 +17,7 @@ Value *add(Value *args) {
 			switch (args->val.listValue->head->value->type) {
 				case integerType:
 					if (result->type == integerType) {
-						result->val.integerValue = result->val.integerValue + current->value->val.integerType;
+						result->val.integerValue = result->val.integerValue + current->value->val.integerValue;
 					}
 					else {
 						result->val.floatValue = result->val.floatValue + current->value->val.integerValue;
@@ -29,7 +29,7 @@ Value *add(Value *args) {
 						result->val.floatValue = result->val.integerValue;
 						result->type = floatType;
 					}
-					result.floatValue=result.floatValue + current->value->val.floatValue;
+					result->val.floatValue = result->val.floatValue + current->value->val.floatValue;
 					break;
 					
 				default:
@@ -61,11 +61,11 @@ Value *subtract(Value *args) {
 			switch (current->value->type) {
 				case integerType:
 					result->type = integerType;
-					result->val->integerValue = current->value->val.integerValue;
+					result->val.integerValue = current->value->val.integerValue;
 					break;
 				case floatType:
 					result->type = floatType;
-					result->val->floatValue = current->value->val.floatValue;
+					result->val.floatValue = current->value->val.floatValue;
 					break;
 				default:
 					printf("Error: Attempted to subtract non-number\n");
@@ -77,7 +77,7 @@ Value *subtract(Value *args) {
 				switch (args->val.listValue->head->value->type) {
 					case integerType:
 						if (result->type == integerType) {
-							result->val.integerValue = result->val.integerValue - current->value->val.integerType;
+							result->val.integerValue = result->val.integerValue - current->value->val.integerValue;
 						}
 						else {
 							result->val.floatValue = result->val.floatValue - current->value->val.integerValue;
@@ -89,7 +89,7 @@ Value *subtract(Value *args) {
 							result->val.floatValue = result->val.integerValue;
 							result->type = floatType;
 						}
-						result.floatValue=result.floatValue - current->value->val.floatValue;
+						result->val.floatValue = result->val.floatValue - current->value->val.floatValue;
 						break;
 						
 					default:
@@ -103,11 +103,11 @@ Value *subtract(Value *args) {
 			switch (current->value->type) {
 				case integerType:
 					result->type = integerType;
-					result->val->integerValue = -1 * current->value->val.integerValue;
+					result->val.integerValue = -1 * current->value->val.integerValue;
 					break;
 				case floatType:
 					result->type = floatType;
-					result->val->floatValue = -1 * current->value->val.floatValue;
+					result->val.floatValue = -1 * current->value->val.floatValue;
 					break;
 				default:
 					printf("Error: Attempted to subtract non-number\n");
@@ -134,7 +134,7 @@ Value *multiply(Value *args) {
 			switch (args->val.listValue->head->value->type) {
 				case integerType:
 					if (result->type == integerType) {
-						result->val.integerValue = result->val.integerValue * current->value->val.integerType;
+						result->val.integerValue = result->val.integerValue * current->value->val.integerValue;
 					}
 					else {
 						result->val.floatValue = result->val.floatValue * current->value->val.integerValue;
@@ -146,7 +146,7 @@ Value *multiply(Value *args) {
 						result->val.floatValue = result->val.integerValue;
 						result->type = floatType;
 					}
-					result.floatValue = result.floatValue * current->value->val.floatValue;
+					result->val.floatValue = result->val.floatValue * current->value->val.floatValue;
 					break;
 					
 				default:
@@ -164,7 +164,6 @@ Value *multiply(Value *args) {
 		return NULL;
 	}
 }
-}
 
 Value *divide(Value *args) {
 	Value *result = malloc(sizeof(*result));
@@ -179,11 +178,11 @@ Value *divide(Value *args) {
 			switch (current->value->type) {
 				case integerType:
 					result->type = integerType;
-					result->val->integerValue = current->value->val.integerValue;
+					result->val.integerValue = current->value->val.integerValue;
 					break;
 				case floatType:
 					result->type = floatType;
-					result->val->floatValue = current->value->val.floatValue;
+					result->val.floatValue = current->value->val.floatValue;
 					break;
 				default:
 					printf("Error: Attempted to divide non-number\n");
@@ -200,7 +199,7 @@ Value *divide(Value *args) {
 							return NULL;
 						}
 						if (result->type == integerType) {
-							result->val.integerValue = result->val.integerValue / current->value->val.integerType;
+							result->val.integerValue = result->val.integerValue / current->value->val.integerValue;
 						}
 						else {
 							result->val.floatValue = result->val.floatValue / current->value->val.integerValue;
@@ -217,7 +216,7 @@ Value *divide(Value *args) {
 							result->val.floatValue = result->val.integerValue;
 							result->type = floatType;
 						}
-						result.floatValue = result.floatValue / current->value->val.floatValue;
+						result->val.floatValue = result->val.floatValue / current->value->val.floatValue;
 						break;
 						
 					default:
@@ -236,7 +235,7 @@ Value *divide(Value *args) {
 						return NULL;
 					}
 					result->type = integerType;
-					result->val->integerValue = 1 / current->value->val.integerValue;
+					result->val.integerValue = 1 / current->value->val.integerValue;
 					break;
 				case floatType:
 					if (current->value->val.floatValue == 0) {
@@ -264,19 +263,67 @@ Value *divide(Value *args) {
 }
 
 Value *car(Value *args) {
-	//assert that value is list type
-	//loop through list
-	// addem up
-	// malloc a value
-	// return that value
+	if (args->type == listType) {
+		return args->val.listValue->head->value;
+	}
+	else {
+		printf("Error: Cannot return car of a non-list");
+		return NULL;
+	}
 }
 
-Value *cdr(Value *args) {
-	//assert that value is list type
-	//loop through list
-	// addem up
-	// malloc a value
-	// return that value
+Value *cdr(Value *args) { //deal with returning NULL being legitimate. (errorType for Value objects?)
+	if (args->val->type == listType) {
+		if (args->val.listValue->head) {
+			if (args->val.listValue->head->next) {
+				Value *newValue = malloc(sizeof(*newValue));
+				newValue->type = listType;
+				newValue->val.listValue->head = args->val.listValue->head->next
+				newValue->val.listValue->tail = args->val.listValue->tail;
+				return newList;
+			}
+			return NULL;
+		}
+		printf("Error: cdr of empty list");
+		return NULL;
+	}
+	printf("Error: Cannot return cdr of a non-list");
+	return NULL;
+}
+
+Value *envLookup(char *symbol, Environment *environment) {
+	Node *current = environment->bindings->head;
+	while (current) {
+		if (current->value->val.listValue->head->value->val.symbolValue == symbol) {
+			return current->value->val.listValue->head->next->value;
+		}
+		current = current->next;
+	}
+	if (environment->parentFrame) {
+		envLookup(symbol, environment->parentFrame);
+	}
+	printf("reference to undefined identifier: %s", symbol);
+	return NULL;
+}
+
+Value *evalEach(Value *args, Environment *env) {
+	Value *evaluated = malloc(sizeof(*evaluated));
+	evaluated->type = listType;
+	create(evaluated->val.listValue);
+	if (args->type == listType) {
+		Node *current = args->val.listValue->head;
+		while (current) {
+			push(evaluated->val.listValue, eval(current->value, env));
+			current = current->next;
+		}
+		evaluated->val.listValue = reverse(evaluated->val.listValue);
+		return evaluated;
+	}
+	else {
+		printf("error: in evalEach, args is not a linked List");
+		free(evaluated);
+		return NULL;
+	}
 }
 
 Value *eval(Value *expr, Environment *env) {
@@ -314,10 +361,13 @@ Value *apply(Value *f, Value *actualArgs) {
 	if (f->type == primitiveType) {
 		return f->val.primitiveValue(actualArgs);
 	} else {
-		assert(f->type == closureType);
-		Value *formalArgs = f->val.closureValue->actualArgs;
-		Environment *frame = createFrame(f->val.closureValue->environment);
-		return eval(f->val.closureAvlue->body, frame);
+		if (f->type == closureType) {
+			Value *formalArgs = f->val.closureValue->actualArgs;
+			Environment *frame = createFrame(f->val.closureValue->environment);
+			return eval(f->val.closureAvlue->body, frame);
+		} else {
+			printf("procedure application: expected procedure");
+		}
 	}
 }
 

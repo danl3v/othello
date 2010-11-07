@@ -16,7 +16,7 @@ Value *evalIf(LinkedList *args, Environment *environment);
 
 Value *evalQuote(LinkedList *args, Environment *environment);
 
-Value *envLookup(char *symb, Environment *env);
+Value *envLookup(char *symbol, Environment *environment);
 
 Value *apply(Value *f, Value *actualArgs);
 
@@ -25,3 +25,11 @@ Value *exponentiate(Value *args);
 Environment *createTopFrame();
 
 Value *makePrimitiveValue(Value* (*f)(Value *));
+
+Value *add(Value *args);
+
+Value *subtract(Value *args);
+
+Value *multiply(Value *args);
+
+Value *divide(Value *args);
