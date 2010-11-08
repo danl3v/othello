@@ -39,3 +39,5 @@ Value *divide(Value *args);
 void bind(char *symbol, Value *value, Environment *environment);
 
 void printValue(Value* value);
+
+void evalAll(Value *expr, Environment *env);

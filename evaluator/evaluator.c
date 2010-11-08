@@ -273,8 +273,6 @@ Value *car(Value *args) {
 }
 
 Value *cdr(Value *args) { //deal with returning NULL being legitimate. (errorType for Value objects?)
-	printValue(args);
-	printValue(args);
 	if (args->type == listType) {
 		if (args->val.listValue->head) {
 			if (args->val.listValue->head->next) {
@@ -283,10 +281,8 @@ Value *cdr(Value *args) { //deal with returning NULL being legitimate. (errorTyp
 				newValue->val.listValue = malloc(sizeof(newValue->val.listValue));
 				newValue->val.listValue->head = args->val.listValue->head->next;
 				newValue->val.listValue->tail = args->val.listValue->tail;
-				printf("cdr returning not NULL\n");
 				return newValue;
 			}
-			printf("cdr returning NULL\n");
 			return NULL;
 		}
 		printf("Error: cdr of empty list\n");
@@ -343,14 +339,12 @@ Environment* createTopFrame() {
 
 Value *envLookup(Value *symbol, Environment *environment) {
 	Node *current = malloc(sizeof(*current));
-	printf("In envLookup\n");
 	current = environment->bindings->head;
 	while (current) {
 		//printf("In while\n");
 		//printf("binding: %s\n", current->value->val.listValue->head->value->val.symbolValue);
 		//printf("lookup: %s\n", symbol->val.symbolValue);
 		if (!strcmp(current->value->val.listValue->head->value->val.symbolValue, symbol->val.symbolValue)) {
-			printf("found %s!\n", symbol->val.symbolValue);
 			return current->value->val.listValue->head->next->value;
 		}
 		current = current->next;
@@ -363,44 +357,54 @@ Value *envLookup(Value *symbol, Environment *environment) {
 }
 
 Value *evalEach(Value *args, Environment *env) {
-	Value *evaluated = malloc(sizeof(*evaluated));
-	evaluated->type = listType;
-	evaluated->val.listValue = malloc(sizeof(evaluated->val.listValue));
-	create(evaluated->val.listValue);
-	printf("asd\n");
-	if (args->type == listType) {
-		printf("asdf\n");
-		Node *current = args->val.listValue->head;
-		while (current) {
-			printf("current value: %d", current->value->val.integerValue);
-			push(evaluated->val.listValue, eval(current->value, env));
-			current = current->next;
+	if (args) {
+		Value *evaluated = malloc(sizeof(*evaluated));
+		evaluated->type = listType;
+		evaluated->val.listValue = malloc(sizeof(evaluated->val.listValue));
+		create(evaluated->val.listValue);
+		if (args->type == listType) {
+			Node *current = args->val.listValue->head;
+			while (current) {
+				push(evaluated->val.listValue, eval(current->value, env));
+				current = current->next;
+			}
+			evaluated->val.listValue = reverse(evaluated->val.listValue);
+			return evaluated;
 		}
-		evaluated->val.listValue = reverse(evaluated->val.listValue);
-		return evaluated;
+		else {
+			printf("error: in evalEach, args is not a LinkedList\n");
+			free(evaluated);
+			return NULL;
+		}
 	}
 	else {
-		printf("error: in evalEach, args is not a LinkedList\n");
-		free(evaluated);
+		//printf("args is empty\n");
 		return NULL;
+	}
+}
+
+void evalAll(Value *expr, Environment *env) {
+	Node *current = malloc(sizeof(*current));
+	current = expr->val.listValue->head;
+	while (current) {
+		printValue(eval(current->value, env));
+		//printf("\n");
+		current = current->next;
 	}
 }
 
 Value *eval(Value *expr, Environment *env) {
 	Value *operator;
 	Value *args;
-	switch (expr->val.listValue->head->value->type) {
+	switch (expr->type) { //->val.listValue->head->value->type
 		case booleanType:
 		case integerType:
 		case floatType:
 		case stringType:
-			printf("Returning literal\n");
 			return expr;
 		case symbolType:
-			printf("It's a symbol! : %s\n", expr->val.listValue->head->value->val.symbolValue);
-			return envLookup(expr->val.listValue->head->value, env);
+			return envLookup(expr, env);
 		case listType:
-			printf("Are you here?\n");
 			operator = car(expr);
 			args = cdr(expr);
 			if (operator->type == idType) {
@@ -416,11 +420,8 @@ Value *eval(Value *expr, Environment *env) {
 				if (!strcmp(operator->val.idValue, "'")) {return evalQuote(args, env);}
 				*/
 			} else {
-				Value *evaledOperator = eval(operator,env);
-				printf("Not a special form\n");
-				//printList(args->val.listValue);
+				Value *evaledOperator = eval(operator, env);
 				Value *evaledArgs = evalEach(args,env);
-				printf("Eval each works\n");
 				return apply(evaledOperator, evaledArgs);
 			}
 		default:
@@ -449,47 +450,49 @@ void printValue(Value* value) {
 	switch (value->type) {
 		case booleanType:
 			if (value->val.boolValue) {
-				printf("#t");
+				printf("#t\n");
 			}
 			else {
-				printf("#f");
+				printf("#f\n");
 			}
 			break;			
 		case integerType:
-			printf("%d", value->val.integerValue);
+			printf("%d\n", value->val.integerValue);
 			break;
 			
 		case floatType:
-			printf("%f", value->val.floatValue);
+			printf("%f\n", value->val.floatValue);
 			break;
 		
 		case openType:
-			printf("%s", value->val.openValue);
+			printf("%s\n", value->val.openValue);
 			break;
 			
 		case closeType:
-			printf("%s", value->val.closeValue);
+			printf("%s\n", value->val.closeValue);
 			break;
 			
 		case symbolType:
-			printf("%s", value->val.symbolValue);
+			printf("%s\n", value->val.symbolValue);
 			break;
 			
 		case quoteType:
-			printf("%s",value->val.quoteValue);
+			printf("%s\n",value->val.quoteValue);
 			break;
 			
 		case stringType:
-			printf("%s", value->val.stringValue);
+			printf("%s\n", value->val.stringValue);
 			break;
 			
 		case listType:
+			//printf("it is a list\n");
 			printParseTree(value->val.listValue->head);
+			printf("\n");
 			break;
 		
 		case closureType:
 		case primitiveType:
-			printf("#<procedure>");
+			printf("#<procedure>\n");
 			break;
 		
 		default:

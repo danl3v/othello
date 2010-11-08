@@ -12,7 +12,6 @@ enum TOKEN_TYPE {
 };
 
 int main(int argc, char *argv[]) {
-	printf("Start main\n");
 	Value *valueTree = malloc(sizeof(*valueTree));//I'm adding malloc to these to test
 	valueTree->type = listType;
 	int depth = 0;
@@ -60,17 +59,13 @@ int main(int argc, char *argv[]) {
 			depth = 0;
 		}
 		else {
-			if (valueTree->val.listValue->head) {
-				printf("Before eval\n");
-				exprValue = eval(valueTree, topFrame);
-				printf("After eval\n");
-				printValue(exprValue);
-				printf("After printValue\n");
+			if (valueTree) {
+				evalAll(valueTree, topFrame);
 			}
 			else {
 				printf("null parse tree\n");
 			}
-			printf("\n");
+			//printf("\n");
 			create(leftoverTokens); //Deal with memory stuff.
 		}
 	}
