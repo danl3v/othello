@@ -4,7 +4,7 @@
 
 enum TOKEN_TYPE {
 	booleanType, integerType, floatType, stringType, symbolType, openType, closeType, quoteType, 
-	listType, closureType, primitiveType, idType
+	listType, closureType, primitiveType
 };
 
 Value* createValueObjectofListType(LinkedList *parseTree) {	

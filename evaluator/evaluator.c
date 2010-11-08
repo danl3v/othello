@@ -5,7 +5,7 @@
 
 enum TOKEN_TYPE {
 	booleanType, integerType, floatType, stringType, symbolType, openType, closeType, quoteType, 
-	listType, closureType, primitiveType, idType
+	listType, closureType, primitiveType
 };
 
 Value *add(Value *args) {
@@ -283,6 +283,7 @@ Value *cdr(Value *args) { //deal with returning NULL being legitimate. (errorTyp
 				newValue->val.listValue->tail = args->val.listValue->tail;
 				return newValue;
 			}
+			printf("cdr returning null");
 			return NULL;
 		}
 		printf("Error: cdr of empty list\n");
@@ -292,19 +293,69 @@ Value *cdr(Value *args) { //deal with returning NULL being legitimate. (errorTyp
 	return NULL;
 }
 
+Value *envLookup(char *symbol, Environment *environment) {
+	printf("begin evnironment lookup on %s\n", symbol);
+	if (!environment) {
+		printf("No environment\n");
+	}
+	Node *current = environment->bindings->head;
+	printf("next evnironment lookup\n");
+	while (current) {
+		printf("looping in envLookup\n");
+		//printf("In while\n");
+		//printf("binding: %s\n", current->value->val.listValue->head->value->val.symbolValue);
+		//printf("lookup: %s\n", symbol->val.symbolValue);
+		if (!strcmp(current->value->val.listValue->head->value->val.symbolValue, symbol)) {
+			return current->value->val.listValue->head->next->value;
+			printf("found!");
+		}
+		current = current->next;
+	}
+	if (environment->parentFrame) {
+		printf("going to higher frame\n");
+		return envLookup(symbol, environment->parentFrame);
+	} else {
+		printf("not found :_(\n");
+		return NULL;
+	}
+}
+
+Value *localEnvLookup(char *symbol, Environment *environment) {
+	Node *current;
+	current = environment->bindings->head;
+	while (current) {
+		//printf("In while\n");
+		//printf("binding: %s\n", current->value->val.listValue->head->value->val.symbolValue);
+		//printf("lookup: %s\n", symbol->val.symbolValue);
+		if (!strcmp(current->value->val.listValue->head->value->val.symbolValue, symbol)) {
+			return current->value->val.listValue->head->next->value;
+			printf("found!");
+		}
+		current = current->next;
+	}
+	return NULL;
+}
+
 void bind(char *symbol, Value *value, Environment *environment){
-	//printf("in bind\n");
-	Value *binding = malloc(sizeof(*binding));
-	binding->type = listType;
-	binding->val.listValue = malloc(sizeof(binding->val.listValue));
-	create(binding->val.listValue);
-	//printf("binding created\n");
-	Value *symbolValue = malloc(sizeof(*symbolValue));
-	symbolValue->type = symbolType;
-	symbolValue->val.symbolValue = symbol;
-	push(binding->val.listValue, value);
-	push(binding->val.listValue, symbolValue);
-	push(environment->bindings, binding);
+	printf("binding in progress\n");
+	Value *v = localEnvLookup(symbol, environment);
+	printf("checked if variable already bound\n");
+	if (v) {
+		v->type = value->type;
+		v->val = value->val;
+	} else {
+		Value *binding = malloc(sizeof(*binding));
+		binding->type = listType;
+		binding->val.listValue = malloc(sizeof(binding->val.listValue));
+		create(binding->val.listValue);
+		Value *symbolValue = malloc(sizeof(*symbolValue));
+		symbolValue->type = symbolType;
+		symbolValue->val.symbolValue = symbol;
+		push(binding->val.listValue, value);
+		push(binding->val.listValue, symbolValue);
+		push(environment->bindings, binding);
+	}
+	printf("bound\n");
 }
 
 Value *makePrimitiveValue(Value* (*f)(Value *)){
@@ -337,25 +388,6 @@ Environment* createTopFrame() {
 	return topFrame;
 }
 
-Value *envLookup(Value *symbol, Environment *environment) {
-	Node *current = malloc(sizeof(*current));
-	current = environment->bindings->head;
-	while (current) {
-		//printf("In while\n");
-		//printf("binding: %s\n", current->value->val.listValue->head->value->val.symbolValue);
-		//printf("lookup: %s\n", symbol->val.symbolValue);
-		if (!strcmp(current->value->val.listValue->head->value->val.symbolValue, symbol->val.symbolValue)) {
-			return current->value->val.listValue->head->next->value;
-		}
-		current = current->next;
-	}
-	if (environment->parentFrame) {
-		envLookup(symbol, environment->parentFrame);
-	}
-	printf("reference to undefined identifier: %s\n", symbol->val.symbolValue);
-	return NULL;
-}
-
 Value *evalEach(Value *args, Environment *env) {
 	if (args) {
 		Value *evaluated = malloc(sizeof(*evaluated));
@@ -365,8 +397,13 @@ Value *evalEach(Value *args, Environment *env) {
 		if (args->type == listType) {
 			Node *current = args->val.listValue->head;
 			while (current) {
-				push(evaluated->val.listValue, eval(current->value, env));
-				current = current->next;
+				Value *v = eval(current->value, env);
+				if (v) {
+					push(evaluated->val.listValue, v);
+					current = current->next;
+				} else {
+					return NULL;
+				}
 			}
 			evaluated->val.listValue = reverse(evaluated->val.listValue);
 			return evaluated;
@@ -396,6 +433,7 @@ void evalAll(Value *expr, Environment *env) {
 Value *eval(Value *expr, Environment *env) {
 	Value *operator;
 	Value *args;
+	Value *v;
 	switch (expr->type) { //->val.listValue->head->value->type
 		case booleanType:
 		case integerType:
@@ -403,44 +441,137 @@ Value *eval(Value *expr, Environment *env) {
 		case stringType:
 			return expr;
 		case symbolType:
-			return envLookup(expr, env);
+			v = envLookup(expr->val.symbolValue, env);
+			if (v) {
+				return v;
+			} else {
+				printf("reference to undefined identifier: '%s'\n", expr->val.symbolValue);
+				return NULL;
+			}
 		case listType:
 			operator = car(expr);
 			args = cdr(expr);
-			if (operator->type == idType) {
-				NULL;
+			if (operator->type == symbolType) {
+				if (!strcmp(operator->val.symbolValue, "define")) {return evalDefine(args, env);}
+				if (!strcmp(operator->val.symbolValue, "lambda")) {return evalLambda(args, env);}
 				/*
-				if (!strcmp(operator->val.idValue, "define")) {return evalDefine(args, env);}
-				if (!strcmp(operator->val.idValue, "lambda")) {return evalLambda(args, env);}
-				if (!strcmp(operator->val.idValue, "let")) {return evalLet(args, env);}
-				if (!strcmp(operator->val.idValue, "letrec")) {return evalLetRec(args, env);}
-				if (!strcmp(operator->val.idValue, "if")) {return evalIf(args, env);}
-				if (!strcmp(operator->val.idValue, "load")) {return evalLoad(args, env);}
-				if (!strcmp(operator->val.idValue, "quote")) {return evalQuote(args, env);}
-				if (!strcmp(operator->val.idValue, "'")) {return evalQuote(args, env);}
+				if (!strcmp(operator->val.symbolValue, "let")) {return evalLet(args, env);}
+				if (!strcmp(operator->val.symbolValue, "letrec")) {return evalLetRec(args, env);}
+				if (!strcmp(operator->val.symbolValue, "if")) {return evalIf(args, env);}
+				if (!strcmp(operator->val.symbolValue, "load")) {return evalLoad(args, env);}
+				if (!strcmp(operator->val.symbolValue, "quote")) {return evalQuote(args, env);}
+				if (!strcmp(operator->val.symbolValue, "'")) {return evalQuote(args, env);}
 				*/
-			} else {
+				printf("Evaluating Operator: ");
+				printValue(operator);
 				Value *evaledOperator = eval(operator, env);
+				printf("Operator Evaluated: ");
+				printValue(evaledOperator);
 				Value *evaledArgs = evalEach(args,env);
 				return apply(evaledOperator, evaledArgs);
+			} else if (operator->type == closureType || operator->type == primitiveType || operator->type == listType) {
+				printf("harro");
+				Value *evaledOperator = eval(operator, env);
+				Value *evaledArgs = evalEach(args,env);
+				if (evaledArgs) {
+					return apply(evaledOperator, evaledArgs);
+				} else {
+					printf("procedure application: expected procedure, given: ");
+					printValue(operator);
+					return NULL;
+				}
+			} else {
+				printf("procedure application: expected procedure, given2: ");
+				printValue(operator);
+				return NULL;
 			}
-		default:
+			
+		case closureType:
+		case primitiveType:
 			return expr;
+		/*
+			else if (operator->type == closureType || operator->type == primitiveType) {
+				printf("harro");
+				Value *evaledArgs = evalEach(args,env);
+				if (evaledArgs) {
+					return apply(operator, evaledArgs);
+				}
+			} else if (operator->type == listType) {
+				Value *evaledOperator = eval(operator, env);
+				Value *evaledArgs = evalEach(args,env);
+				if (evaledArgs && 
+					(evaledOperator->type == closureType || operator->type == primitiveType)) {
+					return apply(evaledOperator, evaledArgs);
+				} else {
+					printf("procedure application: expected procedure, given: ");
+					printValue(operator);
+					return NULL;
+				}
+			} else {
+				printf("procedure application: expected procedure, given: ");
+				printValue(operator);
+				return NULL;
+			}
+			*/
+		default:
+			return NULL;
 	}
 }
 
 Value *apply(Value *f, Value *actualArgs) {
 	if (f->type == primitiveType) {
+		printf("applying primitive\n");
+		printValue(actualArgs);
+		printValue(f);
 		return f->val.primitiveValue(actualArgs);
 	} else {
 		if (f->type == closureType) {
-			LinkedList *formalArgs = f->val.closureValue->actualArgs;
+			printf("applying closure\n");
 			Environment *frame = createFrame(f->val.closureValue->environment);
+			printf("applying closure2\n");
+			Node *currentFA = f->val.closureValue->formalArgs->val.listValue->head;
+			printf("applying closure3\n");
+			Node *currentAA = actualArgs->val.listValue->head;
+			printf("applying closure4\n");
+			while (currentFA && currentAA) {
+				printf("looping\n");
+				printValue(currentFA->value);
+				printValue(currentAA->value);
+				bind(currentFA->value->val.symbolValue, currentAA->value, frame);
+				currentFA = currentFA->next;
+				currentAA = currentAA->next;
+			}
+			printf("returning from closure application\n");
+			//f->val.closureValue->body->type = listType;
+			//printValue(f->val.closureValue->body);
 			return eval(f->val.closureValue->body, frame);
 		} else {
 			printf("procedure application: expected procedure\n");
 		}
 	}
+}
+
+Value *evalDefine(Value *args, Environment *environment) {
+	while (environment->parentFrame) {
+		environment = environment->parentFrame;
+	}
+	Value *v = eval(args->val.listValue->head->next->value, environment);
+	bind(args->val.listValue->head->value->val.symbolValue, v, environment);
+	Value *howdyDoodyValue = malloc(sizeof(*howdyDoodyValue));
+	howdyDoodyValue->type = stringType;
+	howdyDoodyValue->val.stringValue = "Howdy Doody";
+	return howdyDoodyValue;
+}
+
+Value *evalLambda(Value *args, Environment *environment) {
+	Value *value = malloc(sizeof(value));
+	value->val.closureValue = malloc(sizeof(value->val.closureValue));
+	value->type = closureType;
+	value->val.closureValue->formalArgs = car(args);
+	value->val.closureValue->body = cdr(args);
+	value->val.closureValue->environment = environment;
+	//printValue(args);
+	return value;
 }
 
 void printValue(Value* value) {
@@ -491,6 +622,8 @@ void printValue(Value* value) {
 			break;
 		
 		case closureType:
+			printf("#<closure>\n");
+			break;
 		case primitiveType:
 			printf("#<procedure>\n");
 			break;

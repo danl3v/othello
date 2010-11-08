@@ -34,7 +34,7 @@ typedef struct __Environment__{
 } Environment;
 
 typedef struct __Closure__{
-	LinkedList *actualArgs;
+	Value *formalArgs;
 	Value *body;
 	Environment *environment;
 } Closure;
