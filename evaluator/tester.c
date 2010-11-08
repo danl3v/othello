@@ -12,34 +12,43 @@ enum TOKEN_TYPE {
 };
 
 int main(int argc, char *argv[]) {
-	Value *valueTree;
+	printf("Start main\n");
+	Value *valueTree = malloc(sizeof(*valueTree));//I'm adding malloc to these to test
 	valueTree->type = listType;
 	int depth = 0;
-	Value *exprValue;
-	LinkedList *tokens = NULL;
+	Value *exprValue = malloc(sizeof(*exprValue));
+	LinkedList *tokens = malloc(sizeof(*tokens));//These were set to NULL before
 	//LinkedList *parseTree = NULL;
-	LinkedList *leftoverTokens = NULL;
+	LinkedList *leftoverTokens = malloc(sizeof(*leftoverTokens));
+	//printf("before createTopFrame\n");
 	Environment *topFrame = createTopFrame();
-	
+	//printf("after createTopFrame\n");
+	//create(tokens);
+	//create(leftoverTokens);
 	char *expression = malloc(256 * sizeof(char));
+	
 	while (fgets(expression, 255, stdin)) {
 		tokens = tokenize(expression);
-		//printf("Tokenized\n");
+		//printf("after tokenize\n");
 		if (!tokens) { // store a tail, if last thing in token list is null
 			printf("syntax error\n"); // get the line number somehow
 			return SYNTAX_ERROR_UNTOKENIZABLE;
 		}
-	
+
 		//printf("tokens:\n");
 		//printList(tokens);
-		
-		
+		//printf("about to append\n");
+		//printList(leftoverTokens);
 		tokens = append(leftoverTokens, tokens);
 		
 		//printf("appended tokens\n");
 		//printList(tokens);
-
 		valueTree->val.listValue = parse(tokens, &depth);
+
+		//printf("THE TREE:\n");
+		//printParseTree(valueTree->val.listValue->head);
+		//printf("\n");
+		//printf("xxxxx: %s\n", valueTree->val.listValue->head->value->val.symbolValue);
 
 		if (depth < 0) {
 			printf("syntax error: too many close parentheses\n");
@@ -47,21 +56,22 @@ int main(int argc, char *argv[]) {
 		}
 		else if (depth > 0) {
 			//printf("we have leftovers\n");
-			leftoverTokens = tokens;
+			//leftoverTokens = tokens;
 			depth = 0;
 		}
 		else {
 			if (valueTree->val.listValue->head) {
+				printf("Before eval\n");
 				exprValue = eval(valueTree, topFrame);
-				//printf("THE TREE:\n");
-				//printParseTree(parseTree->head);
+				printf("After eval\n");
 				printValue(exprValue);
+				printf("After printValue\n");
 			}
 			else {
-				printf("null parse tree");
+				printf("null parse tree\n");
 			}
 			printf("\n");
-			leftoverTokens = NULL;
+			create(leftoverTokens); //Deal with memory stuff.
 		}
 	}
 	free(expression);

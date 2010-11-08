@@ -86,8 +86,8 @@ void printLast(LinkedList *list) {
 }
 
 LinkedList *append(LinkedList *list0, LinkedList *list1) {
-	if (list0) {
-		if (list1) {
+	if (list0->head) {
+		if (list1->head) {
 			//printf("setting head\n");
 			list0->tail->next = list1->head;
 			//printf("setting tail\n");
@@ -100,7 +100,7 @@ LinkedList *append(LinkedList *list0, LinkedList *list1) {
 			return list0;
 		}
 	}
-	else if (list1) {
+	else if (list1->head) {
 		//printf("list0 NULL\n");
 		return list1;
 	}
@@ -225,11 +225,12 @@ void printList(LinkedList *list) {
 	}
 }
 
-Value* car(LinkedList *list){
+
+Value* listCar(LinkedList *list){
 	return list->head->value;
 }
 
-LinkedList* cdr(LinkedList *list){
+LinkedList* listCdr(LinkedList *list){
 	if(list->head->next){
 		LinkedList *newList;
 		create(newList);

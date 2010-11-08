@@ -35,11 +35,13 @@ typedef struct __Environment__{
 
 typedef struct __Closure__{
 	LinkedList *actualArgs;
-	LinkedList *body;
+	Value *body;
 	Environment *environment;
 } Closure;
 
 void create(LinkedList *list);
+
+//void create(Environment *environment);
 
 int push(LinkedList *list, Value *value);
 
@@ -55,6 +57,6 @@ void freeValue(Value *value);
 
 void printList(LinkedList *list);
 
-Value *car(LinkedList *list);
+Value *listCar(LinkedList *list);
 
-LinkedList *cdr(LinkedList *list);
+LinkedList *listCdr(LinkedList *list);

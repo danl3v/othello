@@ -120,7 +120,7 @@ void printParseTree(Node* head) {
 		if (head->next) {
 			printf(" ");
 		}
-		
+		//printf("next in printParseTree\n");
 		head = head->next;
 	}
 	
