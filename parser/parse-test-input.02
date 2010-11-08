@@ -5,4 +5,3 @@
         (if (eq? x (car L))
             L
             (my-member x (cdr L))))))
-            
