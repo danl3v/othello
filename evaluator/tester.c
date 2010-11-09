@@ -12,20 +12,20 @@ enum TOKEN_TYPE {
 };
 
 int main(int argc, char *argv[]) {
-	Value *valueTree = malloc(sizeof(*valueTree));//I'm adding malloc to these to test
+	Value *valueTree = malloc(sizeof(*valueTree)); // are you sure we need to malloc here
 	valueTree->type = listType;
 	int depth = 0;
-	Value *exprValue = malloc(sizeof(*exprValue));
-	LinkedList *tokens = malloc(sizeof(*tokens));//These were set to NULL before
+	Value *exprValue = malloc(sizeof(*exprValue)); // are you sure we need to malloc here
+	LinkedList *tokens = malloc(sizeof(*tokens)); // are you sure we need to malloc here
 	//LinkedList *parseTree = NULL;
-	LinkedList *leftoverTokens = malloc(sizeof(*leftoverTokens));
+	LinkedList *leftoverTokens = malloc(sizeof(*leftoverTokens)); // are you sure we need to malloc here!
 	//printf("before createTopFrame\n");
 	Environment *topFrame = createTopFrame();
 	//printf("after createTopFrame\n");
 	//create(tokens);
 	//create(leftoverTokens);
 	char *expression = malloc(256 * sizeof(char));
-	
+	printf("> "); // can we put this into the fets??
 	while (fgets(expression, 255, stdin)) {
 		tokens = tokenize(expression);
 		//printf("after tokenize\n");
@@ -68,6 +68,7 @@ int main(int argc, char *argv[]) {
 			//printf("\n");
 			create(leftoverTokens); //Deal with memory stuff.
 		}
+		printf("> "); // do not print this out if we have leftover tokens
 	}
 	free(expression);
 	// think about destroying tokens at the end

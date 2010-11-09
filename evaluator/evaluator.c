@@ -278,7 +278,8 @@ Value *cdr(Value *args) { //deal with returning NULL being legitimate. (errorTyp
 			if (args->val.listValue->head->next) {
 				Value *newValue = malloc(sizeof(*newValue));
 				newValue->type = listType;
-				newValue->val.listValue = malloc(sizeof(newValue->val.listValue));
+				newValue->val.listValue = malloc(sizeof(LinkedList));
+				create(newValue->val.listValue); // i think we don't need this
 				newValue->val.listValue->head = args->val.listValue->head->next;
 				newValue->val.listValue->tail = args->val.listValue->tail;
 				return newValue;
@@ -389,11 +390,11 @@ Environment* createTopFrame() {
 }
 
 Value *evalEach(Value *args, Environment *env) {
+	Value *evaluated = malloc(sizeof(*evaluated));
+	evaluated->type = listType;
+	evaluated->val.listValue = malloc(sizeof(evaluated->val.listValue));
+	create(evaluated->val.listValue);
 	if (args) {
-		Value *evaluated = malloc(sizeof(*evaluated));
-		evaluated->type = listType;
-		evaluated->val.listValue = malloc(sizeof(evaluated->val.listValue));
-		create(evaluated->val.listValue);
 		if (args->type == listType) {
 			Node *current = args->val.listValue->head;
 			while (current) {
@@ -402,6 +403,7 @@ Value *evalEach(Value *args, Environment *env) {
 					push(evaluated->val.listValue, v);
 					current = current->next;
 				} else {
+					printf("error in eval each, could not evaluate the argument!!!!");
 					return NULL;
 				}
 			}
@@ -414,17 +416,17 @@ Value *evalEach(Value *args, Environment *env) {
 			return NULL;
 		}
 	}
-	else {
-		//printf("args is empty\n");
-		return NULL;
+	else { // if there are no args, we want to return an empty list
+		return evaluated;
 	}
 }
 
 void evalAll(Value *expr, Environment *env) {
-	Node *current = malloc(sizeof(*current));
+	Node *current = malloc(sizeof(*current)); // are you sure we need to malloc here
 	current = expr->val.listValue->head;
 	while (current) {
-		printValue(eval(current->value, env));
+		Value *evaluated = eval(current->value, env);
+		printValue(evaluated);
 		//printf("\n");
 		current = current->next;
 	}
@@ -452,8 +454,8 @@ Value *eval(Value *expr, Environment *env) {
 			operator = car(expr);
 			args = cdr(expr);
 			if (operator->type == symbolType) {
-				if (!strcmp(operator->val.symbolValue, "define")) {return evalDefine(args, env);}
-				if (!strcmp(operator->val.symbolValue, "lambda")) {return evalLambda(args, env);}
+				if (!strcmp(operator->val.symbolValue, "define")) { return evalDefine(args, env); }
+				if (!strcmp(operator->val.symbolValue, "lambda")) { return evalLambda(args, env); }
 				/*
 				if (!strcmp(operator->val.symbolValue, "let")) {return evalLet(args, env);}
 				if (!strcmp(operator->val.symbolValue, "letrec")) {return evalLetRec(args, env);}
@@ -467,9 +469,12 @@ Value *eval(Value *expr, Environment *env) {
 				Value *evaledOperator = eval(operator, env);
 				printf("Operator Evaluated: ");
 				printValue(evaledOperator);
+				printf("evaluating argmuents\n");
 				Value *evaledArgs = evalEach(args,env);
+				printf("evaluated arguments\n");
 				return apply(evaledOperator, evaledArgs);
-			} else if (operator->type == closureType || operator->type == primitiveType || operator->type == listType) {
+			}
+			else if (operator->type == closureType || operator->type == primitiveType || operator->type == listType) {
 				printf("harro");
 				Value *evaledOperator = eval(operator, env);
 				Value *evaledArgs = evalEach(args,env);
@@ -480,7 +485,8 @@ Value *eval(Value *expr, Environment *env) {
 					printValue(operator);
 					return NULL;
 				}
-			} else {
+			}
+			else {
 				printf("procedure application: expected procedure, given2: ");
 				printValue(operator);
 				return NULL;
@@ -514,6 +520,7 @@ Value *eval(Value *expr, Environment *env) {
 			}
 			*/
 		default:
+			printf("eval returning null\n");
 			return NULL;
 	}
 }
@@ -526,13 +533,13 @@ Value *apply(Value *f, Value *actualArgs) {
 		return f->val.primitiveValue(actualArgs);
 	} else {
 		if (f->type == closureType) {
-			printf("applying closure\n");
+			printf("applying closure: creating enviornment\n");
 			Environment *frame = createFrame(f->val.closureValue->environment);
-			printf("applying closure2\n");
+			printf("applying closure: getting formal argument\n");
 			Node *currentFA = f->val.closureValue->formalArgs->val.listValue->head;
-			printf("applying closure3\n");
+			printf("applying closure: getting actual arg\n");
 			Node *currentAA = actualArgs->val.listValue->head;
-			printf("applying closure4\n");
+			printf("applying closure: beginning the loop\n");
 			while (currentFA && currentAA) {
 				printf("looping\n");
 				printValue(currentFA->value);
@@ -541,9 +548,11 @@ Value *apply(Value *f, Value *actualArgs) {
 				currentFA = currentFA->next;
 				currentAA = currentAA->next;
 			}
+			
+			printf("printing body");
+			printValue(f->val.closureValue->body);
 			printf("returning from closure application\n");
-			//f->val.closureValue->body->type = listType;
-			//printValue(f->val.closureValue->body);
+			printf("the body is of type: %d\n", f->val.closureValue->body->type);
 			return eval(f->val.closureValue->body, frame);
 		} else {
 			printf("procedure application: expected procedure\n");
@@ -565,10 +574,15 @@ Value *evalDefine(Value *args, Environment *environment) {
 
 Value *evalLambda(Value *args, Environment *environment) {
 	Value *value = malloc(sizeof(value));
-	value->val.closureValue = malloc(sizeof(value->val.closureValue));
+	value->val.closureValue = malloc(sizeof(Closure));
 	value->type = closureType;
 	value->val.closureValue->formalArgs = car(args);
-	value->val.closureValue->body = cdr(args);
+	Value *tempBody = cdr(args);
+	tempBody->val = tempBody->val.listValue->head->value->val;
+	tempBody->type = tempBody->val.listValue->head->value->type;
+	value->val.closureValue->body = tempBody;
+	printf("the body is of type: %d\n", value->val.closureValue->body->type);
+	printf("list type: %d\n", listType);
 	value->val.closureValue->environment = environment;
 	//printValue(args);
 	return value;
@@ -625,7 +639,7 @@ void printValue(Value* value) {
 			printf("#<closure>\n");
 			break;
 		case primitiveType:
-			printf("#<procedure>\n");
+			printf("#<procedure>\n"); // maybe have some sort of label
 			break;
 		
 		default:
