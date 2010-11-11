@@ -33,7 +33,11 @@ int main(int argc, char *argv[]) {
 	while (fgets(expression, 255, stdin)) {
 		tokens = tokenize(expression);
 		if (tokens) {
-		printValue(*tokens);
+			printTokens(*tokens);
+			printf("TYPE: %d\n", (*tokens)->type);
+			printValue(*tokens);
+			printf("TYPE: %d\n", (*tokens)->type);
+			printValue(*tokens);
 		//destroy(tokens);
 		}
 	}

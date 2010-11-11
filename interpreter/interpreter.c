@@ -56,19 +56,21 @@ Value *cons(Value *value1, Value *value2) {
 }
 
 int isProper(Value **value) {
-	Value *current = *value;
-	if (current->type == pairType) {
-		while (current) {
-			if (cdr(current)->type != pairType) {
-				return 0;
-			} else {
-			current = current->val.pairValue->cdr;
+	if (*value) {
+		Value *current = *value;
+		if (current->type == pairType) {
+			while (current) {
+				if (cdr(current)) {
+					if ((cdr(current))->type != pairType) {
+						return 0;
+					}
+				}
+				current = cdr(current);
 			}
+			return 1;
 		}
-		return 1;
-	} else {
-		return 0;
 	}
+	return 0;
 }
 
 Value **reverse(Value **value) {
@@ -82,96 +84,155 @@ Value **reverse(Value **value) {
 				current->val.pairValue->cdr = previous;
 				previous = current;
 				current = next;
-				current = cdr(current);
 			}
+			(*value) = previous;
+			return value;
 		} else {
 			printf("cannot reverse a non list\n");
 			return NULL;
 		}
 	}
 }
-
-void printValue(Value *value) {
-	if (value->type == pairType) {
-		printf("(");
-		printValueHelper(value);
-		printf(")\n");
-	} else {
-		printValueHelper(value);
-		printf("\n");
+void printTokens(Value *value) {
+	if (value) {
+		Value *current = value;
+		switch(current->type) {
+			case booleanType:
+				if (current->val.booleanValue) {
+					printf("#t:boolean\n");
+				}
+				else {
+					printf("#f:boolean\n");
+				}
+				break;
+				
+			case integerType:
+				printf("%d:integer\n", current->val.integerValue);
+				break;
+				
+			case floatType:
+				printf("%f:float\n", current->val.floatValue);
+				break;
+			case stringType:
+				printf("%s:string\n", current->val.stringValue);
+				break;
+				
+			case symbolType:
+				printf("%s:symbol\n", current->val.symbolValue);
+				break;
+				
+			case openType:
+				printf("%s:open\n", current->val.openValue);
+				break;
+				
+			case closeType:
+				printf("%s:close\n", current->val.closeValue);
+				break;
+				
+			case quoteType:
+				printf("%s:quote\n", current->val.quoteValue);
+				break;
+			
+			case pairType:
+				printTokens(car(current));
+				printTokens(cdr(current));
+				break;
+			
+			default:
+				printf("invalid type for value structure");
+				break;
+	   }
 	}
 }
 
-void printValueHelper(Value* value) {
-	if (!value) {
-		return;
+void printValue(Value *value) {
+	if (value) {
+		if (value->type == pairType) {
+			printf("(");
+			printValueHelper(value);
+			printf(")\n");
+		} else {
+			printValueHelper(value);
+			printf("\n");
+		}
 	}
-	switch (value->type) {
-		case booleanType:
-			if (value->val.booleanValue) {
-				printf("#t");
-			}
-			else {
-				printf("#f");
-			}
-			break;	
-			
-		case integerType:
-			printf("%d", value->val.integerValue);
-			break;
-			
-		case floatType:
-			printf("%f", value->val.floatValue);
-			break;
-		
-		case openType:
-			printf("%s", value->val.openValue);
-			break;
-			
-		case closeType:
-			printf("%s", value->val.closeValue);
-			break;
-			
-		case symbolType:
-			printf("%s", value->val.symbolValue);
-			break;
-			
-		case quoteType:
-			printf("%s",value->val.quoteValue);
-			break;
-			
-		case stringType:
-			printf("%s", value->val.stringValue);
-			break;
-			
-		case pairType:
-			if (value->val.pairValue->car->type == pairType) {
-				printValue(value->val.pairValue->car);
-			} else {
-				printValueHelper(value->val.pairValue->car);
-			}
-			if (value->val.pairValue->cdr) {
-				printf(" ");
-				if (value->val.pairValue->cdr->type == pairType) {
-					printValueHelper(value->val.pairValue->cdr);
-				} else {
-					printf(". ");
-					printValueHelper(value->val.pairValue->cdr);
-				}
-			}
-			break;
+}
 
-		case closureType:
-			printf("#<closure>");
-			break;
+void printValueHelper(Value *value) {
+	if (value) {
+		switch (value->type) {
+			case booleanType:
+				if (value->val.booleanValue) {
+					printf("#t");
+				}
+				else {
+					printf("#f");
+				}
+				break;	
+				
+			case integerType:
+				printf("%d", value->val.integerValue);
+				break;
+				
+			case floatType:
+				printf("%f", value->val.floatValue);
+				break;
 			
-		case primitiveType:
-			printf("#<procedure>"); // maybe have some sort of label
-			break;
-		
-		default:
-			printf("i don't know what type of value i am");
-			break;		
+			case openType:
+				printf("%s", value->val.openValue);
+				break;
+				
+			case closeType:
+				printf("%s", value->val.closeValue);
+				break;
+				
+			case symbolType:
+				printf("%s", value->val.symbolValue);
+				break;
+				
+			case quoteType:
+				printf("%s", value->val.quoteValue);
+				break;
+				
+			case stringType:
+				printf("%s", value->val.stringValue);
+				break;
+				
+			case pairType:
+				printf("in pair type\n");
+				if ((car(value))->type == pairType) {
+				printf("in pair type2\n");
+					printValue(car(value));
+				} else {
+				printf("in pair type3\n");
+					printValueHelper(car(value));
+				}
+				printf("in pair type55\n");
+				printf("type: %d\n", value->type);
+				if (cdr(value)) {
+					printf(" ");
+					if ((cdr(value))->type == pairType) {
+						printValueHelper(cdr(value));
+					} else {
+						printf(". ");
+						printValueHelper(cdr(value));
+					}
+				}
+				break;
+	
+			case closureType:
+				printf("#<closure>");
+				break;
+				
+			case primitiveType:
+				printf("#<procedure>"); // maybe have some sort of label
+				break;
+			
+			default:
+				printf("i don't know what type of value i am");
+				break;		
+		}
+		printf("type: %d\n", value->type);
 	}
 }
 
@@ -232,7 +293,7 @@ Value **tokenize (char *expression) {
 	int currentState = inBetween;
 	int tokenStartIndex = 0;
 	int tokenCurrentIndex = 0;
-	Value *tokenListTemp = mallocValue();
+	Value *tokenListTemp = NULL;
 	Value **tokenList = mallocValueStarStar();
 	tokenList = &(tokenListTemp);
 	
@@ -695,6 +756,6 @@ Value **tokenize (char *expression) {
 		return NULL;
 	}
 	
-	return tokenList;
+	return reverse(tokenList);
 	
 }

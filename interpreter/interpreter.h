@@ -42,9 +42,11 @@ int isProper(Value **value);
 
 Value **reverse(Value **value);
 
+void printTokens(Value *value);
+
 void printValue(Value *value);
 
-void printValueHelper(Value* value);
+void printValueHelper(Value *value);
 
 Value **tokenize (char *expression);
 
