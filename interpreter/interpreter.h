@@ -30,12 +30,24 @@ Pair *mallocPair();
 
 Value *mallocValue();
 
+Value **mallocValueStarStar();
+
 Value *car(Value *value);
 
 Value *cdr(Value *value);
 
 Value *cons(Value *value1, Value *value2);
 
+int isProper(Value **value);
+
+Value **reverse(Value **value);
+
 void printValue(Value *value);
 
 void printValueHelper(Value* value);
+
+Value **tokenize (char *expression);
+
+int consToken(Value **tokenList, int type, char *string, int lineNumber);
+
+char *substr(char *string, int start, int end);
