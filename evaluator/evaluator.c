@@ -3,6 +3,10 @@
 #include <string.h>
 #include "evaluator.h"
 
+/* main issues
+memory managment, data structures
+*/
+
 enum TOKEN_TYPE {
 	booleanType, integerType, floatType, stringType, symbolType, openType, closeType, quoteType, 
 	listType, closureType, primitiveType
@@ -422,10 +426,15 @@ Value *evalEach(Value *args, Environment *env) {
 }
 
 void evalAll(Value *expr, Environment *env) {
+	//printf("evalAll\n");
 	Node *current = malloc(sizeof(*current)); // are you sure we need to malloc here
 	current = expr->val.listValue->head;
 	while (current) {
+		printf("evalAll calling eval\n");
 		Value *evaluated = eval(current->value, env);
+		printf("evalAll call to eval completed\n");
+		printf("Value of input expression: ");
+		printf("\n");
 		printValue(evaluated);
 		//printf("\n");
 		current = current->next;
@@ -433,6 +442,8 @@ void evalAll(Value *expr, Environment *env) {
 }
 
 Value *eval(Value *expr, Environment *env) {
+	printf("eval-ing: ");
+	printValue (expr);
 	Value *operator;
 	Value *args;
 	Value *v;
@@ -451,8 +462,20 @@ Value *eval(Value *expr, Environment *env) {
 				return NULL;
 			}
 		case listType:
+			printf("retrieving car: ");
 			operator = car(expr);
+			printf("car retrieved: ");
+			printValue(operator);
+			printf("operator type: ");
+			printf("%d\n", operator->type);
+			printf("retrieving cdr: ");
 			args = cdr(expr);
+			printf("cdr retrieved: ");
+			printValue(args);
+			if (args) {
+				printf("args type: ");
+				printf("%d\n", args->type);
+			}
 			if (operator->type == symbolType) {
 				if (!strcmp(operator->val.symbolValue, "define")) { return evalDefine(args, env); }
 				if (!strcmp(operator->val.symbolValue, "lambda")) { return evalLambda(args, env); }
@@ -533,13 +556,14 @@ Value *apply(Value *f, Value *actualArgs) {
 		return f->val.primitiveValue(actualArgs);
 	} else {
 		if (f->type == closureType) {
-			printf("applying closure: creating enviornment\n");
+			printf("applying closure\n");
+			//printf("applying closure: creating enviornment\n");
 			Environment *frame = createFrame(f->val.closureValue->environment);
-			printf("applying closure: getting formal argument\n");
+			//printf("applying closure: getting formal argument\n");
 			Node *currentFA = f->val.closureValue->formalArgs->val.listValue->head;
-			printf("applying closure: getting actual arg\n");
+			//printf("applying closure: getting actual arg\n");
 			Node *currentAA = actualArgs->val.listValue->head;
-			printf("applying closure: beginning the loop\n");
+			//printf("applying closure: beginning the loop\n");
 			while (currentFA && currentAA) {
 				printf("looping\n");
 				printValue(currentFA->value);
@@ -553,6 +577,8 @@ Value *apply(Value *f, Value *actualArgs) {
 			printValue(f->val.closureValue->body);
 			printf("returning from closure application\n");
 			printf("the body is of type: %d\n", f->val.closureValue->body->type);
+			printf("the body is: ");
+			printValue(f->val.closureValue->body);
 			return eval(f->val.closureValue->body, frame);
 		} else {
 			printf("procedure application: expected procedure\n");
@@ -564,6 +590,18 @@ Value *evalDefine(Value *args, Environment *environment) {
 	while (environment->parentFrame) {
 		environment = environment->parentFrame;
 	}
+	if (args->type == listType) {
+		if (!args->val.listValue->head->next) {
+			printf("define: bad syntax (missing expression after identifier) in: (define ");
+			printValue(args);
+			return NULL;
+		}
+		if (!args->val.listValue->head->value->type == symbolType)
+		{
+			printf("define: first argument not a symbol\n");
+			return NULL;
+		}
+	}
 	Value *v = eval(args->val.listValue->head->next->value, environment);
 	bind(args->val.listValue->head->value->val.symbolValue, v, environment);
 	Value *howdyDoodyValue = malloc(sizeof(*howdyDoodyValue));
@@ -573,16 +611,46 @@ Value *evalDefine(Value *args, Environment *environment) {
 }
 
 Value *evalLambda(Value *args, Environment *environment) {
+	printf("evalLambda args[0] (parameters): ");
+	printValue(car(args));
+	printf("type of evalLambda args[0] (parameters): ");
+	printf("%d\n", car(args)->type);
+	printf("evalLambda args[1] (body): ");
+	printValue(cdr(args));
+	printf("type of evalLambda args[1] (body): ");
+	printf("%d\n", cdr(args)->type);
+	//printf("1\n");
 	Value *value = malloc(sizeof(value));
+	//printf("2\n");
 	value->val.closureValue = malloc(sizeof(Closure));
+	//printf("3\n");
 	value->type = closureType;
+	//printf("4\n");
 	value->val.closureValue->formalArgs = car(args);
-	Value *tempBody = cdr(args);
-	tempBody->val = tempBody->val.listValue->head->value->val;
-	tempBody->type = tempBody->val.listValue->head->value->type;
+	//printf("5\n");
+	Value *tempBody = malloc(sizeof(*tempBody));
+	tempBody->val = cdr(args)->val;
+	tempBody->type = cdr(args)->type;
+	if (tempBody->type == listType) {
+		if (tempBody->val.listValue->head->value->type != listType) {
+			printf("lambda: formal argument not a list\n");
+			return NULL;
+		}
+		if (!tempBody->val.listValue->head->next) {
+			//printf("5.5\n");
+			tempBody->val = cdr(args)->val.listValue->head->value->val;
+			tempBody->type = cdr(args)->val.listValue->head->value->type;
+		}
+	}
+	//tempBody = cdr(args);
+	//printf("6\n");
+	//tempBody->val = tempBody->val.listValue->head->value->val;
+	//printf("7\n");
+	//tempBody->type = cdr(args)->type;
+	//printf("8\n");
 	value->val.closureValue->body = tempBody;
-	printf("the body is of type: %d\n", value->val.closureValue->body->type);
-	printf("list type: %d\n", listType);
+	//printf("the body is of type: %d\n", value->val.closureValue->body->type);
+	//printf("list type: %d\n", listType);
 	value->val.closureValue->environment = environment;
 	//printValue(args);
 	return value;

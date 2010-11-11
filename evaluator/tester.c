@@ -27,8 +27,9 @@ int main(int argc, char *argv[]) {
 	char *expression = malloc(256 * sizeof(char));
 	printf("> "); // can we put this into the fets??
 	while (fgets(expression, 255, stdin)) {
+		//printf("fgets\n");
 		tokens = tokenize(expression);
-		//printf("after tokenize\n");
+		//printf("tokenized\n");
 		if (!tokens) { // store a tail, if last thing in token list is null
 			printf("syntax error\n"); // get the line number somehow
 			return SYNTAX_ERROR_UNTOKENIZABLE;
@@ -43,7 +44,7 @@ int main(int argc, char *argv[]) {
 		//printf("appended tokens\n");
 		//printList(tokens);
 		valueTree->val.listValue = parse(tokens, &depth);
-
+		//printf("parsed\n");
 		//printf("THE TREE:\n");
 		//printParseTree(valueTree->val.listValue->head);
 		//printf("\n");
@@ -61,6 +62,7 @@ int main(int argc, char *argv[]) {
 		else {
 			if (valueTree) {
 				evalAll(valueTree, topFrame);
+				printf("evaluated\n");
 			}
 			else {
 				printf("null parse tree\n");
