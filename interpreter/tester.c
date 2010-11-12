@@ -8,39 +8,69 @@ enum TOKEN_TYPE {
 	pairType, closureType, primitiveType
 };
 
-/*
-int main() {
-	Value *value1 = mallocValue();
-	value1->type = integerType;
-	value1->val.integerValue = 1;
-	Value *value2 = mallocValue();
-	value2->type = integerType;
-	value2->val.integerValue = 2;
-	Value *value3 = mallocValue();
-	value3->type = integerType;
-	value3->val.integerValue = 3;
-	Value *listTemp = cons(value1, value3);
-	Value **list = &(listTemp);
-	//printf("%d\n", (list)->type);
-	printValue(*list);
-	return 1;
-}
-*/
 
-int main(int argc, char *argv[]) {
+enum ERROR_TYPE {
+	SYNTAX_ERROR_UNTOKENIZABLE, SYNTAX_ERROR_UNTERMINATED_INPUT, SYNTAX_ERROR_TOO_MANY_CLOSE_PARENTHESES
+};
+
+int tokenTester() {
 	char *expression = malloc(256 * sizeof(char));
 	Value **tokens;
+	
 	while (fgets(expression, 255, stdin)) {
 		tokens = tokenize(expression);
 		if (tokens) {
 			printTokens(*tokens);
-			printf("TYPE: %d\n", (*tokens)->type);
-			printValue(*tokens);
-			printf("TYPE: %d\n", (*tokens)->type);
-			printValue(*tokens);
-		//destroy(tokens);
+		/*destroy(tokens);*/
 		}
 	}
 	free(expression);
 	return 0;
+}
+
+int parseTester() {
+	int depth = 0;
+	char *expression = malloc(256 * sizeof(char));
+	Value **tokens;
+	Value **leftoverTokens;
+	Value **parseTree;
+	
+	while (fgets(expression, 255, stdin)) {
+		tokens = tokenize(expression);
+		if (!tokens) {
+			printf("syntax error");
+			return SYNTAX_ERROR_UNTOKENIZABLE;
+		}
+		
+		parseTree = parse(tokens, &depth);
+		
+		if (depth < 0) {
+			printf("syntax error: too many close parentheses\n");
+			return SYNTAX_ERROR_TOO_MANY_CLOSE_PARENTHESES;
+		}
+		else if (depth > 0) {
+			/*printf("we have leftovers\n");
+			leftoverTokens = tokens;
+			depth = 0;*/
+			printf("leftovers");
+		}
+		else {
+			if (parseTree) {
+				printf("THE FINAL TREE\n");
+				printValue(*parseTree);
+			}
+			else {
+				printf("null parse tree");
+			}
+			printf("\n");
+			leftoverTokens = NULL;
+		}
+		
+	}
+	free(expression);
+	return 0;
+}
+
+int main(int argc, char *argv[]) {
+	return parseTester();
 }

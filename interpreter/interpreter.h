@@ -26,11 +26,25 @@ typedef struct __Environment__{
 	Pair *bindings;
 } Environment;
 
+
+/* TESTERS */
+int tokenTester();
+
+int parseTester();
+
+int evaluatorTester();
+
+/* MEMORY */
+
 Pair *mallocPair();
 
 Value *mallocValue();
 
 Value **mallocValueStarStar();
+
+void freeValue(Value *value);
+
+/* LISTS */
 
 Value *car(Value *value);
 
@@ -42,14 +56,24 @@ int isProper(Value **value);
 
 Value **reverse(Value **value);
 
+/* PRINTING */
+
 void printTokens(Value *value);
 
 void printValue(Value *value);
 
 void printValueHelper(Value *value);
 
+/* TOKENIZE */
+
 Value **tokenize (char *expression);
 
 int consToken(Value **tokenList, int type, char *string, int lineNumber);
 
 char *substr(char *string, int start, int end);
+
+/* PARSE */
+
+Value **parse(Value **tokenList, int* depth);
+
+/* EVALUATE */
