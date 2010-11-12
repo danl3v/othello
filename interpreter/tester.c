@@ -30,34 +30,38 @@ int tokenTester() {
 
 int parseTester() {
 	int depth = 0;
-	char *expression = malloc(256 * sizeof(char));
-	Value **tokens;
-	Value **leftoverTokens;
-	Value **parseTree;
+	char *expression = malloc(256 * sizeof(char)); /* i dont think we need to malloc this */
+	Value **tokens = NULL;
+	Value **leftoverTokens = NULL;
+	Value **parseTree = NULL;
 	
 	while (fgets(expression, 255, stdin)) {
+		printf("aaa\n");
 		tokens = tokenize(expression);
-		if (!tokens) {
-			printf("syntax error");
-			return SYNTAX_ERROR_UNTOKENIZABLE;
+		if (tokens) {
+			printTokens(*tokens);
+		}
+		
+				printf("aaa22\n");
+		if (leftoverTokens) {
+		printTokens(*leftoverTokens);
+		}
+		printf("aaa33\n");
+		if (leftoverTokens) {
+			*tokens = append(*leftoverTokens, *tokens);
 		}
 		
 		parseTree = parse(tokens, &depth);
 		
-		if (depth < 0) {
-			printf("syntax error: too many close parentheses\n");
-			return SYNTAX_ERROR_TOO_MANY_CLOSE_PARENTHESES;
-		}
-		else if (depth > 0) {
-			/*printf("we have leftovers\n");
+		if (depth > 0) {
+			printf("leftovers with depth: %d\n", depth);
 			leftoverTokens = tokens;
-			depth = 0;*/
-			printf("leftovers");
+			depth = 0;
 		}
 		else {
 			if (parseTree) {
-				printf("THE FINAL TREE\n");
-				printValue(*parseTree);
+				printf("THE FINAL TREE:\n");
+				printValueHelper(*parseTree);
 			}
 			else {
 				printf("null parse tree");

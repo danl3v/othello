@@ -54,11 +54,15 @@ Value *cons(Value *value1, Value *value2);
 
 int isProper(Value **value);
 
+Value *append(Value *value1, Value *value2);
+
 Value **reverse(Value **value);
 
 /* PRINTING */
 
 void printTokens(Value *value);
+
+void printParseTree(Value *value);
 
 void printValue(Value *value);
 

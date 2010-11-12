@@ -112,6 +112,24 @@ int isProper(Value **value) {
 	return 0;
 }
 
+Value *append(Value *value1, Value *value2) {
+	printf("in append\n");
+	if (value1) {
+		Value *current = value1;
+		while(cdr(current)) {
+			current = cdr(current);
+		}
+		value1->val.pairValue->cdr = value2;
+		return value1;
+	}
+	else if (value2) {
+		return value2;
+	}
+	else {
+		return NULL;
+	}
+}
+
 Value **reverse(Value **value) {
 	if (*value) {
 		Value *current = *value;
@@ -158,16 +176,32 @@ void printTokens(Value *value) {
 	}
 }
 
+void printParseTree(Value *value) {
+	if (value) {
+		switch(value->type) {
+			case booleanType:	printf("#%c\n", value->val.booleanValue?'t':'f');									break;
+			case integerType:	printf("%d\n", value->val.integerValue);											break;
+			case floatType:		printf("%f\n", value->val.floatValue);												break;
+			case stringType:	printf("%s\n", value->val.stringValue);												break;	
+			case symbolType:	printf("%s\n", value->val.symbolValue);												break;	
+			case openType:		printf("%s\n", value->val.openValue);												break;	
+			case closeType:		printf("%s\n", value->val.closeValue);												break;	
+			case quoteType:		printf("%s\n", value->val.quoteValue);												break;
+			case pairType:		printf("("); printParseTree(car(value)); printParseTree(cdr(value)); printf(")");	break;
+			default:			printf("i don't know what type of value i am");										break;
+		}
+	}
+}
+
 void printValue(Value *value) {
 	if (value) {
 		Value *current = value;
 		if (current->type == pairType) {
 			printf("(");
 			printValueHelper(current);
-			printf(")\n");
+			printf(")");
 		} else {
 			printValueHelper(current);
-			printf("\n");
 		}
 	}
 }
@@ -175,7 +209,7 @@ void printValue(Value *value) {
 void printValueHelper(Value *value) {
 	if (value) {
 		switch (value->type) {
-			case booleanType:	printf("#%c:boolean\n", value->val.booleanValue?'t':'f');	break;
+			case booleanType:	printf("#%c\n", value->val.booleanValue?'t':'f');	break;
 			case integerType:	printf("%d", value->val.integerValue);						break;
 			case floatType:		printf("%f", value->val.floatValue);						break;
 			case openType:		printf("%s", value->val.openValue);							break;
@@ -247,6 +281,10 @@ Value **tokenize (char *expression) {
 	/*Value *tokenListTemp = NULL;*/
 	Value **tokenList = mallocValueStarStar();
 	/* tokenList = &(tokenListTemp); */
+	
+	if (!(*expression)) {
+		return NULL;
+	}
 	
 	while (expression[tokenCurrentIndex]) {
 		switch (currentState) {
@@ -724,42 +762,25 @@ Value **parse(Value **tokenList, int* depth) {
 	Value *current;
 	if (tokenList) { /* check to see if the tokenList exists */
 		current = *tokenList;
-		while (current && current->type == pairType) {
-			printf("PARSE TREE\n");
-			printValue(*parseTree);
-			printf("\n");
-			printf("current: ");
-			printValue(car(current));
-			printf("\n");
-			if (car(current)->type == closeType) {
-				printf("saw a close type\n");
-				/* freeValue(car(current)) free the close parentheses, but we will seg fault if we try to access the car */
-				current = cdr(current);
-				if (car(*parseTree)) {
-					Value *subTree = NULL;
-					while ((car(*parseTree))->type != openType) {
-						printf("popping");
-						printValue(car(*parseTree));
-						if (!(*parseTree)) { printf("snytax error: too many close parentheses\n"); return NULL; }
-						subTree = cons(car(*parseTree), subTree);
-						*parseTree = cdr(*parseTree);
-					}
-					(*parseTree) = cons(subTree, *parseTree);
-				}
-				(*depth)--;
-				/* freeValue(car(current)) free the open parentheses, but we will seg fault if we try to access the car */
-				current = cdr(current);
-			}
-			else if (car(current)->type == openType) {
+		while (current) { /* start to iterate through the tokenList */
+			if ((car(current))->type == openType) {
 				(*parseTree) = cons(car(current), *parseTree);
 				(*depth)++;
-				printf("see an open type\n");
+			}
+			else if ((car(current))->type == closeType) { /* if parse tree is empty, we have a problem */
+				Value *subTree = NULL;
+				while (car(*parseTree)->type != openType) {
+					subTree = cons(car(*parseTree), subTree);
+					*parseTree = cdr(*parseTree);
 				}
+				*parseTree = cdr(*parseTree); /* pop off the open type */
+				(*parseTree) = cons(subTree, *parseTree); /* push the subtree onto the parseTree */
+				(*depth)--; /* decrease the depth */
+			}
 			else {
-				printf("regular token\n");
 				(*parseTree) = cons(car(current), *parseTree);
 			}
-			current = cdr(current);
+			current = cdr(current); /* move to the next token in the tokenList */
 		}
 		return parseTree;
 	}
@@ -768,8 +789,6 @@ Value **parse(Value **tokenList, int* depth) {
 	}
 }
 
- 
- 
 /*
  * EVALUATOR
  *
