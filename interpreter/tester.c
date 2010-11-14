@@ -35,39 +35,22 @@ int parseTester() {
 	Value **leftoverTokens = NULL;
 	Value **parseTree = NULL;
 	
+	printf("> ");
 	while (fgets(expression, 255, stdin)) {
-		printf("aaa\n");
-		tokens = tokenize(expression);
-		if (tokens) {
-			printTokens(*tokens);
-		}
-		
-				printf("aaa22\n");
-		if (leftoverTokens) {
-		printTokens(*leftoverTokens);
-		}
-		printf("aaa33\n");
-		if (leftoverTokens) {
-			*tokens = append(*leftoverTokens, *tokens);
-		}
-		
+		tokens = append(leftoverTokens, tokenize(expression));
+		if (tokens) { printf("\nTOKENS:\n"); printTokens(*tokens); }
+
 		parseTree = parse(tokens, &depth);
-		
+
 		if (depth > 0) {
-			printf("leftovers with depth: %d\n", depth);
 			leftoverTokens = tokens;
 			depth = 0;
 		}
 		else {
-			if (parseTree) {
-				printf("THE FINAL TREE:\n");
-				printValueHelper(*parseTree);
-			}
-			else {
-				printf("null parse tree");
-			}
-			printf("\n");
+			if (parseTree) { printf("\nPARSE TREE:\n"); printParseTree(*parseTree); printf("\n"); }
+			else { depth = 0; }
 			leftoverTokens = NULL;
+			printf("> ");
 		}
 		
 	}

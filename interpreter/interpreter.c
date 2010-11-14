@@ -112,17 +112,19 @@ int isProper(Value **value) {
 	return 0;
 }
 
-Value *append(Value *value1, Value *value2) {
-	printf("in append\n");
-	if (value1) {
-		Value *current = value1;
+Value **append(Value **value1, Value **value2) {
+	if (value1 && *value1 && value2 && *value2) {
+		Value *current = *value1;
 		while(cdr(current)) {
 			current = cdr(current);
 		}
-		value1->val.pairValue->cdr = value2;
+		current->val.pairValue->cdr = *value2;
 		return value1;
 	}
-	else if (value2) {
+	else if (value1 && *value1) { /* might not need this */
+		return value1;
+	}
+	else if (value2 && *value2) {
 		return value2;
 	}
 	else {
@@ -176,6 +178,7 @@ void printTokens(Value *value) {
 	}
 }
 
+/*
 void printParseTree(Value *value) {
 	if (value) {
 		switch(value->type) {
@@ -192,16 +195,27 @@ void printParseTree(Value *value) {
 		}
 	}
 }
+*/
+
+void printParseTree(Value *value) {
+	printValueHelper(value);
+	/*
+		Value *current = value;
+		while (current) {
+			printValue(car(current));
+			current = cdr(current);
+		}
+	*/
+}
 
 void printValue(Value *value) {
 	if (value) {
-		Value *current = value;
-		if (current->type == pairType) {
+		if (value->type == pairType) {
 			printf("(");
-			printValueHelper(current);
+			printValueHelper(value);
 			printf(")");
 		} else {
-			printValueHelper(current);
+			printValueHelper(value);
 		}
 	}
 }
@@ -209,7 +223,7 @@ void printValue(Value *value) {
 void printValueHelper(Value *value) {
 	if (value) {
 		switch (value->type) {
-			case booleanType:	printf("#%c\n", value->val.booleanValue?'t':'f');	break;
+			case booleanType:	printf("#%c\n", value->val.booleanValue?'t':'f');			break;
 			case integerType:	printf("%d", value->val.integerValue);						break;
 			case floatType:		printf("%f", value->val.floatValue);						break;
 			case openType:		printf("%s", value->val.openValue);							break;
@@ -218,8 +232,13 @@ void printValueHelper(Value *value) {
 			case quoteType:		printf("%s", value->val.quoteValue);						break;
 			case stringType:	printf("%s", value->val.stringValue);						break;
 			case pairType:
-				if ((car(value))->type == pairType) { printValue(car(value)); }
-				else { printValueHelper(car(value)); }
+				if (car(value)) {
+					if ((car(value))->type == pairType) { printValue(car(value)); }
+					else { printValueHelper(car(value)); }
+				}
+				else {
+					printf("()");	
+				}
 				if (cdr(value)) {
 					printf(" ");
 					if ((cdr(value))->type == pairType) { printValueHelper(cdr(value)); }
@@ -281,14 +300,11 @@ Value **tokenize (char *expression) {
 	/*Value *tokenListTemp = NULL;*/
 	Value **tokenList = mallocValueStarStar();
 	/* tokenList = &(tokenListTemp); */
-	
-	if (!(*expression)) {
-		return NULL;
+	if (!(*expression) || (!strcmp(expression, "\n"))) {
+		return tokenList;
 	}
-	
 	while (expression[tokenCurrentIndex]) {
 		switch (currentState) {
-		
 			case inBetween:
 				tokenStartIndex = tokenCurrentIndex;
 				switch (expression[tokenCurrentIndex]) {
@@ -763,26 +779,28 @@ Value **parse(Value **tokenList, int* depth) {
 	if (tokenList) { /* check to see if the tokenList exists */
 		current = *tokenList;
 		while (current) { /* start to iterate through the tokenList */
-			if ((car(current))->type == openType) {
+			if ((car(current))->type == openType) { /* if we see an open paren, push onto stack and increment depth */
 				(*parseTree) = cons(car(current), *parseTree);
 				(*depth)++;
 			}
-			else if ((car(current))->type == closeType) { /* if parse tree is empty, we have a problem */
+			else if ((car(current))->type == closeType) { /* if we see a close type, do something special */
 				Value *subTree = NULL;
-				while (car(*parseTree)->type != openType) {
+				if (!(*parseTree)) { printf("error: too many close parens"); return NULL; }
+				while (!(car(*parseTree) && car(*parseTree)->type == openType)) {
 					subTree = cons(car(*parseTree), subTree);
+					if (!(*parseTree) || !(cdr(*parseTree))) { printf("error: too many close parens"); return NULL; }
 					*parseTree = cdr(*parseTree);
 				}
 				*parseTree = cdr(*parseTree); /* pop off the open type */
 				(*parseTree) = cons(subTree, *parseTree); /* push the subtree onto the parseTree */
 				(*depth)--; /* decrease the depth */
 			}
-			else {
+			else { /* if regular old token, just push onto the tree */
 				(*parseTree) = cons(car(current), *parseTree);
 			}
 			current = cdr(current); /* move to the next token in the tokenList */
 		}
-		return parseTree;
+		return reverse(parseTree);
 	}
 	else { /* return NULL if the tokenList does not exist */
 		return NULL;
