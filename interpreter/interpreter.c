@@ -82,7 +82,6 @@ Value *car(Value *value) {
 }
 
 Value *fakeCar(Value *value) {
-	printf("fake car\n");
 	return car(car(value));
 }
 
@@ -97,11 +96,25 @@ Value *cdr(Value *value) {
 	}
 }
 
+Value *fakeCdr(Value *value) {
+	return cdr(car(value));
+}
+
 Value *cons(Value *value1, Value *value2) {
 	Value *result = mallocValue();
 	Pair *pair = mallocPair();
 	pair->car = value1;
 	pair->cdr = value2;
+	result->type = pairType;
+	result->val.pairValue = pair;
+	return result;
+}
+
+Value *fakeCons(Value *value) {
+	Value *result = mallocValue();
+	Pair *pair = mallocPair();
+	pair->car = car(value);
+	pair->cdr = cdr(value);
 	result->type = pairType;
 	result->val.pairValue = pair;
 	return result;
@@ -1080,7 +1093,7 @@ Value *evalQuote(Value *args) {
 		return NULL;
 	}
 	else {
-		return args;
+		return car(args);
 	}
 }
 
@@ -1098,7 +1111,8 @@ Environment* createTopFrame() {
 	bind("*", makePrimitiveValue(multiply), topFrame);
 	bind("/", makePrimitiveValue(divide), topFrame);
 	bind("car", makePrimitiveValue(fakeCar), topFrame);
-	bind("cdr", makePrimitiveValue(cdr), topFrame);
+	bind("cdr", makePrimitiveValue(fakeCdr), topFrame);
+	bind("cons", makePrimitiveValue(fakeCons), topFrame);
 	return topFrame;
 }
 
@@ -1156,13 +1170,30 @@ void bind(char *symbol, Value *value, Environment *environment) {
 }
 
 Value **evaluate(Value **parseTree, Environment *environment) {
-	return evalEach(parseTree, environment);
+	return evalTop(parseTree, environment);
+}
+
+Value **evalTop(Value **tree, Environment *environment) {
+	Value **evaluated = mallocValueStarStar();
+	Value *valueStar = NULL;
+	Value *current = *tree;
+	while (current && car(current)) {
+		if (!(*evaluated)) {
+			*evaluated = cons(eval(car(current), environment), valueStar);
+		} else {
+			*evaluated = cons(eval(car(current), environment), *evaluated);
+		}
+		current = cdr(current);
+	}
+	if (!(*evaluated)) {
+		*evaluated = NULL;
+		return evaluated;
+	}
+	return reverse(evaluated);
 }
 
 Value **evalEach(Value **tree, Environment *environment) {
 	Value **evaluated = mallocValueStarStar();
-	//Value *valueStar = NULL;
-	//Value *valueStar2;
 	Value *current = *tree;
 	while (current && car(current)) {
 		*evaluated = cons(eval(car(current), environment), *evaluated);
@@ -1199,8 +1230,6 @@ Value *eval(Value *value, Environment *environment) {
 			if (operator->type == symbolType) {
 				Value *evaledOperator;
 				Value **evaledArgs;
-				printf("the args\n");
-				printParseTree(*args);
 				if (!strcmp(operator->val.symbolValue, "quote")) {return evalQuote(*args);}
 				/*
 				if (!strcmp(operator->val.symbolValue, "define")) { return evalDefine(args, environment); }

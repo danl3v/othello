@@ -59,7 +59,11 @@ Value *fakeCar(Value *value);
 
 Value *cdr(Value *value);
 
+Value *fakeCdr(Value *value);
+
 Value *cons(Value *value1, Value *value2);
+
+Value *fakeCons(Value *value);
 
 int isProper(Value **value);
 
@@ -112,6 +116,8 @@ Value *environmentLookup(char *symbol, Environment *environment, int local);
 void bind(char *symbol, Value *value, Environment *environment);
 
 Value **evaluate(Value **parseTree, Environment *environment);
+
+Value **evalTop(Value **tree, Environment *environment);
 
 Value **evalEach(Value **tree, Environment *environment);
 
