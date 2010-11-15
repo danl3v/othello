@@ -10,8 +10,6 @@
  *
  */
 
-/*add in null*/
-
 enum STATE_TYPE {
 	inBetween, inBool, inInteger, inFloat, inString, inSymbol, inPreNumber, inPreFloat, inComment
 };
@@ -45,6 +43,11 @@ Value **mallocValueStarStar() {
 Pair *mallocPair() {
 	Pair *pair = malloc(sizeof(*pair));
 	return pair;
+}
+
+Closure *mallocClosure() {
+	Closure *closure = malloc(sizeof(*closure));
+	return closure;
 }
 
 void freeValue(Value *value) {
@@ -82,7 +85,7 @@ Value *car(Value *value) {
 }
 
 Value *fakeCar(Value *value) {
-	return car(car(value));
+	return car(car(car(value)));
 }
 
 Value *cdr(Value *value) {
@@ -97,7 +100,7 @@ Value *cdr(Value *value) {
 }
 
 Value *fakeCdr(Value *value) {
-	return cdr(car(value));
+	return cdr(car(car(value)));
 }
 
 Value *cons(Value *value1, Value *value2) {
@@ -190,16 +193,16 @@ Value **reverse(Value **value) {
 void printTokens(Value *value) {
 	if (value) {
 		switch(value->type) {
-			case booleanType:	printf("#%c:boolean\n", value->val.booleanValue?'t':'f');	break;
-			case integerType:	printf("%d:integer\n", value->val.integerValue);			break;
-			case floatType:		printf("%f:float\n", value->val.floatValue);				break;
-			case stringType:	printf("%s:string\n", value->val.stringValue);				break;	
-			case symbolType:	printf("%s:symbol\n", value->val.symbolValue);				break;	
-			case openType:		printf("%s:open\n", value->val.openValue);					break;	
-			case closeType:		printf("%s:close\n", value->val.closeValue);				break;	
-			case quoteType:		printf("%s:quote\n", value->val.quoteValue);				break;
-			case pairType:		printTokens(car(value)); printTokens(cdr(value));			break;
-			default:			printf("in printTokens: i don't know what type of value i am");				break;
+			case booleanType:	printf("#%c:boolean\n", value->val.booleanValue?'t':'f');		break;
+			case integerType:	printf("%d:integer\n", value->val.integerValue);				break;
+			case floatType:		printf("%f:float\n", value->val.floatValue);					break;
+			case stringType:	printf("%s:string\n", value->val.stringValue);					break;	
+			case symbolType:	printf("%s:symbol\n", value->val.symbolValue);					break;	
+			case openType:		printf("%s:open\n", value->val.openValue);						break;	
+			case closeType:		printf("%s:close\n", value->val.closeValue);					break;	
+			case quoteType:		printf("%s:quote\n", value->val.quoteValue);					break;
+			case pairType:		printTokens(car(value)); printTokens(cdr(value));				break;
+			default:			printf("in printTokens: i don't know what type of value i am");	break;
 		}
 	}
 }
@@ -1093,7 +1096,99 @@ Value *evalQuote(Value *args) {
 		return NULL;
 	}
 	else {
-		return car(args);
+		return args;
+	}
+}
+
+Value *evalDefine(Value *args, Environment *environment) {
+	Value *value;
+	while (environment->parentFrame) {
+		environment = environment->parentFrame;
+	}
+	
+	if (!args || !car(args) || !cdr(args)) { /* if we do not have at least two arguments */
+		printf("define: bad syntax (missing expression after identifier)\n");
+		return NULL;
+	}
+	
+	
+	if (car(args)->type != symbolType) { /* if if the first argument is not a symbol */
+		printf("define: first argument not a symbol\n");
+		return NULL;
+	}
+	
+	
+	if (cdr(cdr(args))) { /* if we have more than two arguments */
+		printf("define: bad syntax (multiple expressions after identifier)\n");
+		return NULL;
+	}
+
+	/* we should free the first arg, or we should change bind to accept a symbolValue as its first argument */
+	/* also, problems with having to take the car all the time. talk to david about this to make it consistent */
+	value = eval(car(cdr(args)), environment);
+	bind(car(args)->val.symbolValue, value, environment);
+	return NULL;
+}
+
+Value *evalIf(Value *args, Environment *environment) {
+	Value *testValue;
+	if (!args) { /* check to make sure we have at least 1 argument */
+		printf("if: bad syntax (has 0 parts after keyword");
+		return NULL;
+	
+	}
+	if (!cdr(args)) { /* if we have two arguments */
+		printf("if: bad syntax (has 1 part after keyword)");
+		return NULL;
+	}
+	testValue = eval(car(args), environment);
+	
+	/* if the test result is false, then return the eval of the alternate */
+	if (testValue && testValue->type == booleanType && testValue->val.booleanValue == 0) {
+		if (!cdr(cdr(args))) {
+			return NULL;
+		}
+		return eval(car(cdr(cdr(args))), environment);
+	}
+	
+	else {
+		return eval(car(cdr(args)), environment);
+	}
+	
+	/* we should never get here */
+	return NULL;
+}
+
+Value *evalLambda(Value *args, Environment *environment) {
+	Value *closure;
+	if (!args) {
+		printf("lambda: does not take in any formal arguments");
+		return NULL;
+	}
+	if (!cdr(args)) {
+		printf("lambda: missing formal arguments or body");
+		return NULL;
+	}
+	
+	closure = mallocValue();
+	if (closure) { /* i dont think we need to malloc the closure, but i could be wrong */
+		closure->type = closureType;
+		closure->val.closureValue = mallocClosure();
+		if (closure->val.closureValue) {
+			closure->val.closureValue->formalArguments = car(args);
+			closure->val.closureValue->body = cdr(args); /* body is a list, can have multiple bodies */
+			closure->val.closureValue->environment = environment;
+			return closure;
+		}
+		else {
+			freeValue(closure);
+			printf("problem allocating memory for the closureValue\n");
+			return NULL;
+		}
+	}
+	else {
+		printf("problem allocating memory for the closure\n");
+		return NULL;
 	}
 }
 
@@ -1173,6 +1268,7 @@ Value **evaluate(Value **parseTree, Environment *environment) {
 	return evalTop(parseTree, environment);
 }
 
+/* i really think we can combine this with eval each in some way */
 Value **evalTop(Value **tree, Environment *environment) {
 	Value **evaluated = mallocValueStarStar();
 	Value *valueStar = NULL;
@@ -1231,12 +1327,12 @@ Value *eval(Value *value, Environment *environment) {
 				Value *evaledOperator;
 				Value **evaledArgs;
 				if (!strcmp(operator->val.symbolValue, "quote")) {return evalQuote(*args);}
+				if (!strcmp(operator->val.symbolValue, "define")) { return evalDefine(*args, environment); }
+				if (!strcmp(operator->val.symbolValue, "if")) { return evalIf(*args, environment); }
+				if (!strcmp(operator->val.symbolValue, "lambda")) { return evalLambda(*args, environment); }
 				/*
-				if (!strcmp(operator->val.symbolValue, "define")) { return evalDefine(args, environment); }
-				if (!strcmp(operator->val.symbolValue, "lambda")) { return evalLambda(args, environment); }
 				if (!strcmp(operator->val.symbolValue, "let")) {return evalLet(args, environment);}
 				if (!strcmp(operator->val.symbolValue, "letrec")) {return evalLetRec(args, environment);}
-				if (!strcmp(operator->val.symbolValue, "if")) {return evalIf(args, environment);}
 				if (!strcmp(operator->val.symbolValue, "load")) {return evalLoad(args, environment);}
 				if (!strcmp(operator->val.symbolValue, "'")) {return evalQuote(args, environment);}
 				*/
@@ -1244,7 +1340,7 @@ Value *eval(Value *value, Environment *environment) {
 				evaledArgs = evalEach(args, environment);
 				return apply(evaledOperator, evaledArgs);
 			}
-			else if (operator->type == closureType || operator->type == primitiveType || operator->type == pairType) {
+			/*else if (operator->type == closureType || operator->type == primitiveType || operator->type == pairType) {
 				Value *evaledOperator = eval(operator, environment);
 				Value **evaledArgs = evalEach(args, environment);
 				printf("WHAT IN THE WORLD ARE WE DOING HERE\n");
@@ -1253,16 +1349,18 @@ Value *eval(Value *value, Environment *environment) {
 				} else {
 					printf("procedure application: expected procedure, given: ");
 					printValue(operator);
+					printf("\n");
 					return NULL;
 				}
-			}
+			}*/
 			else {
-				printf("procedure application: expected procedure, given2: ");
+				printf("procedure application: expected procedure, given: ");
 				printValue(operator);
+				printf("\n");
 				return NULL;
 			}
 		default:
-			printf("wrong type\n");
+			printf("i don't know what value type i am\n");
 			return NULL;
 	}
 }
@@ -1270,17 +1368,30 @@ Value *eval(Value *value, Environment *environment) {
 Value *apply(Value *f, Value **actualArgs) {
 	if (f->type == primitiveType) {
 		return f->val.primitiveValue(*actualArgs);
-	} else {
+	}
+	else {
 		if (f->type == closureType) {
 			Environment *frame = createFrame(f->val.closureValue->environment);
-			Value *currentFormalArg = car(*(f->val.closureValue->formalArgs));
-			Value *currentActualArg = car(*actualArgs);
+			Value *currentFormalArg = f->val.closureValue->formalArguments; /* maybe add some error checking */
+			Value *currentActualArg = *actualArgs;
+			printf("\nformal\n");
+			printValue(currentFormalArg);
+			printf("\nactual\n");
+			printValue(currentActualArg);
+			printf("\n");
 			while (currentFormalArg && currentActualArg) {
-				bind(currentFormalArg->val.symbolValue, currentActualArg, frame);
+				bind((car(currentFormalArg))->val.symbolValue, car(currentActualArg), frame);
 				currentFormalArg = cdr(currentFormalArg);
 				currentActualArg = cdr(currentActualArg);
 			}
-			return eval(*(f->val.closureValue->body), frame);
+			if (currentFormalArg || currentActualArg) {
+				printf("wrong number of arguments\n");
+				return NULL;
+			}
+			printf("\nevaluating body:\n");
+			printValue(car(f->val.closureValue->body));
+			printf("\n");
+			return eval(car(f->val.closureValue->body), frame); /* convert this into eval each */
 		} else {
 			printf("procedure application: expected procedure\n");
 			return NULL;

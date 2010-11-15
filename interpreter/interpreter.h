@@ -29,8 +29,8 @@ typedef struct __Environment__{
 } Environment;
 
 typedef struct __Closure__{
-	Value **formalArgs;
-	Value **body;
+	Value *formalArguments;
+	Value *body;
 	Environment *environment;
 } Closure;
 
@@ -44,6 +44,8 @@ int evaluateTester();
 /* MEMORY */
 
 Pair *mallocPair();
+
+Closure *mallocClosure();
 
 Value *mallocValue();
 
@@ -104,6 +106,14 @@ Value *subtract(Value *args);
 Value *multiply(Value *args);
 
 Value *divide(Value *args);
+
+/* SPECIAL FORMS */
+
+Value *evalDefine(Value *args, Environment *environment);
+
+Value *evalIf(Value *args, Environment *environment);
+
+Value *evalLambda(Value *args, Environment *environment);
 
 /* EVALUATE */
 

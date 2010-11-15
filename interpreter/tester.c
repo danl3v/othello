@@ -79,7 +79,6 @@ int evaluateTester() {
 		parseTree = parse(tokens, &depth);
 
 		if (depth > 0) {
-			printf(">zero depth\n");
 			leftoverTokens = tokens;
 			depth = 0;
 		}
