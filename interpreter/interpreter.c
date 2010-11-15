@@ -1165,7 +1165,7 @@ Value **evalEach(Value **tree, Environment *environment) {
 	//Value *valueStar2;
 	Value *current = *tree;
 	while (current && car(current)) {
-		*evaluated2 = cons(eval(car(current), environment), *evaluated);
+		*evaluated = cons(eval(car(current), environment), *evaluated);
 		current = cdr(current);
 	}
 	if (!(*evaluated)) {
