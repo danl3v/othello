@@ -21,6 +21,10 @@ enum TOKEN_TYPE {
 	pairType, closureType, primitiveType
 };
 
+enum SCOPE {
+	localScope, globalScope
+};
+
 /*
  * MEMORY FUNCTIONS
  *
@@ -178,34 +182,17 @@ void printTokens(Value *value) {
 	}
 }
 
-/*
-void printParseTree(Value *value) {
-	if (value) {
-		switch(value->type) {
-			case booleanType:	printf("#%c\n", value->val.booleanValue?'t':'f');									break;
-			case integerType:	printf("%d\n", value->val.integerValue);											break;
-			case floatType:		printf("%f\n", value->val.floatValue);												break;
-			case stringType:	printf("%s\n", value->val.stringValue);												break;	
-			case symbolType:	printf("%s\n", value->val.symbolValue);												break;	
-			case openType:		printf("%s\n", value->val.openValue);												break;	
-			case closeType:		printf("%s\n", value->val.closeValue);												break;	
-			case quoteType:		printf("%s\n", value->val.quoteValue);												break;
-			case pairType:		printf("("); printParseTree(car(value)); printParseTree(cdr(value)); printf(")");	break;
-			default:			printf("i don't know what type of value i am");										break;
-		}
-	}
-}
-*/
-
 void printParseTree(Value *value) {
 	printValueHelper(value);
-	/*
-		Value *current = value;
-		while (current) {
-			printValue(car(current));
-			current = cdr(current);
-		}
-	*/
+}
+
+void printEvaluation(Value *value) { /* do we want this to take in a * or **? */
+	Value *current = value;
+	while (current) {
+		printValueHelper(car(current));
+		printf("\n");
+		current = cdr(current);
+	}
 }
 
 void printValue(Value *value) {
@@ -223,7 +210,7 @@ void printValue(Value *value) {
 void printValueHelper(Value *value) {
 	if (value) {
 		switch (value->type) {
-			case booleanType:	printf("#%c\n", value->val.booleanValue?'t':'f');			break;
+			case booleanType:	printf("#%c", value->val.booleanValue?'t':'f');				break;
 			case integerType:	printf("%d", value->val.integerValue);						break;
 			case floatType:		printf("%f", value->val.floatValue);						break;
 			case openType:		printf("%s", value->val.openValue);							break;
@@ -422,7 +409,7 @@ Value **tokenize (char *expression) {
 					case ')':
 					case ']':
 						consToken(tokenList, symbolType, substr(expression, tokenStartIndex, tokenCurrentIndex), lineNumber);
-						consToken(tokenList, openType, substr(expression, tokenCurrentIndex, tokenCurrentIndex+1), lineNumber);
+						consToken(tokenList, closeType, substr(expression, tokenCurrentIndex, tokenCurrentIndex+1), lineNumber);
 						currentState = inBetween;
 						break;
 						
@@ -795,6 +782,10 @@ Value **parse(Value **tokenList, int* depth) {
 				(*parseTree) = cons(subTree, *parseTree); /* push the subtree onto the parseTree */
 				(*depth)--; /* decrease the depth */
 			}
+			/*else if ((car(current))->type == quoteType) {
+				Value **parseOne = parseQuote(current);
+				(*parseTree) = cons(*parseOne, *parseTree);
+			}*/
 			else { /* if regular old token, just push onto the tree */
 				(*parseTree) = cons(car(current), *parseTree);
 			}
@@ -813,3 +804,304 @@ Value **parse(Value **tokenList, int* depth) {
  *
  *
  */
+
+Value *add(Value *args) {
+	printf("in add\n");
+	Value *result = mallocValue();
+	Value *current = args;
+	result->type = integerType;
+	result->val.integerValue = 0;
+	if (!current) {
+		printf("+ with no args\n");
+		return result;
+	}
+	if (args->type == pairType) {
+		while (current) { /* check our error checking. maybe not so good? (+) should be 0 */
+			switch (car(current)->type) {
+				case integerType:
+					if (result->type == integerType) {
+						result->val.integerValue = result->val.integerValue + car(current)->val.integerValue;
+					}
+					else {
+						result->val.floatValue = result->val.floatValue + car(current)->val.integerValue;
+					}
+					break;
+					
+				case floatType:
+					if (result->type == integerType) {
+						result->val.floatValue = result->val.integerValue;
+						result->type = floatType;
+					}
+					result->val.floatValue = result->val.floatValue + car(current)->val.floatValue;
+					break;
+					
+				default:
+					printf("Error: Attempted to add non-number\n");
+					free(result);
+					return NULL;
+			}
+			current = cdr(current);
+		}
+		return result;
+	}
+	else {
+		printf("Error: Argument not list\n");
+		free(result);
+		return NULL;
+	}
+}
+
+Value *subtract(Value *args) {
+	Value *result = mallocValue();
+	Value *current = args;
+	if (!current) {
+		printf("-: expects at least 1 argument, given 0\n");
+		free(result);
+		return NULL;
+	}
+	if (args->type == pairType) {
+		if (cdr(current)) {
+			switch (car(current)->type) {
+				case integerType:
+					result->type = integerType;
+					result->val.integerValue = car(current)->val.integerValue;
+					break;
+				case floatType:
+					result->type = floatType;
+					result->val.floatValue = car(current)->val.floatValue;
+					break;
+				default:
+					printf("Error: Attempted to subtract non-number\n");
+					free(result);
+					return NULL;
+			}
+			current = cdr(current);
+			while (current) { /* check our error checking. maybe not so good? */
+				switch (car(current)->type) {
+					case integerType:
+						if (result->type == integerType) {
+							result->val.integerValue = result->val.integerValue - car(current)->val.integerValue;
+						}
+						else {
+							result->val.floatValue = result->val.floatValue - car(current)->val.integerValue;
+						}
+						break;
+						
+					case floatType:
+						if (result->type == integerType) {
+							result->val.floatValue = result->val.integerValue;
+							result->type = floatType;
+						}
+						result->val.floatValue = result->val.floatValue - car(current)->val.floatValue;
+						break;
+						
+					default:
+						printf("Error: Attempted to subtract non-number\n");
+						free(result);
+						return NULL;
+				}
+				current = cdr(current);
+			}
+		} else {
+			switch (car(current)->type) {
+				case integerType:
+					result->type = integerType;
+					result->val.integerValue = -1 * car(current)->val.integerValue;
+					break;
+				case floatType:
+					result->type = floatType;
+					result->val.floatValue = -1 * car(current)->val.floatValue;
+					break;
+				default:
+					printf("Error: Attempted to subtract non-number\n");
+					free(result);
+					return NULL;
+			}
+		}
+		return result;
+	}
+	else {
+		printf("Error: Argument not list\n");
+		free(result);
+		return NULL;
+	}
+}
+
+Value *makePrimitiveValue(Value* (*f)(Value *)){
+	Value *resultValue = mallocValue();
+	resultValue->type = primitiveType;
+	resultValue->val.primitiveValue = f;
+	return resultValue;
+}
+
+Environment* createTopFrame() {
+	Environment *topFrame = createFrame(NULL);
+	/*
+	Value *five = mallocValue();
+	five->type = integerType;
+	five->val.integerValue = 5;
+	printf("binding x\n");
+	bind("x", five, topFrame);
+	printf("x bound\n");
+	*/
+	bind("+", makePrimitiveValue(add), topFrame);
+	bind("-", makePrimitiveValue(subtract), topFrame);
+	/*bind("*", makePrimitiveValue(multiply), topFrame);
+	bind("/", makePrimitiveValue(divide), topFrame);
+	bind("car", makePrimitiveValue(car), topFrame);
+	bind("cdr", makePrimitiveValue(cdr), topFrame);*/
+	return topFrame;
+}
+
+Environment* createFrame(Environment *parent) {
+	Environment *frame = malloc(sizeof(*frame));
+	frame->parentFrame = parent;
+	frame->bindings = malloc(sizeof(frame->bindings));
+	return frame;
+}
+
+Value *environmentLookup(char *symbol, Environment *environment, int global) {
+	Value *current;
+	if (!environment) {
+		if (global) { printf("error: variable not found\n"); }
+		return NULL;
+	}
+	
+	current = *(environment->bindings);
+	while (current) {
+		if (!strcmp((car(car(current)))->val.symbolValue, symbol)) {
+			return cdr(car(current));
+		}
+		current = cdr(current);
+	}
+	
+	if (global) {
+		return environmentLookup(symbol, environment->parentFrame, global);
+	}
+	else {
+		return environmentLookup(symbol, NULL, global); /* maybe this is dumb, uses extra memory */
+	}
+}
+
+void bind(char *symbol, Value *value, Environment *environment) {
+	Value *v = environmentLookup(symbol, environment, localScope);
+	if (v && value) {
+		v->type = value->type;
+		v->val = value->val;
+	}
+	else if (value) {
+		Value *symbolValue;
+		Value *binding;
+		binding = mallocValue();
+		binding->type = pairType;
+		symbolValue = mallocValue();
+		symbolValue->type = symbolType;
+		symbolValue->val.symbolValue = symbol;
+		binding->val.pairValue = mallocPair();
+		binding->val.pairValue->car = symbolValue;
+		binding->val.pairValue->cdr = value;
+		*(environment->bindings) = cons(binding, *(environment->bindings));
+	}
+	else {
+		printf("dont wanna seg fault! - in bind\n");
+	}
+}
+
+Value **evaluate(Value **parseTree, Environment *environment) {
+	return evalEach(parseTree, environment);
+}
+
+Value **evalEach(Value **tree, Environment *environment) {
+	Value **evaluated = mallocValueStarStar();
+	Value *current = (*tree);
+	while(current && car(current)) {
+		*evaluated = cons(eval(car(current), environment), *evaluated);
+		current = cdr(current);
+	}
+	return reverse(evaluated);
+}
+
+Value *eval(Value *value, Environment *environment) {
+	Value *operator;
+	Value **args = mallocValueStarStar();
+	Value *v;
+	switch (value->type) {
+		case booleanType:
+		case integerType:
+		case floatType:
+		case stringType:
+			return value;
+		case symbolType:
+			v = environmentLookup(value->val.symbolValue, environment, globalScope);
+			if (v) {
+				return v;
+			} else {
+				printf("reference to undefined identifier: '%s'\n", value->val.symbolValue);
+				return NULL;
+			}
+		case pairType:
+			operator = car(value);
+			*args = cdr(value);
+			if (operator->type == symbolType) {
+				Value *evaledOperator;
+				Value **evaledArgs;
+				/*
+				if (!strcmp(operator->val.symbolValue, "define")) { return evalDefine(args, env); }
+				if (!strcmp(operator->val.symbolValue, "lambda")) { return evalLambda(args, env); }
+				if (!strcmp(operator->val.symbolValue, "let")) {return evalLet(args, env);}
+				if (!strcmp(operator->val.symbolValue, "letrec")) {return evalLetRec(args, env);}
+				if (!strcmp(operator->val.symbolValue, "if")) {return evalIf(args, env);}
+				if (!strcmp(operator->val.symbolValue, "load")) {return evalLoad(args, env);}
+				if (!strcmp(operator->val.symbolValue, "quote")) {return evalQuote(args, env);}
+				if (!strcmp(operator->val.symbolValue, "'")) {return evalQuote(args, env);}
+				*/
+				evaledOperator = eval(operator, environment);
+				evaledArgs = evalEach(args, environment);
+				return apply(evaledOperator, evaledArgs);
+			}
+			else if (operator->type == closureType || operator->type == primitiveType || operator->type == pairType) {
+				Value *evaledOperator = eval(operator, environment);
+				Value **evaledArgs = evalEach(args, environment);
+				if (evaledArgs) {
+					return apply(evaledOperator, evaledArgs);
+				} else {
+					printf("procedure application: expected procedure, given: ");
+					printValue(operator);
+					return NULL;
+				}
+			}
+			else {
+				printf("procedure application: expected procedure, given2: ");
+				printValue(operator);
+				return NULL;
+			}
+		default:
+			printf("wrong type\n");
+			return NULL;
+	}
+}
+
+Value *apply(Value *f, Value **actualArgs) {
+	if (f->type == primitiveType) {
+		printf("applying\n");
+		printValue(*actualArgs);
+		printf("applying\n");
+		printValue(f);
+		return f->val.primitiveValue(*actualArgs);
+	} else {
+		if (f->type == closureType) {
+			Environment *frame = createFrame(f->val.closureValue->environment);
+			Value *currentFormalArg = car(*(f->val.closureValue->formalArgs));
+			Value *currentActualArg = car(*actualArgs);
+			while (currentFormalArg && currentActualArg) {
+				bind(currentFormalArg->val.symbolValue, currentActualArg, frame);
+				currentFormalArg = cdr(currentFormalArg);
+				currentActualArg = cdr(currentActualArg);
+			}
+			return eval(*(f->val.closureValue->body), frame);
+		} else {
+			printf("procedure application: expected procedure\n");
+			return NULL;
+		}
+	}
+}

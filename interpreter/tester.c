@@ -47,7 +47,11 @@ int parseTester() {
 			depth = 0;
 		}
 		else {
-			if (parseTree) { printf("\nPARSE TREE:\n"); printParseTree(*parseTree); printf("\n"); }
+			if (parseTree) { 
+				printf("\nPARSE TREE:\n"); 
+				printParseTree(*parseTree); 
+				printf("\n");
+			}
 			else { depth = 0; }
 			leftoverTokens = NULL;
 			printf("> ");
@@ -58,6 +62,46 @@ int parseTester() {
 	return 0;
 }
 
+int evaluateTester() {
+	int depth = 0;
+	char *expression = malloc(256 * sizeof(char)); /* i dont think we need to malloc this */
+	Value **tokens = NULL;
+	Value **leftoverTokens = NULL;
+	Value **parseTree = NULL;
+	Value **value = NULL;
+	Environment *topFrame;
+	
+	printf("> ");
+	while (fgets(expression, 255, stdin)) {
+		tokens = append(leftoverTokens, tokenize(expression));
+		if (tokens) { printf("\nTOKENS:\n"); printTokens(*tokens); }
+
+		parseTree = parse(tokens, &depth);
+
+		if (depth > 0) {
+			printf(">zero depth\n");
+			leftoverTokens = tokens;
+			depth = 0;
+		}
+		else {
+			if (parseTree) { 
+				printf("\nPARSE TREE:\n"); 
+				printParseTree(*parseTree); 
+				printf("\n");
+				topFrame = createTopFrame();
+				value = evaluate(parseTree, topFrame);
+				printf("\nVALUE:\n"); 
+				printEvaluation(*value);
+			}
+			else { depth = 0; }
+			leftoverTokens = NULL;
+			printf("> ");
+		}
+	}
+	free(expression);
+	return 0;
+}
+
 int main(int argc, char *argv[]) {
-	return parseTester();
+	return evaluateTester();
 }

@@ -1,3 +1,5 @@
+/* STRUCTS */
+
 typedef struct __Value__ {
 	int type;
 	int lineNumber;
@@ -23,16 +25,21 @@ typedef struct __Pair__ {
 
 typedef struct __Environment__{
 	struct __Environment__ *parentFrame;
-	Pair *bindings;
+	Value **bindings;
 } Environment;
 
+typedef struct __Closure__{
+	Value **formalArgs;
+	Value **body;
+	Environment *environment;
+} Closure;
 
 /* TESTERS */
 int tokenTester();
 
 int parseTester();
 
-int evaluatorTester();
+int evaluateTester();
 
 /* MEMORY */
 
@@ -64,6 +71,8 @@ void printTokens(Value *value);
 
 void printParseTree(Value *value);
 
+void printEvaluation(Value *value);
+
 void printValue(Value *value);
 
 void printValueHelper(Value *value);
@@ -81,3 +90,19 @@ char *substr(char *string, int start, int end);
 Value **parse(Value **tokenList, int* depth);
 
 /* EVALUATE */
+
+Environment* createTopFrame();
+
+Environment* createFrame(Environment *parent);
+
+Value *environmentLookup(char *symbol, Environment *environment, int local);
+
+void bind(char *symbol, Value *value, Environment *environment);
+
+Value **evaluate(Value **parseTree, Environment *environment);
+
+Value **evalEach(Value **tree, Environment *environment);
+
+Value *eval(Value *value, Environment *environment);
+
+Value *apply(Value *f, Value **actualArgs);
