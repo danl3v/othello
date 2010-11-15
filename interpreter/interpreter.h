@@ -107,6 +107,8 @@ Value *multiply(Value *args);
 
 Value *divide(Value *args);
 
+Value *eq(Value *args);
+
 /* SPECIAL FORMS */
 
 Value *evalDefine(Value *args, Environment *environment);

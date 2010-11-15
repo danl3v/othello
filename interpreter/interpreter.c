@@ -1090,6 +1090,15 @@ Value *divide(Value *args) {
 	return result;
 }
 
+Value *eq(Value *args) {
+	if (args && cdr(args) && !cdr(cdr(args))){
+		printf("got the right number of args!\n");
+		return NULL;
+	}
+	printf("eq?: expects 2 arguments\n");
+	return NULL;
+}
+
 Value *evalQuote(Value *args) {
 	if (cdr(args)) {
 		printf("error: quote: bad syntax (wrong number of parts)" );
@@ -1208,6 +1217,7 @@ Environment* createTopFrame() {
 	bind("car", makePrimitiveValue(fakeCar), topFrame);
 	bind("cdr", makePrimitiveValue(fakeCdr), topFrame);
 	bind("cons", makePrimitiveValue(fakeCons), topFrame);
+	bind("eq?", makePrimitiveValue(eq), topFrame);
 	return topFrame;
 }
 
