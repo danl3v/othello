@@ -74,16 +74,25 @@ Value *car(Value *value) {
 	if (value && value->type == pairType) {
 		return value->val.pairValue->car;
 	} else {
-		printf("error: cannot take the car of a non-list\n");
+		printf("error: cannot take the car of a non-list: ");
+		printValue(value);
+		printf("\n");
 		return NULL;
 	}
+}
+
+Value *fakeCar(Value *value) {
+	printf("fake car\n");
+	return car(car(value));
 }
 
 Value *cdr(Value *value) {
 	if (value && value->type == pairType) {
 		return value->val.pairValue->cdr;
 	} else {
-		printf("error: cannot take the cdr of a non-list\n");
+		printf("error: cannot take the cdr of a non-list: ");
+		printValue(value);
+		printf("\n");
 		return NULL;
 	}
 }
@@ -213,8 +222,8 @@ void printValueHelper(Value *value) {
 			case booleanType:	printf("#%c", value->val.booleanValue?'t':'f');				break;
 			case integerType:	printf("%d", value->val.integerValue);						break;
 			case floatType:		printf("%f", value->val.floatValue);						break;
-			case openType:		printf("%s", value->val.openValue);							break;
-			case closeType:		printf("%s", value->val.closeValue);						break;
+			case openType:		printf("%s--", value->val.openValue);						break;
+			case closeType:		printf("%s--", value->val.closeValue);						break;
 			case symbolType:	printf("%s", value->val.symbolValue);						break;
 			case quoteType:		printf("%s", value->val.quoteValue);						break;
 			case stringType:	printf("%s", value->val.stringValue);						break;
@@ -224,7 +233,7 @@ void printValueHelper(Value *value) {
 					else { printValueHelper(car(value)); }
 				}
 				else {
-					printf("()");	
+					printf("()");
 				}
 				if (cdr(value)) {
 					printf(" ");
@@ -284,9 +293,7 @@ Value **tokenize (char *expression) {
 	int currentState = inBetween;
 	int tokenStartIndex = 0;
 	int tokenCurrentIndex = 0;
-	/*Value *tokenListTemp = NULL;*/
 	Value **tokenList = mallocValueStarStar();
-	/* tokenList = &(tokenListTemp); */
 	if (!(*expression) || (!strcmp(expression, "\n"))) {
 		return tokenList;
 	}
@@ -808,11 +815,9 @@ Value **parse(Value **tokenList, int* depth) {
 Value *add(Value *args) {
 	Value *result = mallocValue();
 	Value *current = args;
-	printf("in add");
 	result->type = integerType;
 	result->val.integerValue = 0;
 	if (!args) {
-		printf("+ with no args\n");
 		return result;
 	}
 	if (args->type == pairType) {
@@ -927,7 +932,157 @@ Value *subtract(Value *args) {
 	}
 }
 
+Value *multiply(Value *args) {
+	Value *result = mallocValue();
+	Value *current = args;
+	result->type = integerType;
+	result->val.integerValue = 1;
+	if (!args) {
+		return result;
+	}
+	if (args->type == pairType) {
+		while (current) { 
+			switch (car(current)->type) {
+				case integerType:
+					if (result->type == integerType) {
+						result->val.integerValue = result->val.integerValue * car(current)->val.integerValue;
+					}
+					else {
+						result->val.floatValue = result->val.floatValue * car(current)->val.integerValue;
+					}
+					break;
+					
+				case floatType:
+					if (result->type == integerType) {
+						result->val.floatValue = result->val.integerValue;
+						result->type = floatType;
+					}
+					result->val.floatValue = result->val.floatValue * car(current)->val.floatValue;
+					break;
+					
+				default:
+					printf("Error: Attempted to multiply non-number\n");
+					free(result);
+					return NULL;
+			}
+			current = cdr(current);
+		}
+		return result;
+	}
+	else {
+		printf("Error: Argument not list\n");
+		free(result);
+		return NULL;
+	}
+}
 
+Value *divide(Value *args) {
+	Value *result = mallocValue();
+	Value *current = args;
+	if (!current) {
+		printf("/: expects at least 1 argument, given 0\n");
+		freeValue(result);
+		return NULL;
+	}
+	/* Here we check for if args is one item long, and if first item is non-number */
+	if (car(current)->type == integerType) {
+		if (!cdr(current)) {
+			if (car(current)->val.integerValue == 0) {
+				printf("/: division by zero\n");
+				freeValue(result);
+				return NULL;
+			}
+			else {
+				result->type = integerType;
+				result->val.integerValue = 1 / car(current)->val.integerValue;
+				return result;
+			}
+		}
+	}
+	else if (car(current)->type == floatType) {
+		if (!cdr(current)) {
+			if (car(current)->val.floatValue == 0) {
+				printf("/: division by zero\n");
+				freeValue(result);
+				return NULL;
+			}
+			else {
+				result->type = floatType;
+				result->val.floatValue = 1 / car(current)->val.floatValue;
+				return result;
+			}
+		}
+	}
+	else {
+		printf("Error: Attempted to divide non-number\n");
+		freeValue(result);
+		return NULL;
+	}
+	/* Here we set the type of the result based upon the first arg */
+	result->type = integerType;
+	if (car(current)->type == floatType) { result->type = floatType; }
+	/* starting with the second item, we check for division by zero */
+	current = cdr(current);
+	while (current) {
+		if (car(current)->type == floatType) {
+			result->type = floatType;
+			if (car(current)->val.floatValue == 0) {
+				printf("/: division by zero\n");
+				freeValue(result);
+				return NULL;
+			}
+		}
+		else if (car(current)->type == integerType) {
+			if (car(current)->val.integerValue == 0) {
+				printf("/: division by zero\n");
+				freeValue(result);
+				return NULL;
+			}
+		}
+		else {
+			printf("Error: Attempted to divide non-number\n");
+			freeValue(result);
+			return NULL;
+		}
+		current = cdr(current);
+	}
+	/* Here we set the value of the result based upon the first item*/
+	current = args;
+	if (result->type == integerType) { 
+		result->val.integerValue = car(current)->val.integerValue; 
+	}
+	else {
+		if (car(current)->type == integerType) {
+			result->val.floatValue = (float)(car(current)->val.integerValue);
+		}
+		else {
+			result->val.floatValue = (car(current)->val.floatValue);
+		}
+	}
+	/* starting again with the second item, we divide */
+	current = cdr(current);
+	while (current) {
+		if (result->type == integerType) {
+			result->val.integerValue = result->val.integerValue / car(current)->val.integerValue;
+		}
+		else {
+			if (car(current)->type == integerType) { result->val.floatValue = result->val.floatValue / car(current)->val.integerValue; }
+			else { result->val.floatValue = result->val.floatValue / car(current)->val.floatValue; }
+		}
+		current = cdr(current);
+	}
+	return result;
+}
+
+Value *evalQuote(Value *args) {
+	if (cdr(args)) {
+		printf("error: quote: bad syntax (wrong number of parts)" );
+		return NULL;
+	}
+	else {
+		return args;
+	}
+}
 
 Value *makePrimitiveValue(Value* (*f)(Value *)){
 	Value *resultValue = mallocValue();
@@ -938,20 +1093,12 @@ Value *makePrimitiveValue(Value* (*f)(Value *)){
 
 Environment* createTopFrame() {
 	Environment *topFrame = createFrame(NULL);
-	/*
-	Value *five = mallocValue();
-	five->type = integerType;
-	five->val.integerValue = 5;
-	printf("binding x\n");
-	bind("x", five, topFrame);
-	printf("x bound\n");
-	*/
 	bind("+", makePrimitiveValue(add), topFrame);
 	bind("-", makePrimitiveValue(subtract), topFrame);
-	/*bind("*", makePrimitiveValue(multiply), topFrame);
+	bind("*", makePrimitiveValue(multiply), topFrame);
 	bind("/", makePrimitiveValue(divide), topFrame);
-	bind("car", makePrimitiveValue(car), topFrame);
-	bind("cdr", makePrimitiveValue(cdr), topFrame);*/
+	bind("car", makePrimitiveValue(fakeCar), topFrame);
+	bind("cdr", makePrimitiveValue(cdr), topFrame);
 	return topFrame;
 }
 
@@ -1014,18 +1161,17 @@ Value **evaluate(Value **parseTree, Environment *environment) {
 
 Value **evalEach(Value **tree, Environment *environment) {
 	Value **evaluated = mallocValueStarStar();
-	/**evaluated = mallocValue();*/
+	//Value *valueStar = NULL;
+	//Value *valueStar2;
 	Value *current = *tree;
 	while (current && car(current)) {
-		*evaluated = cons(eval(car(current), environment), *evaluated);
+		*evaluated2 = cons(eval(car(current), environment), *evaluated);
 		current = cdr(current);
-	}/*
-	if (evaluated == NULL) {
-		printf("NULL evaluated\n");
-		Value *valueStar = mallocValue();
-		*evaluated = valueStar;
+	}
+	if (!(*evaluated)) {
+		*evaluated = NULL;
 		return evaluated;
-	}*/
+	}
 	return reverse(evaluated);
 }
 
@@ -1051,33 +1197,28 @@ Value *eval(Value *value, Environment *environment) {
 			operator = car(value);
 			*args = cdr(value);
 			if (operator->type == symbolType) {
-				printf("start of if\n");
 				Value *evaledOperator;
 				Value **evaledArgs;
+				printf("the args\n");
+				printParseTree(*args);
+				if (!strcmp(operator->val.symbolValue, "quote")) {return evalQuote(*args);}
 				/*
-				if (!strcmp(operator->val.symbolValue, "define")) { return evalDefine(args, env); }
-				if (!strcmp(operator->val.symbolValue, "lambda")) { return evalLambda(args, env); }
-				if (!strcmp(operator->val.symbolValue, "let")) {return evalLet(args, env);}
-				if (!strcmp(operator->val.symbolValue, "letrec")) {return evalLetRec(args, env);}
-				if (!strcmp(operator->val.symbolValue, "if")) {return evalIf(args, env);}
-				if (!strcmp(operator->val.symbolValue, "load")) {return evalLoad(args, env);}
-				if (!strcmp(operator->val.symbolValue, "quote")) {return evalQuote(args, env);}
-				if (!strcmp(operator->val.symbolValue, "'")) {return evalQuote(args, env);}
+				if (!strcmp(operator->val.symbolValue, "define")) { return evalDefine(args, environment); }
+				if (!strcmp(operator->val.symbolValue, "lambda")) { return evalLambda(args, environment); }
+				if (!strcmp(operator->val.symbolValue, "let")) {return evalLet(args, environment);}
+				if (!strcmp(operator->val.symbolValue, "letrec")) {return evalLetRec(args, environment);}
+				if (!strcmp(operator->val.symbolValue, "if")) {return evalIf(args, environment);}
+				if (!strcmp(operator->val.symbolValue, "load")) {return evalLoad(args, environment);}
+				if (!strcmp(operator->val.symbolValue, "'")) {return evalQuote(args, environment);}
 				*/
 				evaledOperator = eval(operator, environment);
-				printValue(*args);
 				evaledArgs = evalEach(args, environment);
-				/*if (evaledArgs) {*/
-					return apply(evaledOperator, evaledArgs);
-				/*}
-				else{
-					return *args; What should we return here?
-				}*/
+				return apply(evaledOperator, evaledArgs);
 			}
 			else if (operator->type == closureType || operator->type == primitiveType || operator->type == pairType) {
-				printf("start of elseif\n");
 				Value *evaledOperator = eval(operator, environment);
 				Value **evaledArgs = evalEach(args, environment);
+				printf("WHAT IN THE WORLD ARE WE DOING HERE\n");
 				if (evaledArgs) {
 					return apply(evaledOperator, evaledArgs);
 				} else {
@@ -1099,12 +1240,8 @@ Value *eval(Value *value, Environment *environment) {
 
 Value *apply(Value *f, Value **actualArgs) {
 	if (f->type == primitiveType) {
-		if (actualArgs == NULL) {
-			return f->val.primitiveValue(NULL);
-		}
 		return f->val.primitiveValue(*actualArgs);
 	} else {
-		printf("In apply else");
 		if (f->type == closureType) {
 			Environment *frame = createFrame(f->val.closureValue->environment);
 			Value *currentFormalArg = car(*(f->val.closureValue->formalArgs));

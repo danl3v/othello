@@ -55,6 +55,8 @@ void freeValue(Value *value);
 
 Value *car(Value *value);
 
+Value *fakeCar(Value *value);
+
 Value *cdr(Value *value);
 
 Value *cons(Value *value1, Value *value2);
@@ -88,6 +90,16 @@ char *substr(char *string, int start, int end);
 /* PARSE */
 
 Value **parse(Value **tokenList, int* depth);
+
+/* PRIMITIVES */
+
+Value *add(Value *args);
+
+Value *subtract(Value *args);
+
+Value *multiply(Value *args);
+
+Value *divide(Value *args);
 
 /* EVALUATE */
 

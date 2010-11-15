@@ -84,7 +84,7 @@ int evaluateTester() {
 			depth = 0;
 		}
 		else {
-			if (parseTree) { 
+			if (parseTree) {
 				printf("\nPARSE TREE:\n"); 
 				printParseTree(*parseTree); 
 				printf("\n");
