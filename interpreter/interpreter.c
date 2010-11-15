@@ -99,8 +99,14 @@ Value *cdr(Value *value) {
 	}
 }
 
-Value *fakeCdr(Value *value) {
-	return cdr(car(car(value)));
+Value *fakeCdr(Value *value) { /* we should not need to create a new mini parse tree to do cdr, car, cons */
+	Value *result = mallocValue();
+	Pair *pair = mallocPair();
+	pair->car = cdr(car(car(value)));
+	pair->cdr = NULL;
+	result->type = pairType;
+	result->val.pairValue = pair;
+	return result;
 }
 
 Value *cons(Value *value1, Value *value2) {
@@ -116,8 +122,8 @@ Value *cons(Value *value1, Value *value2) {
 Value *fakeCons(Value *value) {
 	Value *result = mallocValue();
 	Pair *pair = mallocPair();
-	pair->car = car(value);
-	pair->cdr = cdr(value);
+	pair->car = cons(car(value), cdr(value));
+	pair->cdr = NULL;
 	result->type = pairType;
 	result->val.pairValue = pair;
 	return result;
@@ -1092,8 +1098,18 @@ Value *divide(Value *args) {
 
 Value *eq(Value *args) {
 	if (args && cdr(args) && !cdr(cdr(args))){
-		printf("got the right number of args!\n");
-		return NULL;
+		if (car(args) == car(cdr(args))) {
+			Value *true = mallocValue();
+			true->type = booleanType;
+			true->val.booleanValue = 1;
+			return true;
+		}
+		else {
+			Value *false = mallocValue();
+			false->type = booleanType;
+			false->val.booleanValue = 0;
+			return false;
+		}
 	}
 	printf("eq?: expects 2 arguments\n");
 	return NULL;
@@ -1136,6 +1152,27 @@ Value *evalDefine(Value *args, Environment *environment) {
 	/* also, problems with having to take the car all the time. talk to david about this to make it consistent */
 	value = eval(car(cdr(args)), environment);
 	bind(car(args)->val.symbolValue, value, environment);
+	return NULL;
+}
+
+Value *evalLet(Value *args, Environment *environment) {
+	if (args && cdr(args)) {
+		Environment *frame = createFrame(environment);
+		Value *current = car(args);
+		while (current) {
+			if (car(car(current))->type != symbolType) {
+				printf("cannot bind a value to a non identifier\n");
+				/* destroy the frame */
+				return NULL;
+			}
+			bind(car(car(current))->val.symbolValue, eval(car(cdr(car(current))), environment), frame);
+			current = cdr(current);
+		}
+		
+		return eval(car(cdr(args)), frame);	/* use evalEach so we can have multiple bodies */
+	}
+	
+	printf("let: bad syntax\n");
 	return NULL;
 }
 
@@ -1340,8 +1377,8 @@ Value *eval(Value *value, Environment *environment) {
 				if (!strcmp(operator->val.symbolValue, "define")) { return evalDefine(*args, environment); }
 				if (!strcmp(operator->val.symbolValue, "if")) { return evalIf(*args, environment); }
 				if (!strcmp(operator->val.symbolValue, "lambda")) { return evalLambda(*args, environment); }
+				if (!strcmp(operator->val.symbolValue, "let")) {return evalLet(*args, environment);}
 				/*
-				if (!strcmp(operator->val.symbolValue, "let")) {return evalLet(args, environment);}
 				if (!strcmp(operator->val.symbolValue, "letrec")) {return evalLetRec(args, environment);}
 				if (!strcmp(operator->val.symbolValue, "load")) {return evalLoad(args, environment);}
 				if (!strcmp(operator->val.symbolValue, "'")) {return evalQuote(args, environment);}

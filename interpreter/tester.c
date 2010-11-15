@@ -70,7 +70,7 @@ int evaluateTester() {
 	Value **parseTree = NULL;
 	Value **value = NULL;
 	Environment *topFrame = createTopFrame();
-	
+	/* http://www.daniweb.com/forums/thread23485.html - key up down functionality */
 	printf("> ");
 	while (fgets(expression, 255, stdin)) {
 		tokens = append(leftoverTokens, tokenize(expression));
