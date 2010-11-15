@@ -69,7 +69,7 @@ int evaluateTester() {
 	Value **leftoverTokens = NULL;
 	Value **parseTree = NULL;
 	Value **value = NULL;
-	Environment *topFrame;
+	Environment *topFrame = createTopFrame();
 	
 	printf("> ");
 	while (fgets(expression, 255, stdin)) {
@@ -88,7 +88,6 @@ int evaluateTester() {
 				printf("\nPARSE TREE:\n"); 
 				printParseTree(*parseTree); 
 				printf("\n");
-				topFrame = createTopFrame();
 				value = evaluate(parseTree, topFrame);
 				printf("\nVALUE:\n"); 
 				printEvaluation(*value);

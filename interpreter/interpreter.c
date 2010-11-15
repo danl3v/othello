@@ -177,7 +177,7 @@ void printTokens(Value *value) {
 			case closeType:		printf("%s:close\n", value->val.closeValue);				break;	
 			case quoteType:		printf("%s:quote\n", value->val.quoteValue);				break;
 			case pairType:		printTokens(car(value)); printTokens(cdr(value));			break;
-			default:			printf("i don't know what type of value i am");				break;
+			default:			printf("in printTokens: i don't know what type of value i am");				break;
 		}
 	}
 }
@@ -232,9 +232,9 @@ void printValueHelper(Value *value) {
 					else { printf(". "); printValueHelper(cdr(value)); }
 				}
 				break;
-			case closureType:	printf("#<closure>");										break;
-			case primitiveType:	printf("#<procedure> (add a label)"); 						break;
-			default:			printf("i don't know what type of value i am");				break;		
+			case closureType:	printf("#<closure>");																break;
+			case primitiveType:	printf("#<procedure> (add a label)"); 												break;
+			default:			printf("in printValueHelper: i don't know what type of value i am");				break;		
 		}
 	}
 }
@@ -806,12 +806,12 @@ Value **parse(Value **tokenList, int* depth) {
  */
 
 Value *add(Value *args) {
-	printf("in add\n");
 	Value *result = mallocValue();
 	Value *current = args;
+	printf("in add");
 	result->type = integerType;
 	result->val.integerValue = 0;
-	if (!current) {
+	if (!args) {
 		printf("+ with no args\n");
 		return result;
 	}
@@ -927,6 +927,8 @@ Value *subtract(Value *args) {
 	}
 }
 
+
+
 Value *makePrimitiveValue(Value* (*f)(Value *)){
 	Value *resultValue = mallocValue();
 	resultValue->type = primitiveType;
@@ -991,8 +993,7 @@ void bind(char *symbol, Value *value, Environment *environment) {
 	}
 	else if (value) {
 		Value *symbolValue;
-		Value *binding;
-		binding = mallocValue();
+		Value *binding = mallocValue();
 		binding->type = pairType;
 		symbolValue = mallocValue();
 		symbolValue->type = symbolType;
@@ -1013,11 +1014,18 @@ Value **evaluate(Value **parseTree, Environment *environment) {
 
 Value **evalEach(Value **tree, Environment *environment) {
 	Value **evaluated = mallocValueStarStar();
-	Value *current = (*tree);
-	while(current && car(current)) {
+	/**evaluated = mallocValue();*/
+	Value *current = *tree;
+	while (current && car(current)) {
 		*evaluated = cons(eval(car(current), environment), *evaluated);
 		current = cdr(current);
-	}
+	}/*
+	if (evaluated == NULL) {
+		printf("NULL evaluated\n");
+		Value *valueStar = mallocValue();
+		*evaluated = valueStar;
+		return evaluated;
+	}*/
 	return reverse(evaluated);
 }
 
@@ -1043,6 +1051,7 @@ Value *eval(Value *value, Environment *environment) {
 			operator = car(value);
 			*args = cdr(value);
 			if (operator->type == symbolType) {
+				printf("start of if\n");
 				Value *evaledOperator;
 				Value **evaledArgs;
 				/*
@@ -1056,10 +1065,17 @@ Value *eval(Value *value, Environment *environment) {
 				if (!strcmp(operator->val.symbolValue, "'")) {return evalQuote(args, env);}
 				*/
 				evaledOperator = eval(operator, environment);
+				printValue(*args);
 				evaledArgs = evalEach(args, environment);
-				return apply(evaledOperator, evaledArgs);
+				/*if (evaledArgs) {*/
+					return apply(evaledOperator, evaledArgs);
+				/*}
+				else{
+					return *args; What should we return here?
+				}*/
 			}
 			else if (operator->type == closureType || operator->type == primitiveType || operator->type == pairType) {
+				printf("start of elseif\n");
 				Value *evaledOperator = eval(operator, environment);
 				Value **evaledArgs = evalEach(args, environment);
 				if (evaledArgs) {
@@ -1083,12 +1099,12 @@ Value *eval(Value *value, Environment *environment) {
 
 Value *apply(Value *f, Value **actualArgs) {
 	if (f->type == primitiveType) {
-		printf("applying\n");
-		printValue(*actualArgs);
-		printf("applying\n");
-		printValue(f);
+		if (actualArgs == NULL) {
+			return f->val.primitiveValue(NULL);
+		}
 		return f->val.primitiveValue(*actualArgs);
 	} else {
+		printf("In apply else");
 		if (f->type == closureType) {
 			Environment *frame = createFrame(f->val.closureValue->environment);
 			Value *currentFormalArg = car(*(f->val.closureValue->formalArgs));
