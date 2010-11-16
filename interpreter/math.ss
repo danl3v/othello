@@ -1,185 +1,181 @@
 ;; Team Othello
 ;; math.ss
-;; September 24, 2010
-
-(define my-not
-  (lambda (x)
-    (if x #f #t)))
+;; November 17, 2010
     
-(define my->
+(define >
   (lambda (x y . z)
-  	(if (and (<= y x) (my-not (= x y)))
-  	  (my->helper y z)
+  	(if (and (<= y x) (not (= x y)))
+  	  (>helper y z)
   	  #f)))
 
-(define my->helper
+(define >helper
   (lambda (x y)
   	(if (null? y)
   	  #t
-      (if (and (<= (car y) x) (my-not (= x (car y))))
-        (my->helper (car y) (cdr y))
+      (if (and (<= (car y) x) (not (= x (car y))))
+        (>helper (car y) (cdr y))
         #f))))
         
-(define my-<
+(define <
   (lambda (x y . z)
-  	(if (and (<= x y) (my-not (= x y)))
-  	  (my-<helper y z)
+  	(if (and (<= x y) (not (= x y)))
+  	  (<helper y z)
   	  #f)))
 
-(define my-<helper
+(define <helper
   (lambda (x y)
   	(if (null? y)
   	  #t
-      (if (and (<= x (car y)) (my-not (= x (car y))))
-        (my-<helper (car y) (cdr y))
+      (if (and (<= x (car y)) (not (= x (car y))))
+        (<helper (car y) (cdr y))
         #f))))
         
-(define my->=
+(define >=
   (lambda (x y . z)
-  	(if (or (my-not (<= x y)) (= x y))
-  	  (my->=helper y z)
+  	(if (or (not (<= x y)) (= x y))
+  	  (>=helper y z)
   	  #f)))
 
-(define my->=helper
+(define >=helper
   (lambda (x y)
   	(if (null? y)
   	  #t
-      (if (or (my-not (<= x (car y))) (= x (car y)))
-        (my->=helper (car y) (cdr y))
+      (if (or (not (<= x (car y))) (= x (car y)))
+        (>=helper (car y) (cdr y))
         #f))))
 
-(define my-zero?
+(define zero?
   (lambda (x)
     (= 0 x)))
          
-(define my-positive?
+(define positive?
   (lambda (x) 
     (> x 0)))
 
-(define my-negative?
+(define negative?
   (lambda (x) 
     (< x 0)))
 
-(define my-abs ;;flex those babies!
+(define abs ;;flex those babies!
   (lambda (x)
-    (if (my-negative? x)
+    (if (negative? x)
         (- 0 x)
         x)))
 
-(define my-mod
+(define mod
   (lambda (x y)
-    (if (or (my-positive? x) (my-zero? x))
-        (if (< x (my-abs y))
+    (if (or (positive? x) (zero? x))
+        (if (< x (abs y))
             x
-            (my-mod (- x (my-abs y)) y))
-        (my-mod (+ x (my-abs y)) y))))
+            (mod (- x (abs y)) y))
+        (mod (+ x (abs y)) y))))
 
-(define my-even?
+(define even?
   (lambda (x)
-    (if (my-integer? x)
-        (= (my-mod x 2) 0)
+    (if (integer? x)
+        (= (mod x 2) 0)
          "oops!")))
 
-(define my-odd?
+(define odd?
   (lambda (x)
-    (if (my-integer? x)
-        (= (my-mod x 2) 1)
+    (if (integer? x)
+        (= (mod x 2) 1)
         "oops!")))
 
-(define my-floor
+(define floor
   (lambda (x)
-    (- x (my-mod x 1))))
+    (- x (mod x 1))))
 
-(define my-ceiling
+(define ceiling
   (lambda (x)
-    (define y (my-floor x))
+    (define y (floor x))
     (if (= y x)
         x
         (+ y 1))))
 
-(define my-truncate
+(define truncate
   (lambda (x)
-    (if (my-positive? x)
-        (my-floor x)
-        (my-ceiling x))))
+    (if (positive? x)
+        (floor x)
+        (ceiling x))))
 
-(define my-integer?
+(define integer?
   (lambda (x)
     (= (truncate x) x)))
 
-(define my-round
+(define round
   (lambda (x)
-    (define y (my-mod x 1))
+    (define y (mod x 1))
     (if (= y .5)
         (if (even? (+ x y))
             (+ x y)
             (- x y))
         (if (< y .5)
-            (my-floor x)
-            (my-ceiling x)))))
+            (floor x)
+            (ceiling x)))))
 
-(define my-div
+(define div
   (lambda (x y)
-    (if (my-positive? x)
-        (if (my-positive? y)
-            (my-floor (/ x y))
-            (- 0 (my-floor (/ x (my-abs y)))))
-        (if (my-positive? y)
-            (- 0 (my-ceiling (/ (my-abs x) y)))
-            (my-ceiling (/ x y))))))
+    (if (positive? x)
+        (if (positive? y)
+            (floor (/ x y))
+            (- 0 (floor (/ x (abs y)))))
+        (if (positive? y)
+            (- 0 (ceiling (/ (abs x) y)))
+            (ceiling (/ x y))))))
   
 
-(define my-max
+(define max
   (lambda (x . y)
-    (my-max-helper x y)))
+    (max-helper x y)))
 
-(define my-max-helper
+(define max-helper
   (lambda (x y)
     (if (null? y)
         x
         (if (< x (car y))
-            (my-max-helper (car y) (cdr y))
-            (my-max-helper x (cdr y))))))
+            (max-helper (car y) (cdr y))
+            (max-helper x (cdr y))))))
 
-(define my-min
+(define min
   (lambda (x . y)
-    (my-min-helper x y)))
+    (min-helper x y)))
 
-(define my-min-helper
+(define min-helper
   (lambda (x y)
     (if (null? y)
         x
         (if (> x (car y))
-            (my-min-helper (car y) (cdr y))
-            (my-min-helper x (cdr y))))))
+            (min-helper (car y) (cdr y))
+            (min-helper x (cdr y))))))
 
-(define my-gcd
+(define gcd
   (lambda (x . y)
-    (my-gcd-helper x y)))
+    (gcd-helper x y)))
 
-(define my-gcd-helper
+(define gcd-helper
   (lambda (x y)
     (if (null y)
-        (my-abs x)
-        (if (= (my-abs x) (my-abs (car y)))
-            (my-gcd-helper x (cdr y))
-            (if (< (my-abs x) (my-abs (car y)))
-               (my-gcd-helper (- (my-abs (car y)) (my-abs x)) (cons x (cdr y)))
-               (my-gcd-helper (- (my-abs x) (my-abs (car y))) y))))))
-(define my-lcm
+        (abs x)
+        (if (= (abs x) (abs (car y)))
+            (gcd-helper x (cdr y))
+            (if (< (abs x) (abs (car y)))
+               (gcd-helper (- (abs (car y)) (abs x)) (cons x (cdr y)))
+               (gcd-helper (- (abs x) (abs (car y))) y))))))
+(define lcm
   (lambda (x . y)
-    (my-lcm-helper x y)))
+    (lcm-helper x y)))
 
-(define my-lcm-helper
+(define lcm-helper
   (lambda (x y)
     (if (null y)
         x
-        (my-lcm-helper (/ (my-abs (* x (car y))) (my-gcd x (car y))) (cdr y)))))
+        (lcm-helper (/ (abs (* x (car y))) (gcd x (car y))) (cdr y)))))
 
-(define my-expt
+(define expt
   (lambda (x y)
-    (if (my-positive? y)
-        (* x (my-expt x (- y 1)))
-        (if (my-zero? y)
+    (if (positive? y)
+        (* x (expt x (- y 1)))
+        (if (zero? y)
             1
-            (/ (my-expt x (+ y 1)) x)))))
+            (/ (expt x (+ y 1)) x)))))

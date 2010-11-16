@@ -12,12 +12,12 @@
  */
 
 enum STATE_TYPE {
-	inBetween, inBool, inInteger, inFloat, inString, inSymbol, inPreNumber, inPreFloat, inComment
+	inBetween, inBool, inInteger, inFloat, inString, inSymbol, inPreNumber, inPreFloat, inComment, inPreVariableArity
 };
 
 enum TOKEN_TYPE {
 	booleanType, integerType, floatType, stringType, symbolType, openType, closeType, quoteType, 
-	pairType, closureType, primitiveType, undefinedType
+	pairType, closureType, primitiveType, undefinedType, variableArityType
 };
 
 enum SCOPE {
@@ -120,7 +120,7 @@ Value *cons(Value *value1, Value *value2) {
 	return result;
 }
 
-Value *fakeCons(Value *value) {
+Value *fakeCons(Value *value) { /*We can probably do a lot of this with regular cons*/
 	Value *value1;
 	Value *value2;
 	Pair *pair1;
@@ -244,16 +244,17 @@ Value **reverse(Value **value) {
 void printTokens(Value *value) {
 	if (value) {
 		switch(value->type) {
-			case booleanType:	printf("#%c:boolean\n", value->val.booleanValue?'t':'f');		break;
-			case integerType:	printf("%d:integer\n", value->val.integerValue);				break;
-			case floatType:		printf("%f:float\n", value->val.floatValue);					break;
-			case stringType:	printf("\"%s\":string\n", value->val.stringValue);					break;	
-			case symbolType:	printf("%s:symbol\n", value->val.symbolValue);					break;	
-			case openType:		printf("%s:open\n", value->val.openValue);						break;	
-			case closeType:		printf("%s:close\n", value->val.closeValue);					break;	
-			case quoteType:		printf("%s:quote\n", value->val.quoteValue);					break;
-			case pairType:		printTokens(car(value)); printTokens(cdr(value));				break;
-			default:			printf("in printTokens: i don't know what type of value i am");	break;
+			case booleanType:			printf("#%c:boolean\n", value->val.booleanValue?'t':'f');		break;
+			case integerType:			printf("%d:integer\n", value->val.integerValue);				break;
+			case floatType:				printf("%f:float\n", value->val.floatValue);					break;
+			case stringType:			printf("\"%s\":string\n", value->val.stringValue);				break;	
+			case symbolType:			printf("%s:symbol\n", value->val.symbolValue);					break;	
+			case openType:				printf("%s:open\n", value->val.openValue);						break;	
+			case closeType:				printf("%s:close\n", value->val.closeValue);					break;	
+			case quoteType:				printf("%s:quote\n", value->val.quoteValue);					break;
+			case pairType:				printTokens(car(value)); printTokens(cdr(value));				break;
+			case variableArityType:		printf("%s:variableArity\n", value->val.variableArityValue);	break;
+			default:					printf("in printTokens: i don't know what type of value i am");	break;
 		}
 	}
 }
@@ -286,14 +287,15 @@ void printValue(Value *value) {
 void printValueHelper(Value *value) {
 	if (value) {
 		switch (value->type) {
-			case booleanType:	printf("#%c", value->val.booleanValue?'t':'f');				break;
-			case integerType:	printf("%d", value->val.integerValue);						break;
-			case floatType:		printf("%f", value->val.floatValue);						break;
-			case openType:		printf("%s--", value->val.openValue);						break;
-			case closeType:		printf("%s--", value->val.closeValue);						break;
-			case symbolType:	printf("%s", value->val.symbolValue);						break;
-			case quoteType:		printf("%s", value->val.quoteValue);						break;
-			case stringType:	printf("\"%s\"", value->val.stringValue);						break;
+			case booleanType:			printf("#%c", value->val.booleanValue?'t':'f');								break;
+			case integerType:			printf("%d", value->val.integerValue);										break;
+			case floatType:				printf("%f", value->val.floatValue);										break;
+			case openType:				printf("%s--", value->val.openValue);										break;
+			case closeType:				printf("%s--", value->val.closeValue);										break;
+			case symbolType:			printf("%s", value->val.symbolValue);										break;
+			case quoteType:				printf("%s", value->val.quoteValue);										break;
+			case stringType:			printf("\"%s\"", value->val.stringValue);									break;
+			case variableArityType:		printf("%s", value->val.variableArityValue);								break;
 			case pairType:
 				if (car(value)) {
 					if ((car(value))->type == pairType) { printValue(car(value)); }
@@ -308,10 +310,10 @@ void printValueHelper(Value *value) {
 					else { printf(". "); printValueHelper(cdr(value)); }
 				}
 				break;
-			case closureType:	printf("#<closure>");																break;
-			case primitiveType:	printf("#<procedure> (add a label)"); 												break;
-			case undefinedType: printf("#<undefined>");																break;
-			default:			printf("in printValueHelper: i don't know what type of value i am");				break;		
+			case closureType:			printf("#<closure>");														break;
+			case primitiveType:			printf("#<procedure> (add a label)"); 										break;
+			case undefinedType: 		printf("#<undefined>");														break;
+			default:					printf("in printValueHelper: i don't know what type of value i am");		break;		
 		}
 	}
 }
@@ -341,14 +343,15 @@ int consToken(Value **tokenList, int type, char *string, int lineNumber) {
 		token->type = type;
 		token->lineNumber = lineNumber;
 		switch (type) {
-			case booleanType:	token->val.booleanValue = (!strcmp(string,"T") || !strcmp(string,"t")); free(string);	break;
-			case integerType:	token->val.integerValue = strtol(string, &str, 0); free(string);						break;
-			case floatType:		token->val.floatValue = strtod(string, &str); free(string);								break;
-			case stringType:	token->val.stringValue = string;														break;
-			case symbolType:	token->val.symbolValue = string;														break;
-			case openType:		token->val.openValue = string;															break;
-			case closeType:		token->val.closeValue = string;															break;
-			case quoteType:		token->val.quoteValue = string;															break;
+			case booleanType:			token->val.booleanValue = (!strcmp(string,"T") || !strcmp(string,"t")); free(string);	break;
+			case integerType:			token->val.integerValue = strtol(string, &str, 0); free(string);						break;
+			case floatType:				token->val.floatValue = strtod(string, &str); free(string);								break;
+			case stringType:			token->val.stringValue = string;														break;
+			case symbolType:			token->val.symbolValue = string;														break;
+			case openType:				token->val.openValue = string;															break;
+			case closeType:				token->val.closeValue = string;															break;
+			case quoteType:				token->val.quoteValue = string;															break;
+			case variableArityType:		token->val.variableArityValue = string;													break;
 		}
 		*tokenList = cons(token, (*tokenList));
 	}
@@ -410,7 +413,7 @@ Value **tokenize (char *expression) {
 						break;
 						
 					case '.':
-						currentState = inFloat;
+						currentState = inPreVariableArity;
 						break;
 						
 					case '"':
@@ -519,6 +522,72 @@ Value **tokenize (char *expression) {
 						
 					default:
 						currentState=inSymbol;
+						break;
+				}
+			break;
+			
+			case inPreVariableArity:
+				switch (expression[tokenCurrentIndex]) {
+					case '0':
+					case '1':
+					case '2':
+					case '3':
+					case '4':
+					case '5':
+					case '6':
+					case '7':
+					case '8':
+					case '9':
+						currentState = inFloat;
+						break;
+						
+					case '\n':
+					case '\r':
+						lineNumber++;
+					case ' ':
+					case '\t':
+						consToken(tokenList, variableArityType, substr(expression, tokenStartIndex, tokenCurrentIndex), lineNumber);
+						currentState = inBetween;
+						break;
+					
+					case '(':
+					case '[':
+						consToken(tokenList, variableArityType, substr(expression, tokenStartIndex, tokenCurrentIndex), lineNumber);
+						consToken(tokenList, openType, substr(expression, tokenCurrentIndex, tokenCurrentIndex+1), lineNumber);
+						currentState = inBetween;
+						break;
+						
+					case ')':
+					case ']':
+						consToken(tokenList, variableArityType, substr(expression, tokenStartIndex, tokenCurrentIndex), lineNumber);
+						consToken(tokenList, closeType, substr(expression, tokenCurrentIndex, tokenCurrentIndex+1), lineNumber);
+						currentState = inBetween;
+						break;
+					
+					case '"':
+						consToken(tokenList, variableArityType, substr(expression, tokenStartIndex, tokenCurrentIndex), lineNumber);
+						tokenStartIndex = tokenCurrentIndex;
+						currentState = inString;
+						break;
+						
+					case '\'':
+						consToken(tokenList, variableArityType, substr(expression, tokenStartIndex, tokenCurrentIndex), lineNumber);
+						consToken(tokenList, quoteType, substr(expression, tokenCurrentIndex, tokenCurrentIndex+1), lineNumber);
+						currentState = inBetween;
+						break;
+						
+					case ';':
+						consToken(tokenList, variableArityType, substr(expression, tokenStartIndex, tokenCurrentIndex), lineNumber);
+						currentState = inComment;
+						break;
+
+					case '\\':
+						tokenCurrentIndex++;
+						currentState = inSymbol;
+						break;
+						
+					default:
+						currentState = inSymbol;
 						break;
 				}
 			break;
@@ -1467,6 +1536,7 @@ Value *evalLet(Value *args, Environment *environment) {
 
 Value *evalLetRec(Value *args, Environment *environment) {
 	Value *undefined;
+	Value **val;
 	if (args && cdr(args)) {
 		Environment *frame = createFrame(environment);
 		Value *current = car(args);
@@ -1486,9 +1556,10 @@ Value *evalLetRec(Value *args, Environment *environment) {
 			bind(car(car(current))->val.symbolValue, eval(car(cdr(car(current))), frame), frame);
 			current = cdr(current);
 		}
-		return eval(car(cdr(args)), frame);	/* use evalEach so we can have multiple bodies */
+		val = mallocValueStarStar();
+		*val = cdr(args);
+		return *(evalEach(val, frame));
 	}
-	
 	printf("letrec: bad syntax\n");
 	return NULL;
 }
@@ -1531,7 +1602,7 @@ Value *evalLambda(Value *args, Environment *environment) {
 	}
 	
 	closure = mallocValue();
-	if (closure) { /* i dont think we need to malloc the closure, but i could be wrong */
+	if (closure) {
 		closure->type = closureType;
 		closure->val.closureValue = mallocClosure();
 		if (closure->val.closureValue) {
@@ -1552,7 +1623,7 @@ Value *evalLambda(Value *args, Environment *environment) {
 	}
 }
 
-Value *evalLoad(Value *args, Environment *environment) {
+Value *evalLoad(Value *args, Environment *environment) { /* think about line lengths */
 	if (args && car(args) && car(args)->type == stringType) {
 		char filename[1024];
 		char *expression;
@@ -1569,7 +1640,6 @@ Value *evalLoad(Value *args, Environment *environment) {
 		}
 		strcat(filename, "/");
 		strcat(filename, car(args)->val.stringValue);
-		printf("%s\n", filename);
 		file = fopen(filename, "rt");
 		if (!file) {
 			printf("error: file not found!\n");
@@ -1617,11 +1687,6 @@ Value *makePrimitiveValue(Value* (*f)(Value *)){
 
 Environment* createTopFrame() {
 	Environment *topFrame = createFrame(NULL);
-	Value* nullValue = mallocValue();
-	nullValue->type = pairType;
-	nullValue->val.pairValue = mallocPair();
-	nullValue->val.pairValue->car = NULL;
-	nullValue->val.pairValue->cdr = NULL;
 	bind("+", makePrimitiveValue(add), topFrame);
 	bind("-", makePrimitiveValue(subtract), topFrame);
 	bind("*", makePrimitiveValue(multiply), topFrame);
@@ -1635,8 +1700,16 @@ Environment* createTopFrame() {
 	bind("<=", makePrimitiveValue(lessThanEqual), topFrame);
 	bind("and", makePrimitiveValue(__and__), topFrame);
 	bind("or", makePrimitiveValue(__or__), topFrame);
-	bind("null", nullValue, topFrame);
+	bind("null", cons(NULL, NULL), topFrame);
 	/*eval("(load \"math.ss\")");*/
+	Value *load;
+	load->type = stringType;
+	load->val.stringValue = "lists.ss";
+	evalLoad(cons(load, NULL), topFrame);
+	load->val.stringValue = "math.ss";
+	evalLoad(cons(load, NULL), topFrame);
+	load->val.stringValue = "standard.ss";
+	evalLoad(cons(load, NULL), topFrame);
 	return topFrame;
 }
 
@@ -1689,7 +1762,7 @@ int bind(char *symbol, Value *value, Environment *environment) {
 		*(environment->bindings) = cons(binding, *(environment->bindings));
 	}
 	else {
-		/*printf("dont wanna seg fault! - in bind\n");*/
+		printf("dont wanna seg fault! - in bind\n");
 		return 1;
 	}
 	return 0;
@@ -1805,6 +1878,7 @@ Value *apply(Value *f, Value **actualArgs) {
 	}
 	else {
 		if (f->type == closureType) {
+			Value **val;
 			Environment *frame = createFrame(f->val.closureValue->environment);
 			Value *currentFormalArg = f->val.closureValue->formalArguments; /* maybe add some error checking */
 			Value *currentActualArg = *actualArgs;
@@ -1814,18 +1888,50 @@ Value *apply(Value *f, Value **actualArgs) {
 			printValue(currentActualArg);
 			printf("\n");
 			while (currentFormalArg && currentActualArg) {
-				bind((car(currentFormalArg))->val.symbolValue, car(currentActualArg), frame);
-				currentFormalArg = cdr(currentFormalArg);
-				currentActualArg = cdr(currentActualArg);
+				printf("currentActualArg\n");
+				printValue(currentActualArg);
+				printf("\ncurrentFormalArg\n");
+				printValue(currentFormalArg);
+				printf("\n");
+				if (car(currentFormalArg)->type == variableArityType) {
+					if (!cdr(currentFormalArg)) {
+						printf("error: no variable after arity\n");
+						return NULL;
+					}
+					if (cdr(cdr(currentFormalArg))) {
+						printf("error: too many variables after arity\n");
+						return NULL;
+					}
+					printf("VA\n");
+					printValue((car(cdr(currentFormalArg))));
+					printValue(cons(currentActualArg, NULL)); /*cons(currentActualArg, NULL)*/
+					bind((car(cdr(currentFormalArg)))->val.symbolValue, cons(currentActualArg, NULL), frame);
+					currentFormalArg = NULL;
+					currentActualArg = NULL;
+					break;
+				}
+				else {
+					bind((car(currentFormalArg))->val.symbolValue, car(currentActualArg), frame);				
+					currentFormalArg = cdr(currentFormalArg);
+					currentActualArg = cdr(currentActualArg);
+				}
 			}
-			if (currentFormalArg || currentActualArg) {
-				printf("wrong number of arguments\n");
+			if (currentFormalArg && car(currentFormalArg) && car(currentFormalArg)->type == variableArityType) {
+				bind((car(cdr(currentFormalArg)))->val.symbolValue, cons(NULL, NULL), frame);
+			}
+			 
+			if (currentActualArg || (currentFormalArg && car(currentFormalArg) && car(currentFormalArg)->type != variableArityType)) {
+				printValue(car(currentFormalArg));
+				printValue(currentActualArg);
+				printf("error: wrong number of arguments\n");
 				return NULL;
 			}
 			printf("\nevaluating body:\n");
-			printValue(car(f->val.closureValue->body));
+			printParseTree(f->val.closureValue->body);
 			printf("\n");
-			return eval(car(f->val.closureValue->body), frame); /* convert this into eval each */
+			val = mallocValueStarStar();
+			*val = f->val.closureValue->body;
+			return *(evalEach(val, frame));
 		} else {
 			printf("procedure application: expected procedure\n");
 			return NULL;

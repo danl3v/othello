@@ -1,231 +1,231 @@
 ;; Team Othello
 ;; lists.ss
-;; October 4, 2010
+;; November 17, 2010
 
-(define my-caar
+(define caar
   (lambda (L)
     (car (car L))))
 
-(define my-cadr
+(define cadr
   (lambda (L)
     (car (cdr L))))
 
-(define my-cdar
+(define cdar
   (lambda (L)
     (cdr (car L))))
 
-(define my-caaar
+(define caaar
   (lambda (L)
     (car (car (car L)))))
 
-(define my-caadr
+(define caadr
   (lambda (L)
     (car (car (cdr L)))))
 
-(define my-cadar
+(define cadar
   (lambda (L)
     (car (cdr (car L)))))
 
-(define my-cdaar
+(define cdaar
   (lambda (L)
     (cdr (car (car L)))))
 
-(define my-caddr
+(define caddr
   (lambda (L)
     (car (cdr (cdr L)))))
 
-(define my-cdadr
+(define cdadr
   (lambda (L)
     (cdr (car (cdr L)))))
 
-(define my-cddar
+(define cddar
   (lambda (L)
     (cdr (cdr (car L)))))
 
-(define my-cdddr
+(define cdddr
   (lambda (L)
     (cdr (cdr (cdr L)))))
 
-(define my-caaaar
+(define caaaar
   (lambda (L)
     (car (car (car (car L))))))
 
-(define my-caaadr
+(define caaadr
   (lambda (L)
     (car (car (car (cdr L))))))
 
-(define my-caadar
+(define caadar
   (lambda (L)
     (car (car (cdr (car L))))))
 
-(define my-cadaar
+(define cadaar
   (lambda (L)
     (car (cdr (car (car L))))))
 
-(define my-cdaaar
+(define cdaaar
   (lambda (L)
     (cdr (car (car (car L))))))
 
-(define my-caaddr
+(define caaddr
   (lambda (L)
     (car (car (cdr (cdr L))))))
 
-(define my-cadadr
+(define cadadr
   (lambda (L)
     (car (cdr (car (cdr L))))))
 
-(define my-cdaadr
+(define cdaadr
   (lambda (L)
     (cdr (car (car (cdr L))))))
 
-(define my-caddar
+(define caddar
   (lambda (L)
     (car (cdr (cdr (car L))))))
 
-(define my-cdadar
+(define cdadar
   (lambda (L)
     (cdr (car (cdr (car L))))))
 
-(define my-cddaar
+(define cddaar
   (lambda (L)
     (cdr (cdr (car (car L))))))
 
-(define my-cadddr
+(define cadddr
   (lambda (L)
     (car (cdr (cdr (cdr L))))))
 
-(define my-cdaddr
+(define cdaddr
   (lambda (L)
     (cdr (car (cdr (cdr L))))))
 
-(define my-cddadr
+(define cddadr
   (lambda (L)
     (cdr (cdr (car (cdr L))))))
 
-(define my-cdddar
+(define cdddar
   (lambda (L)
     (cdr (cdr (cdr (car L))))))
 
-(define my-cddddr
+(define cddddr
   (lambda (L)
     (cdr (cdr (cdr (cdr L))))))
 
-(define my-list
+(define list
   (lambda x
     x))
 
-(define my-length
+(define length
   (lambda (L)
-    (my-length-helper L 0)))
+    (length-helper L 0)))
 
-(define my-length-helper 
+(define length-helper 
   (lambda (L x)
     (if (null? L)
         x
-        (my-length-helper (cdr L) (+ x 1)))))
+        (length-helper (cdr L) (+ x 1)))))
 
-(define my-list-tail
+(define list-tail
   (lambda (L x)
     (if (= x 0)
         L
-        (my-list-tail (cdr L) (- x 1)))))
+        (list-tail (cdr L) (- x 1)))))
 
-(define my-member ;(member 'a '(1 2 3 a b c)) => (a b c)
+(define member ;(member 'a '(1 2 3 a b c)) => (a b c)
   (lambda (x L)   ;(member a '(1 2 3 a b c)) => Error
     (if (null? L)
         #f
         (if (eq? x (car L))
             L
-            (my-member x (cdr L))))))
+            (member x (cdr L))))))
 
-(define my-assq
+(define assq
   (lambda (x L)
     (if (null? L)
         #f
-        (if (eq? x (my-caar L))
+        (if (eq? x (caar L))
             (car L)
-            (my-assq x (cdr L))))))
+            (assq x (cdr L))))))
 
-(define my-map ;we can make this support multiple lists?
+(define map ;we can make this support multiple lists?
   (lambda (f L)
     (if (null? L)
         L
-        (cons (f (car L)) (my-map f (cdr L))))))
+        (cons (f (car L)) (map f (cdr L))))))
 
-(define my-append
+(define append
   (lambda (L M)
     (letrec ((prepend-reversed (lambda (L M)
                                  (if (null? L)
                                      M
                                      (prepend-reversed (cdr L) (cons (car L) M))))))
-      (prepend-reversed (my-reverse L) M))))
+      (prepend-reversed (reverse L) M))))
 
-(define my-reverse
+(define reverse
   (lambda (L)
-    (my-reverse-helper L '())))
+    (reverse-helper L (quote ()))))
 
-(define my-reverse-helper
+(define reverse-helper
   (lambda (L result)
     (if (null? L)
         result
-        (my-reverse-helper (cdr L) (cons (car L) result)))))
+        (reverse-helper (cdr L) (cons (car L) result)))))
 
-(define my-list?
+(define list?
   (lambda (L)
-    (or (null? L) (and (pair? L) (my-list? (cdr L))))))
+    (or (null? L) (and (pair? L) (list? (cdr L))))))
 
-(define my-list-ref
+(define list-ref
   (lambda (L i)
     (if (= i 0)
         (car L)
-        (my-list-ref (cdr L) (- i 1)))))
+        (list-ref (cdr L) (- i 1)))))
 
-(define my-cons*
+(define cons*
   (lambda (x . y)
-    (my-cons*-helper (cdr (my-reverse (cons x y))) (car (my-reverse (cons x y))))))
+    (cons*-helper (cdr (reverse (cons x y))) (car (reverse (cons x y))))))
 
-(define my-cons*-helper
+(define cons*-helper
   (lambda (L result)
     (if (null? L)
         result
-        (my-cons*-helper (cdr L) (cons (car L) result)))))
+        (cons*-helper (cdr L) (cons (car L) result)))))
     
-(define my-memp
+(define memp
   (lambda (f L)
     (if (null? L)
         #f
         (if (f (car L))
             L
-            (my-memp f (cdr L))))))
+            (memp f (cdr L))))))
 
-(define my-remq
+(define remq
   (lambda (x L)
-    (my-filter (lambda (y) (not (equal? x y))) L)))
+    (filter (lambda (y) (not (equal? x y))) L)))
 
-(define my-remp
+(define remp
   (lambda (f L)
-    (my-filter (lambda (x) (not (f x))) L)))
+    (filter (lambda (x) (not (f x))) L)))
 
-(define my-filter
+(define filter
   (lambda (f L)
     (if (null? L)
         L
         (if (f (car L))
-            (cons (car L) (my-filter f (cdr L)))
-            (my-filter f  (cdr L))))))
+            (cons (car L) (filter f (cdr L)))
+            (filter f  (cdr L))))))
 
-(define my-find
+(define find
   (lambda (f L)
     (if (null? L)
         #f
         (if (f (car L))
             (car L)
-            (my-find f (cdr L))))))
+            (find f (cdr L))))))
 
-(define my-assp ;; in example, list is strange
+(define assp ;; in example, list is strange
   (lambda (f L)
     (if (null? L)
         #f
-        (if (f (my-caar L))
+        (if (f (caar L))
             (car L)
-            (my-assp f (cdr L))))))
+            (assp f (cdr L))))))

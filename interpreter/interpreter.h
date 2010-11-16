@@ -12,6 +12,7 @@ typedef struct __Value__ {
 		char *openValue;
 		char *closeValue;
 		char *quoteValue;
+		char *variableArityValue;
 		struct __Pair__ *pairValue;
 		struct __Closure__ *closureValue;
 		struct __Value__* (*primitiveValue)(struct __Value__*);
