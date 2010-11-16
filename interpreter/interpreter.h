@@ -135,6 +135,8 @@ Value *evalLambda(Value *args, Environment *environment);
 
 Value *evalLet(Value *args, Environment *environment);
 
+Value *evalLoad(Value *args, Environment *environment);
+
 /* EVALUATE */
 
 Environment* createTopFrame();

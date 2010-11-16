@@ -1663,8 +1663,8 @@ Value *eval(Value *value, Environment *environment) {
 				if (!strcmp(operator->val.symbolValue, "let")) {return evalLet(*args, environment);}
 				if (!strcmp(operator->val.symbolValue, "letrec")) {return evalLetRec(*args, environment);}
 				if (!strcmp(operator->val.symbolValue, "set!")) {return evalSetBang(*args, environment, environment);}
-				/*if (!strcmp(operator->val.symbolValue, "load")) {return evalLoad(args, environment);}
-				if (!strcmp(operator->val.symbolValue, "'")) {return evalQuote(args, environment);}
+				if (!strcmp(operator->val.symbolValue, "load")) {return evalLoad(*args, environment);}
+				/*if (!strcmp(operator->val.symbolValue, "'")) {return evalQuote(*args, environment);}
 				*/
 				evaledOperator = eval(operator, environment);
 				if (evaledOperator) {
