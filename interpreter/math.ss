@@ -179,3 +179,11 @@
         (if (zero? y)
             1
             (/ (expt x (+ y 1)) x)))))
+
+;;Delete These Testers!
+(define lambdaTester
+    (lambda (x)
+        (lambdaTesterHelper x)))
+        
+(define lambdaTesterHelper
+    (lambda (x) x))

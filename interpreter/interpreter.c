@@ -300,10 +300,6 @@ void printValue(Value *value) {
 
 void printValueHelper(Value *value) {
 	if (value) {
-		if (!(value->type)) {
-			printf("type not set!\n");
-			
-		}
 		switch (value->type) {
 			case booleanType:			printf("#%c", value->val.booleanValue?'t':'f');								break;
 			case integerType:			printf("%d", value->val.integerValue);										break;
@@ -1841,12 +1837,30 @@ Value **evalTop(Value **tree, Environment *environment) {
 
 Value **evalEach(Value **tree, Environment *environment) {
 	Value **evaluated = mallocValueStarStar();
+    Value *valueStar = NULL;
 	Value *current = *tree;
-	*evaluated = NULL;
+	Value *result;
+	/**evaluated = NULL;*/
+	/**evaluated = cons(NULL, NULL);*/
 	while (current && car(current)) {
-		*evaluated = cons(eval(car(current), environment), *evaluated);
+	    result = eval(car(current), environment);
+	    if (result) {
+	        if (!(*evaluated)) {
+		        *evaluated = cons(result, valueStar);
+		    } else {
+		        *evaluated = cons(result, *evaluated);
+		    }
+		}
+		else {
+		    *evaluated = NULL;
+		    return evaluated;
+		}
 		current = cdr(current);
 	}
+	if(!(*evaluated)){
+	    *evaluated = cons(NULL, NULL);
+	}
+	printf("EE Type: %d\n", (*evaluated)->type);
 	printf("EvalEach: ");
 	printValue(*tree);
 	printf("\n");
@@ -1896,7 +1910,12 @@ Value *eval(Value *value, Environment *environment) {
 				evaledOperator = eval(operator, environment);
 				if (evaledOperator) {
 					evaledArgs = evalEach(args, environment);
-					return apply(evaledOperator, evaledArgs);
+					if (args && (!(*evaledArgs))) {
+					    return NULL;
+					}
+					else {
+    					return apply(evaledOperator, evaledArgs);
+    				}
 				}
 				return NULL;
 			}
@@ -1964,7 +1983,12 @@ Value *apply(Value *f, Value **actualArgs) {
 					break;
 				}
 				else {
-					bind((car(currentFormalArg))->val.symbolValue, car(currentActualArg), frame);				
+				    if (car(currentActualArg)->type == pairType) {
+    					bind((car(currentFormalArg))->val.symbolValue, car(car(currentActualArg)), frame);
+    				}
+    				else {
+    				    bind((car(currentFormalArg))->val.symbolValue, car(currentActualArg), frame);
+    				}
 					currentFormalArg = cdr(currentFormalArg);
 					currentActualArg = cdr(currentActualArg);
 				}
