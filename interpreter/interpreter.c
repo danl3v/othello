@@ -1301,7 +1301,7 @@ Environment* createFrame(Environment *parent) {
 Value *environmentLookup(char *symbol, Environment *environment, int global) {
 	Value *current;
 	if (!environment) {
-		if (global) { printf("error: variable not found\n"); }
+		/* if (global) { printf("error: variable not found\n"); } */
 		return NULL;
 	}
 	
