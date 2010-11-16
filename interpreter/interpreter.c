@@ -120,13 +120,57 @@ Value *cons(Value *value1, Value *value2) {
 }
 
 Value *fakeCons(Value *value) {
-	Value *result = mallocValue();
-	Pair *pair = mallocPair();
-	pair->car = cons(car(value), cdr(value));
-	pair->cdr = NULL;
-	result->type = pairType;
-	result->val.pairValue = pair;
-	return result;
+	Value *value1;
+	Value *value2;
+	Pair *pair1;
+	Pair *pair2;
+	
+	if (!value || !cdr(value)) {
+		printf("cons: expects 2 arguments\n");
+		return NULL;
+	}
+	
+	value1 = mallocValue();
+	pair1 = mallocPair();
+	value2 = mallocValue();
+	pair2 = mallocPair();
+	value1->type = pairType;
+	value1->val.pairValue = pair1;
+	value2->type = pairType;
+	value2->val.pairValue = pair2;
+	
+	if (car(value)->type == pairType) {
+		if (car(cdr(value))->type == pairType) {
+			pair1->car = value2;
+			pair1->cdr = NULL;
+			pair2->car = car(car(value));
+			pair2->cdr = car(car(cdr(value)));
+			return value1;
+		}
+		else {
+			pair1->car = value2;
+			pair1->cdr = NULL;
+			pair2->car = car(car(value));
+			pair2->cdr = car(cdr(value));
+			return value1;
+		}
+	}
+	else {
+		if (car(cdr(value))->type == pairType) {
+			pair1->car = value2;
+			pair1->cdr = NULL;
+			pair2->car = car(value);
+			pair2->cdr = car(car(cdr(value)));
+			return value1;
+		}
+		else {
+			pair1->car = value2;
+			pair1->cdr = NULL;
+			pair2->car = car(value);
+			pair2->cdr = car(cdr(value));
+			return value1;
+		}
+	}
 }
 
 int isProper(Value **value) {
@@ -265,6 +309,7 @@ void printValueHelper(Value *value) {
 				break;
 			case closureType:	printf("#<closure>");																break;
 			case primitiveType:	printf("#<procedure> (add a label)"); 												break;
+			case undefinedType: printf("#<undefined>");																break;
 			default:			printf("in printValueHelper: i don't know what type of value i am");				break;		
 		}
 	}
@@ -1097,22 +1142,170 @@ Value *divide(Value *args) {
 }
 
 Value *equalPointer(Value *args) { /* special form for eq? */
-	if (args && cdr(args) && !cdr(cdr(args))){
-		if (car(args) == car(cdr(args))) {
-			Value *true = mallocValue();
-			true->type = booleanType;
-			true->val.booleanValue = 1;
-			return true;
-		}
-		else {
-			Value *false = mallocValue();
-			false->type = booleanType;
-			false->val.booleanValue = 0;
-			return false;
-		}
-	}
-	printf("eq?: expects 2 arguments\n");
-	return NULL;
+        if (args && cdr(args) && !cdr(cdr(args))) {
+            Value *returnBool = mallocValue();
+            returnBool->type = booleanType;
+                if (car(args) == car(cdr(args))) { returnBool->val.booleanValue = 1; }
+                else{ returnBool->val.booleanValue = 0; }
+                return returnBool;
+        }
+        printf("eq?: expects 2 arguments\n");
+        return NULL;
+}
+
+Value *equalContent(Value *args) { /*special form for equal? */
+        if (args && cdr(args) && !cdr(cdr(args))) {
+            Value *returnBool = mallocValue();
+            returnBool->type = booleanType;
+            returnBool->val.booleanValue = 0;
+                if(car(args)->type != car(cdr(args))->type) {
+                    return returnBool;
+                }
+                switch(car(args)->type){
+                    case integerType:
+                        if(car(args)->val.integerValue == car(cdr(args))->val.integerValue) { returnBool->val.booleanValue = 1; }
+                        break;
+                    case floatType:
+                        if(car(args)->val.floatValue == car(cdr(args))->val.floatValue) { returnBool->val.booleanValue = 1; }
+                        break;
+                    case booleanType:
+                        if(car(args)->val.booleanValue == car(cdr(args))->val.booleanValue) { returnBool->val.booleanValue = 1; }
+                        break;
+                    case stringType:
+                        if(!strcmp(car(args)->val.stringValue, car(cdr(args))->val.stringValue)) { returnBool->val.booleanValue = 1; }
+                        break;
+                 }
+                 return returnBool;
+        }        
+        printf("equal?: expects 2 arguments\n");
+        return NULL;
+}
+
+Value *equalNumber(Value *args) { /*special form for = */
+    if(args && cdr(args)){
+        Value *current = args;
+        Value *returnBool = mallocValue();
+        returnBool->type = booleanType;
+        returnBool->val.booleanValue = 1;
+        while(cdr(current)){
+            switch(car(current)->type){
+                case integerType:
+                    switch(car(cdr(current))->type){
+                        case integerType:
+                            if(car(current)->val.integerValue != car(cdr(current))->val.integerValue) { returnBool->val.booleanValue = 0; }
+                            break;
+                        case floatType:
+                            if(car(current)->val.integerValue != car(cdr(current))->val.floatValue) { returnBool->val.booleanValue = 0; }
+                            break;
+                        default:
+                            printf("=: expects type <real number> as arguments\n");
+                            return NULL;
+                    }
+                    break;
+                case floatType:
+                    switch(car(cdr(current))->type){
+                        case integerType:
+                            if(car(current)->val.floatValue != car(cdr(current))->val.integerValue) { returnBool->val.booleanValue = 0; }
+                            break;
+                        case floatType:
+                            if(car(current)->val.floatValue != car(cdr(current))->val.floatValue) { returnBool->val.booleanValue = 0; }
+                            break;
+                        default:
+                            printf("=: expects type <real number> as arguments\n");
+                            return NULL;
+                    }
+                    break;
+                default:
+                    printf("=: expects type <real number> as arguments\n");
+                    return NULL;
+            }
+            current = cdr(current);
+        }
+        return returnBool;
+    }
+    printf("=: expects at least 2 arguments\n");
+    return NULL;
+}
+
+Value *lessThanEqual(Value *args){ /*special form for <= */
+    if(args && cdr(args)){
+        Value *current = args;
+        Value *returnBool = mallocValue();
+        returnBool->type = booleanType;
+        returnBool->val.booleanValue = 1;
+        while(cdr(current)){
+            switch(car(current)->type){
+                case integerType:
+                    switch(car(cdr(current))->type){
+                        case integerType:
+                            if(car(current)->val.integerValue > car(cdr(current))->val.integerValue) { returnBool->val.booleanValue = 0; }
+                            break;
+                        case floatType:
+                            if(car(current)->val.integerValue > car(cdr(current))->val.floatValue) { returnBool->val.booleanValue = 0; }
+                            break;
+                        default:
+                            printf("<=: expects type <real number> as arguments\n");
+                            return NULL;
+                    }
+                    break;
+                case floatType:
+                    switch(car(cdr(current))->type){
+                        case integerType:
+                            if(car(current)->val.floatValue > car(cdr(current))->val.integerValue) { returnBool->val.booleanValue = 0; }
+                            break;
+                        case floatType:
+                            if(car(current)->val.floatValue > car(cdr(current))->val.floatValue) { returnBool->val.booleanValue = 0; }
+                            break;
+                        default:
+                            printf("<=: expects type <real number> as arguments\n");
+                            return NULL;
+                    }
+                    break;
+                default:
+                    printf("<=: expects type <real number> as arguments\n");
+                    return NULL;
+            }
+            current = cdr(current);
+        }
+        return returnBool;
+    }
+    printf("<=: expects at least 2 arguments\n");
+    return NULL;
+}
+
+Value *__and__(Value *args) {
+    Value *current = args;
+    if(!args){
+        Value *noArgs = mallocValue();
+        noArgs->type = booleanType;
+        noArgs->val.booleanValue = 1;
+        return noArgs;
+    }
+    while(cdr(current)) {
+        if(car(current)->type == booleanType && car(current)->val.booleanValue == 0) {
+            Value *false = mallocValue();
+            false->type = booleanType;
+            false->val.booleanValue = 0;
+            return false;
+        }
+        current = cdr(current);
+    }
+    return car(current);
+}
+
+Value *__or__(Value *args) {
+    Value *current = args;
+    Value *false;
+    while(current){
+        if(car(current)->type != booleanType || (car(current)->type == booleanType && car(current)->val.booleanValue == 1)) {
+            return car(current);
+        }
+        current = cdr(current);
+    }
+    false = mallocValue();
+    false->type = booleanType;
+    false->val.booleanValue = 0;
+    return false;
 }
 
 Value *evalQuote(Value *args) {
@@ -1160,7 +1353,55 @@ Value *evalDefine(Value *args, Environment *environment) {
 	/*return NULL;*/
 }
 
+Value *evalSetBang(Value *args, Environment *currentEnvironment, Environment *callingEnvironment) {
+	Value *howdyDoodyValue;
+	Value *current;
+	
+	if (!args || !car(args) || !cdr(args)) { /* if we do not have at least two arguments */
+		printf("set!: bad syntax (missing expression after identifier)\n");
+		return NULL;
+	}
+	
+	
+	if (car(args)->type != symbolType) { /* if if the first argument is not a symbol */
+		printf("set!: first argument not a symbol\n");
+		return NULL;
+	}
+	
+	
+	if (cdr(cdr(args))) { /* if we have more than two arguments */
+		printf("set!: bad syntax (multiple expressions after identifier)\n");
+		return NULL;
+	}
+	
+	if (!currentEnvironment || !callingEnvironment) {
+		/* if (global) { printf("error: variable not found\n"); } */
+		return NULL;
+	}
+	
+	current = *(currentEnvironment->bindings);
+	while (current) {
+		if (!strcmp((car(car(current)))->val.symbolValue, car(args)->val.symbolValue)) {
+			bind(car(args)->val.symbolValue, eval(car(cdr(args)), callingEnvironment), currentEnvironment); 
+			howdyDoodyValue = mallocValue();
+			howdyDoodyValue->type = stringType;
+			howdyDoodyValue->val.stringValue = "Howdy Doody";
+			return howdyDoodyValue;
+		}
+		current = cdr(current);
+	}
+	if (currentEnvironment->parentFrame) {
+		return evalSetBang(args, currentEnvironment->parentFrame, callingEnvironment);
+	}
+	else {
+		printf("set!: cannot set undefined variable: %s", car(args)->val.symbolValue);
+		return NULL;
+	}
+}
+
 Value *evalLet(Value *args, Environment *environment) {
+	Value **val;
+	int notBound;
 	if (args && cdr(args)) {
 		Environment *frame = createFrame(environment);
 		Value *current = car(args);
@@ -1170,10 +1411,13 @@ Value *evalLet(Value *args, Environment *environment) {
 				/* destroy the frame */
 				return NULL;
 			}
-			bind(car(car(current))->val.symbolValue, eval(car(cdr(car(current))), environment), frame);
+			notBound = bind(car(car(current))->val.symbolValue, eval(car(cdr(car(current))), environment), frame);
+			if (notBound) {
+				return NULL;
+			}
 			current = cdr(current);
 		}
-		Value **val = mallocValueStarStar();
+		val = mallocValueStarStar();
 		*val = cdr(args);
 		return *(evalEach(val, frame));
 	}
@@ -1183,17 +1427,18 @@ Value *evalLet(Value *args, Environment *environment) {
 }
 
 Value *evalLetRec(Value *args, Environment *environment) {
+	Value *undefined;
 	if (args && cdr(args)) {
 		Environment *frame = createFrame(environment);
 		Value *current = car(args);
-		Value *undefined = mallocValue();
-		undefined->type = undefinedType;
 		while (current) {
 			if (car(car(current))->type != symbolType) {
 				printf("cannot bind a value to a non identifier\n");
 				/* destroy the frame */
 				return NULL;
 			}
+			undefined = mallocValue();
+			undefined->type = undefinedType;
 			bind(car(car(current))->val.symbolValue, undefined, frame);
 			current = cdr(current);
 		}
@@ -1233,9 +1478,6 @@ Value *evalIf(Value *args, Environment *environment) {
 	else {
 		return eval(car(cdr(args)), environment);
 	}
-	
-	/* we should never get here */
-	return NULL;
 }
 
 Value *evalLambda(Value *args, Environment *environment) {
@@ -1280,6 +1522,7 @@ Value *makePrimitiveValue(Value* (*f)(Value *)){
 
 Environment* createTopFrame() {
 	Environment *topFrame = createFrame(NULL);
+	/*bind("null", , topFrame);*/
 	bind("+", makePrimitiveValue(add), topFrame);
 	bind("-", makePrimitiveValue(subtract), topFrame);
 	bind("*", makePrimitiveValue(multiply), topFrame);
@@ -1288,6 +1531,11 @@ Environment* createTopFrame() {
 	bind("cdr", makePrimitiveValue(fakeCdr), topFrame);
 	bind("cons", makePrimitiveValue(fakeCons), topFrame);
 	bind("eq?", makePrimitiveValue(equalPointer), topFrame);
+	bind("equal?", makePrimitiveValue(equalContent), topFrame);
+	bind("=", makePrimitiveValue(equalNumber), topFrame);
+	bind("<=", makePrimitiveValue(lessThanEqual), topFrame);
+	bind("and", makePrimitiveValue(__and__), topFrame);
+	bind("or", makePrimitiveValue(__or__), topFrame);
 	return topFrame;
 }
 
@@ -1321,7 +1569,7 @@ Value *environmentLookup(char *symbol, Environment *environment, int global) {
 	}
 }
 
-void bind(char *symbol, Value *value, Environment *environment) {
+int bind(char *symbol, Value *value, Environment *environment) {
 	Value *v = environmentLookup(symbol, environment, localScope);
 	if (v && value) {
 		v->type = value->type;
@@ -1340,8 +1588,10 @@ void bind(char *symbol, Value *value, Environment *environment) {
 		*(environment->bindings) = cons(binding, *(environment->bindings));
 	}
 	else {
-		printf("dont wanna seg fault! - in bind\n");
+		/*printf("dont wanna seg fault! - in bind\n");*/
+		return 1;
 	}
+	return 0;
 }
 
 Value **evaluate(Value **parseTree, Environment *environment) {
@@ -1412,12 +1662,16 @@ Value *eval(Value *value, Environment *environment) {
 				if (!strcmp(operator->val.symbolValue, "lambda")) { return evalLambda(*args, environment); }
 				if (!strcmp(operator->val.symbolValue, "let")) {return evalLet(*args, environment);}
 				if (!strcmp(operator->val.symbolValue, "letrec")) {return evalLetRec(*args, environment);}
+				if (!strcmp(operator->val.symbolValue, "set!")) {return evalSetBang(*args, environment, environment);}
 				/*if (!strcmp(operator->val.symbolValue, "load")) {return evalLoad(args, environment);}
 				if (!strcmp(operator->val.symbolValue, "'")) {return evalQuote(args, environment);}
 				*/
 				evaledOperator = eval(operator, environment);
-				evaledArgs = evalEach(args, environment);
-				return apply(evaledOperator, evaledArgs);
+				if (evaledOperator) {
+					evaledArgs = evalEach(args, environment);
+					return apply(evaledOperator, evaledArgs);
+				}
+				return NULL;
 			}
 			/*else if (operator->type == closureType || operator->type == primitiveType || operator->type == pairType) {
 				Value *evaledOperator = eval(operator, environment);
@@ -1476,4 +1730,60 @@ Value *apply(Value *f, Value **actualArgs) {
 			return NULL;
 		}
 	}
+}
+
+Value *evalLoad(Value *args, Environment *environment) {
+        if (args && car(args) && car(args)->type == stringType) {
+                FILE *file = fopen(car(args)->val.stringValue, "rt");
+                if (!file) {
+                        printf("error: file not found!\n");
+                        return NULL;
+                }
+                char *expression = malloc(256 * sizeof(char));
+                int depth = 0;
+                Value **tokens = NULL;
+                Value **leftoverTokens = NULL;
+                Value **parseTree = NULL;
+                Value **value = NULL;
+                Environment *topFrame = createTopFrame();
+                printf("beginning load while\n");
+                while (fgets(expression, 255, file)) {
+                        printf("in load while\n");
+                        printf("in load while\n");
+                        printf("in load while\n");
+                        printf("in load while\n");
+                        tokens = append(leftoverTokens, tokenize(expression));
+                        printf("in load while\n");
+                        printf("in load while\n");
+                        printf("in load while\n");
+                        printf("in load while\n");
+                        if (tokens) { printf("\nTOKENS:\n"); printTokens(*tokens); }
+
+                        parseTree = parse(tokens, &depth);
+
+                        if (depth > 0) {
+                                leftoverTokens = tokens;
+                                depth = 0;
+                        }
+                        else {
+                                if (parseTree) {
+                                        printf("\nPARSE TREE:\n");
+                                        printParseTree(*parseTree);
+                                        printf("\n");
+                                        value = evaluate(parseTree, topFrame);
+                                        printf("\nVALUE:\n");
+                                        printEvaluation(*value);
+                                }
+                                else { depth = 0; }
+                                leftoverTokens = NULL;
+                                printf("> ");
+                        }
+                }
+                fclose(file);
+                return NULL;
+        }
+        else {
+                printf("you got some crazy shit goin' on bro. check yo syntax\n");
+                return NULL;
+        }
 }

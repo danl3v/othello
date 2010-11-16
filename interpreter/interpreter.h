@@ -109,25 +109,25 @@ Value *divide(Value *args); /* special form for / */
 
 Value *equalPointer(Value *args); /* special form for eq? */
 
-Value *isNull(Value *args, Environment *environment); /* special form for null? */
+Value *isNull(Value *args); /* special form for null? */
 
-Value *isPair(Value *args, Environment *environment); /* special form for pair? */
+Value *isPair(Value *args); /* special form for pair? */
 
-Value *equalContent(Value *args, Environment *environment); /* special form for equal? */
+Value *equalContent(Value *args); /* special form for equal? */
 
-Value *equalNumber(Value *args, Environment *environment); /* special form for = */
+Value *equalNumber(Value *args); /* special form for = */
 
-Value *lessThan(Value *args, Environment *environment); /* special form for < */
+Value *lessThanEqual(Value *args); /* special form for <= */
 
-Value *__or__(Value *args, Environment *environment); /* special form for or */
+Value *__or__(Value *args); /* special form for or */
 
-Value *__and__(Value *args, Environment *environment); /* special form for and */
-
-Value *__setBang__(Value *args, Environment *environment); /* special form for set! */
+Value *__and__(Value *args); /* special form for and */
 
 /* SPECIAL FORMS */
 
 Value *evalDefine(Value *args, Environment *environment);
+
+Value *evalSetBang(Value *args, Environment *currentEnvironment, Environment *callingEnvironment); /* special form for set! */
 
 Value *evalIf(Value *args, Environment *environment);
 
@@ -143,7 +143,7 @@ Environment* createFrame(Environment *parent);
 
 Value *environmentLookup(char *symbol, Environment *environment, int local);
 
-void bind(char *symbol, Value *value, Environment *environment);
+int bind(char *symbol, Value *value, Environment *environment);
 
 Value **evaluate(Value **parseTree, Environment *environment);
 
