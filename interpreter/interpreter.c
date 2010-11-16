@@ -1636,6 +1636,7 @@ Environment* createTopFrame() {
 	bind("and", makePrimitiveValue(__and__), topFrame);
 	bind("or", makePrimitiveValue(__or__), topFrame);
 	bind("null", nullValue, topFrame);
+	/*eval("(load \"math.ss\")");*/
 	return topFrame;
 }
 
