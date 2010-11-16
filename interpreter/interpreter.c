@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include "interpreter.h"
 
 /*
@@ -246,7 +247,7 @@ void printTokens(Value *value) {
 			case booleanType:	printf("#%c:boolean\n", value->val.booleanValue?'t':'f');		break;
 			case integerType:	printf("%d:integer\n", value->val.integerValue);				break;
 			case floatType:		printf("%f:float\n", value->val.floatValue);					break;
-			case stringType:	printf("%s:string\n", value->val.stringValue);					break;	
+			case stringType:	printf("\"%s\":string\n", value->val.stringValue);					break;	
 			case symbolType:	printf("%s:symbol\n", value->val.symbolValue);					break;	
 			case openType:		printf("%s:open\n", value->val.openValue);						break;	
 			case closeType:		printf("%s:close\n", value->val.closeValue);					break;	
@@ -292,7 +293,7 @@ void printValueHelper(Value *value) {
 			case closeType:		printf("%s--", value->val.closeValue);						break;
 			case symbolType:	printf("%s", value->val.symbolValue);						break;
 			case quoteType:		printf("%s", value->val.quoteValue);						break;
-			case stringType:	printf("%s", value->val.stringValue);						break;
+			case stringType:	printf("\"%s\"", value->val.stringValue);						break;
 			case pairType:
 				if (car(value)) {
 					if ((car(value))->type == pairType) { printValue(car(value)); }
@@ -781,7 +782,7 @@ Value **tokenize (char *expression) {
 						break;
 						
 					case '"':
-						consToken(tokenList, stringType, substr(expression, tokenStartIndex, tokenCurrentIndex+1), lineNumber);
+						consToken(tokenList, stringType, substr(expression, tokenStartIndex+1, tokenCurrentIndex), lineNumber);
 						currentState = inBetween;
 						break;
 					
@@ -1154,91 +1155,70 @@ Value *equalPointer(Value *args) { /* special form for eq? */
 }
 
 Value *equalContent(Value *args) { /*special form for equal? */
-        if (args && cdr(args) && !cdr(cdr(args))) {
-            Value *returnBool = mallocValue();
-            returnBool->type = booleanType;
-            returnBool->val.booleanValue = 0;
-                if(car(args)->type != car(cdr(args))->type) {
-                    return returnBool;
+       if (args && cdr(args) && !cdr(cdr(args))) {
+           Value *returnBool = mallocValue();
+           returnBool->type = booleanType;
+           returnBool->val.booleanValue = 0;
+               if(car(args)->type != car(cdr(args))->type) {
+                   return returnBool;
+               }
+               switch(car(args)->type){
+                   case integerType:
+                       if(car(args)->val.integerValue == car(cdr(args))->val.integerValue) { returnBool->val.booleanValue = 1; }
+                       break;
+                   case floatType:
+                       if(car(args)->val.floatValue == car(cdr(args))->val.floatValue) { returnBool->val.booleanValue = 1; }
+                       break;
+                   case booleanType:
+                       if(car(args)->val.booleanValue == car(cdr(args))->val.booleanValue) { returnBool->val.booleanValue = 1; }
+                       break;
+                   case stringType:
+                       if(!strcmp(car(args)->val.stringValue, car(cdr(args))->val.stringValue)) { returnBool->val.booleanValue = 1; }
+                       break;
+                   case pairType:
+                                               returnBool->val.booleanValue = compareValues(car(args), car(cdr(args)));
+                                               break;
                 }
-                switch(car(args)->type){
-                    case integerType:
-                        if(car(args)->val.integerValue == car(cdr(args))->val.integerValue) { returnBool->val.booleanValue = 1; }
-                        break;
-                    case floatType:
-                        if(car(args)->val.floatValue == car(cdr(args))->val.floatValue) { returnBool->val.booleanValue = 1; }
-                        break;
-                    case booleanType:
-                        if(car(args)->val.booleanValue == car(cdr(args))->val.booleanValue) { returnBool->val.booleanValue = 1; }
-                        break;
-                    case stringType:
-                        if(!strcmp(car(args)->val.stringValue, car(cdr(args))->val.stringValue)) { returnBool->val.booleanValue = 1; }
-                        break;
-                    case pairType:
-						returnBool->val.booleanValue = compareValues(car(args), car(cdr(args)));
-						/*
-						Value *value = mallocValue();
-						Pair *pair = mallocPair();
-						Value *value2 = mallocValue();
-						Pair *pair2 = mallocPair();
-						value->type = pairType;
-						value->val.pairValue = pair;
-						value2->type = pairType;
-						value2->val.pairValue = pair2;
-						pair->car = car(args);
-						pair->cdr = value2;
-						pair2->car = car(cdr(args));
-						pair2->cdr = NULL;
-						if (car(pair->car)->type == car(pair->cdr)->type) {
-							return equalContent(value);
-						}
-						*/
-						break;
-                 }
-                 return returnBool;
-        }        
-        printf("equal?: expects 2 arguments\n");
-        return NULL;
+                return returnBool;
+       }
+       printf("equal?: expects 2 arguments\n");
+       return NULL;
 }
 
 int compareValues(Value *value, Value *value2) {
-	if (!value && !value2) {
-		return 1;
-	}
-	if 
-	if(value->type != value2->type) {
-		return 0;
-	}
-	switch(car(args)->type){
-		case integerType:
-			if(value->val.integerValue == value2->val.integerValue) { return 1; }
-            break;
-		case floatType:
-			if(value->val.floatValue == value2->val.floatValue) { return 1; }
-			break;
-		case booleanType:
-			if(value->val.booleanValue == value2->val.booleanValue) { return 1; }
-			break;
-		case stringType:
-			if(!strcmp(value->val.stringValue, value2->val.stringValue)) { return 1; }
-			break;
-		case pairType:
-			
-			
-			
-	Value *pairValue1 = car(args);
-	Value *pairValue2 = car(cdr(args));
-	Value *value = mallocValue();
-	Pair *pair = mallocPair();
-	value->type = pairType;
-	value->val.pairValue = pair;
-	pair->car = pairValue1;
-	pair->cdr = pairValue2;
-	if (car(pairValue1)->type != car(pairValue2)->type) {
-		return 0;
-	}
-	return equalContent(
+       if (!value) {
+           if (!value2) {
+               return 1;
+       }
+       else {
+               return 0;
+       }
+       }
+       else if (!value2) {
+           return 0;
+       }
+       if(value->type != value2->type) {
+               return 0;
+       }
+       switch(value->type){
+               case integerType:
+                       if(value->val.integerValue == value2->val.integerValue) { return 1; }
+           break;
+               case floatType:
+                       if(value->val.floatValue == value2->val.floatValue) { return 1; }
+                       break;
+               case booleanType:
+                       if(value->val.booleanValue == value2->val.booleanValue) { return 1; }
+                       break;
+               case stringType:
+                       if(!strcmp(value->val.stringValue, value2->val.stringValue)) { return 1; }
+                       break;
+               case pairType:
+                       return (compareValues(car(value), car(value2)) && compareValues(cdr(value), cdr(value2)));
+   }
+   return 0;
 }
+
 
 Value *equalNumber(Value *args) { /*special form for = */
     if(args && cdr(args)){
@@ -1573,60 +1553,60 @@ Value *evalLambda(Value *args, Environment *environment) {
 }
 
 Value *evalLoad(Value *args, Environment *environment) {
-        if (args && car(args) && car(args)->type == stringType) {
-                FILE *file = fopen(car(args)->val.stringValue, "rt");
-                if (!file) {
-                        printf("error: file not found!\n");
-                        return NULL;
-                }
-                char *expression = malloc(256 * sizeof(char));
-                int depth = 0;
-                Value **tokens = NULL;
-                Value **leftoverTokens = NULL;
-                Value **parseTree = NULL;
-                Value **value = NULL;
-                Environment *topFrame = createTopFrame();
-                printf("beginning load while\n");
-                while (fgets(expression, 255, file)) {
-                        printf("in load while\n");
-                        printf("in load while\n");
-                        printf("in load while\n");
-                        printf("in load while\n");
-                        tokens = append(leftoverTokens, tokenize(expression));
-                        printf("in load while\n");
-                        printf("in load while\n");
-                        printf("in load while\n");
-                        printf("in load while\n");
-                        if (tokens) { printf("\nTOKENS:\n"); printTokens(*tokens); }
+	if (args && car(args) && car(args)->type == stringType) {
+		char filename[1024];
+		char *expression;
+		FILE *file;
+		int depth;
+		Value **tokens;
+		Value **leftoverTokens;
+		Value **parseTree;
+		Value **value;
+		
+		if (!getcwd(filename, sizeof(filename))) {
+			printf("error getting current directory");
+			return NULL;
+		}
+		strcat(filename, "/");
+		strcat(filename, car(args)->val.stringValue);
+		printf("%s\n", filename);
+		file = fopen(filename, "rt");
+		if (!file) {
+			printf("error: file not found!\n");
+			return NULL;
+		}
+		expression = malloc(256 * sizeof(char));
+		depth = 0;
+		tokens = NULL;
+		leftoverTokens = NULL;
+		parseTree = NULL;
+		value = NULL;
+		while (fgets(expression, 255, file)) {
+			tokens = append(leftoverTokens, tokenize(expression));
+			parseTree = parse(tokens, &depth);
 
-                        parseTree = parse(tokens, &depth);
-
-                        if (depth > 0) {
-                                leftoverTokens = tokens;
-                                depth = 0;
-                        }
-                        else {
-                                if (parseTree) {
-                                        printf("\nPARSE TREE:\n");
-                                        printParseTree(*parseTree);
-                                        printf("\n");
-                                        value = evaluate(parseTree, topFrame);
-                                        printf("\nVALUE:\n");
-                                        printEvaluation(*value);
-                                }
-                                else { depth = 0; }
-                                leftoverTokens = NULL;
-                                printf("> ");
-                        }
-                }
-                fclose(file);
-                return NULL;
-        }
-        else {
-                printf("you got some crazy shit goin' on bro. check yo syntax\n");
-                return NULL;
-        }
+			if (depth > 0) {
+				leftoverTokens = tokens;
+				depth = 0;
+			}
+			else {
+				if (parseTree) {
+					value = evaluate(parseTree, environment);
+					printEvaluation(*value);
+				}
+				else { depth = 0; }
+				leftoverTokens = NULL;
+			}
+		}
+		fclose(file);
+		return NULL;
+	}
+	else {
+		printf("you got some crazy shit goin' on bro. check yo syntax\n");
+		return NULL;
+	}
 }
+
 
 Value *makePrimitiveValue(Value* (*f)(Value *)){
 	Value *resultValue = mallocValue();

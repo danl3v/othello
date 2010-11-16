@@ -115,6 +115,8 @@ Value *isPair(Value *args); /* special form for pair? */
 
 Value *equalContent(Value *args); /* special form for equal? */
 
+int compareValues(Value *value, Value *value2);
+
 Value *equalNumber(Value *args); /* special form for = */
 
 Value *lessThanEqual(Value *args); /* special form for <= */
