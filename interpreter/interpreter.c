@@ -277,7 +277,7 @@ void printParseTree(Value *value) {
 	printValueHelper(value);
 }
 
-void printEvaluation(Value *value) { /* do we want this to take in a * or **? */
+void (Value *value) { /* do we want this to take in a * or **? */
 	Value *current = value;
 	while (current) {
 		printValueHelper(car(current));
