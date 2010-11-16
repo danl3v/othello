@@ -1096,7 +1096,7 @@ Value *divide(Value *args) {
 	return result;
 }
 
-Value *eq(Value *args) {
+Value *equalPointer(Value *args) { /* special form for eq? */
 	if (args && cdr(args) && !cdr(cdr(args))){
 		if (car(args) == car(cdr(args))) {
 			Value *true = mallocValue();
@@ -1173,8 +1173,9 @@ Value *evalLet(Value *args, Environment *environment) {
 			bind(car(car(current))->val.symbolValue, eval(car(cdr(car(current))), environment), frame);
 			current = cdr(current);
 		}
-		
-		return eval(car(cdr(args)), frame);	/* use evalEach so we can have multiple bodies */
+		Value **val = mallocValueStarStar();
+		*val = cdr(args);
+		return *(evalEach(val, frame));
 	}
 	
 	printf("let: bad syntax\n");
@@ -1204,7 +1205,7 @@ Value *evalLetRec(Value *args, Environment *environment) {
 		return eval(car(cdr(args)), frame);	/* use evalEach so we can have multiple bodies */
 	}
 	
-	printf("let: bad syntax\n");
+	printf("letrec: bad syntax\n");
 	return NULL;
 }
 
@@ -1286,7 +1287,7 @@ Environment* createTopFrame() {
 	bind("car", makePrimitiveValue(fakeCar), topFrame);
 	bind("cdr", makePrimitiveValue(fakeCdr), topFrame);
 	bind("cons", makePrimitiveValue(fakeCons), topFrame);
-	bind("eq?", makePrimitiveValue(eq), topFrame);
+	bind("eq?", makePrimitiveValue(equalPointer), topFrame);
 	return topFrame;
 }
 

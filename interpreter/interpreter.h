@@ -99,15 +99,31 @@ Value **parse(Value **tokenList, int* depth);
 
 /* PRIMITIVES */
 
-Value *add(Value *args);
+Value *add(Value *args); /* special form for + */
 
-Value *subtract(Value *args);
+Value *subtract(Value *args); /* special form for - */
 
-Value *multiply(Value *args);
+Value *multiply(Value *args); /* special form for * */
 
-Value *divide(Value *args);
+Value *divide(Value *args); /* special form for / */
 
-Value *eq(Value *args);
+Value *equalPointer(Value *args); /* special form for eq? */
+
+Value *isNull(Value *args, Environment *environment); /* special form for null? */
+
+Value *isPair(Value *args, Environment *environment); /* special form for pair? */
+
+Value *equalContent(Value *args, Environment *environment); /* special form for equal? */
+
+Value *equalNumber(Value *args, Environment *environment); /* special form for = */
+
+Value *lessThan(Value *args, Environment *environment); /* special form for < */
+
+Value *__or__(Value *args, Environment *environment); /* special form for or */
+
+Value *__and__(Value *args, Environment *environment); /* special form for and */
+
+Value *__setBang__(Value *args, Environment *environment); /* special form for set! */
 
 /* SPECIAL FORMS */
 
