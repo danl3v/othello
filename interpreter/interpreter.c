@@ -1513,6 +1513,62 @@ Value *evalLambda(Value *args, Environment *environment) {
 	}
 }
 
+Value *evalLoad(Value *args, Environment *environment) {
+        if (args && car(args) && car(args)->type == stringType) {
+                FILE *file = fopen(car(args)->val.stringValue, "rt");
+                if (!file) {
+                        printf("error: file not found!\n");
+                        return NULL;
+                }
+                char *expression = malloc(256 * sizeof(char));
+                int depth = 0;
+                Value **tokens = NULL;
+                Value **leftoverTokens = NULL;
+                Value **parseTree = NULL;
+                Value **value = NULL;
+                Environment *topFrame = createTopFrame();
+                printf("beginning load while\n");
+                while (fgets(expression, 255, file)) {
+                        printf("in load while\n");
+                        printf("in load while\n");
+                        printf("in load while\n");
+                        printf("in load while\n");
+                        tokens = append(leftoverTokens, tokenize(expression));
+                        printf("in load while\n");
+                        printf("in load while\n");
+                        printf("in load while\n");
+                        printf("in load while\n");
+                        if (tokens) { printf("\nTOKENS:\n"); printTokens(*tokens); }
+
+                        parseTree = parse(tokens, &depth);
+
+                        if (depth > 0) {
+                                leftoverTokens = tokens;
+                                depth = 0;
+                        }
+                        else {
+                                if (parseTree) {
+                                        printf("\nPARSE TREE:\n");
+                                        printParseTree(*parseTree);
+                                        printf("\n");
+                                        value = evaluate(parseTree, topFrame);
+                                        printf("\nVALUE:\n");
+                                        printEvaluation(*value);
+                                }
+                                else { depth = 0; }
+                                leftoverTokens = NULL;
+                                printf("> ");
+                        }
+                }
+                fclose(file);
+                return NULL;
+        }
+        else {
+                printf("you got some crazy shit goin' on bro. check yo syntax\n");
+                return NULL;
+        }
+}
+
 Value *makePrimitiveValue(Value* (*f)(Value *)){
 	Value *resultValue = mallocValue();
 	resultValue->type = primitiveType;
@@ -1730,60 +1786,4 @@ Value *apply(Value *f, Value **actualArgs) {
 			return NULL;
 		}
 	}
-}
-
-Value *evalLoad(Value *args, Environment *environment) {
-        if (args && car(args) && car(args)->type == stringType) {
-                FILE *file = fopen(car(args)->val.stringValue, "rt");
-                if (!file) {
-                        printf("error: file not found!\n");
-                        return NULL;
-                }
-                char *expression = malloc(256 * sizeof(char));
-                int depth = 0;
-                Value **tokens = NULL;
-                Value **leftoverTokens = NULL;
-                Value **parseTree = NULL;
-                Value **value = NULL;
-                Environment *topFrame = createTopFrame();
-                printf("beginning load while\n");
-                while (fgets(expression, 255, file)) {
-                        printf("in load while\n");
-                        printf("in load while\n");
-                        printf("in load while\n");
-                        printf("in load while\n");
-                        tokens = append(leftoverTokens, tokenize(expression));
-                        printf("in load while\n");
-                        printf("in load while\n");
-                        printf("in load while\n");
-                        printf("in load while\n");
-                        if (tokens) { printf("\nTOKENS:\n"); printTokens(*tokens); }
-
-                        parseTree = parse(tokens, &depth);
-
-                        if (depth > 0) {
-                                leftoverTokens = tokens;
-                                depth = 0;
-                        }
-                        else {
-                                if (parseTree) {
-                                        printf("\nPARSE TREE:\n");
-                                        printParseTree(*parseTree);
-                                        printf("\n");
-                                        value = evaluate(parseTree, topFrame);
-                                        printf("\nVALUE:\n");
-                                        printEvaluation(*value);
-                                }
-                                else { depth = 0; }
-                                leftoverTokens = NULL;
-                                printf("> ");
-                        }
-                }
-                fclose(file);
-                return NULL;
-        }
-        else {
-                printf("you got some crazy shit goin' on bro. check yo syntax\n");
-                return NULL;
-        }
 }
