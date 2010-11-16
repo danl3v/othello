@@ -13,7 +13,11 @@
 (define cdar
   (lambda (L)
     (cdr (car L))))
-
+    
+(define cddr
+  (lambda (L)
+    (cdr (cdr L))))
+    
 (define caaar
   (lambda (L)
     (car (car (car L)))))

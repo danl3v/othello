@@ -110,8 +110,6 @@ Value *divide(Value *args); /* special form for / */
 
 Value *equalPointer(Value *args); /* special form for eq? */
 
-Value *isNull(Value *args); /* special form for null? */
-
 Value *isPair(Value *args); /* special form for pair? */
 
 Value *equalContent(Value *args); /* special form for equal? */

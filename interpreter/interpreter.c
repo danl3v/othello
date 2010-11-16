@@ -79,14 +79,24 @@ Value *car(Value *value) {
 		return value->val.pairValue->car;
 	} else {
 		printf("error: cannot take the car of a non-list: ");
-		printValue(value);
-		printf("\n");
+		/* printValue(value); */
 		return NULL;
 	}
 }
 
 Value *fakeCar(Value *value) {
-	return car(car(car(value)));
+	Value *carValue = car(car(car(value)));
+	if (carValue) {
+		if (carValue->type == pairType) {
+			return cons(carValue, NULL);
+		}
+		else {
+			return carValue;
+		}
+	}
+	else {
+		return NULL;
+	}
 }
 
 Value *cdr(Value *value) {
@@ -94,8 +104,7 @@ Value *cdr(Value *value) {
 		return value->val.pairValue->cdr;
 	} else {
 		printf("error: cannot take the cdr of a non-list: ");
-		printValue(value);
-		printf("\n");
+		/* printValue(value);  fix error checking here */
 		return NULL;
 	}
 }
@@ -107,7 +116,12 @@ Value *fakeCdr(Value *value) { /* we should not need to create a new mini parse 
 	pair->cdr = NULL;
 	result->type = pairType;
 	result->val.pairValue = pair;
-	return result;
+	if (pair->car) {
+		return result;
+	}
+	else {
+		return NULL;
+	}
 }
 
 Value *cons(Value *value1, Value *value2) {
@@ -286,6 +300,10 @@ void printValue(Value *value) {
 
 void printValueHelper(Value *value) {
 	if (value) {
+		if (!(value->type)) {
+			printf("type not set!\n");
+			
+		}
 		switch (value->type) {
 			case booleanType:			printf("#%c", value->val.booleanValue?'t':'f');								break;
 			case integerType:			printf("%d", value->val.integerValue);										break;
@@ -313,7 +331,7 @@ void printValueHelper(Value *value) {
 			case closureType:			printf("#<closure>");														break;
 			case primitiveType:			printf("#<procedure> (add a label)"); 										break;
 			case undefinedType: 		printf("#<undefined>");														break;
-			default:					printf("in printValueHelper: i don't know what type of value i am");		break;		
+			default:					printf("in printValueHelper: i don't know what type of value i am"); printf("%d", value->type);		break;		
 		}
 	}
 }
@@ -1416,6 +1434,32 @@ Value *__or__(Value *args) {
     return false;
 }
 
+Value *isPair(Value *args) {
+	Value *boolean;
+	printf("isPair args: ");
+	printValue(args);
+	printf("\n");
+	if (!args) {
+		printf("pair? expects one argument, none given\n");
+		return NULL;
+	}
+	else if (cdr(args)) {
+		printf("pair? expects one argument, more than one given\n");
+		return NULL;
+	}
+	printf("isPair args3\n");
+	boolean = mallocValue();
+    boolean->type = booleanType;
+	if (car(args) && car(args)->type == pairType && car(car(args)) && car(car(args))->type == pairType && !compareValues(car(car(args)), cons(NULL, NULL))) {
+		boolean->val.booleanValue = 1;
+		return boolean;
+	}
+	else {
+		boolean->val.booleanValue = 0;
+		return boolean;
+	}	
+}
+
 Value *evalQuote(Value *args) {
 	if (cdr(args)) {
 		printf("error: quote: bad syntax (wrong number of parts)" );
@@ -1582,6 +1626,9 @@ Value *evalIf(Value *args, Environment *environment) {
 		if (!cdr(cdr(args))) {
 			return NULL;
 		}
+		printf("in if\n");
+		printValue(eval(car(cdr(cdr(args))), environment));
+		printf("\n");
 		return eval(car(cdr(cdr(args))), environment);
 	}
 	
@@ -1701,7 +1748,7 @@ Environment* createTopFrame() {
 	bind("and", makePrimitiveValue(__and__), topFrame);
 	bind("or", makePrimitiveValue(__or__), topFrame);
 	bind("null", cons(NULL, NULL), topFrame);
-	/*eval("(load \"math.ss\")");*/
+	bind("pair?", makePrimitiveValue(isPair), topFrame);
 	Value *load;
 	load->type = stringType;
 	load->val.stringValue = "lists.ss";
@@ -1794,11 +1841,17 @@ Value **evalTop(Value **tree, Environment *environment) {
 
 Value **evalEach(Value **tree, Environment *environment) {
 	Value **evaluated = mallocValueStarStar();
+	*evaluated = NULL;
 	Value *current = *tree;
 	while (current && car(current)) {
 		*evaluated = cons(eval(car(current), environment), *evaluated);
 		current = cdr(current);
 	}
+	printf("EvalEach: ");
+	printValue(tree);
+	printf("\n");
+	printValue(*evaluated);
+	printf("\n");
 	if (!(*evaluated)) {
 		*evaluated = NULL;
 		return evaluated;
@@ -1917,6 +1970,7 @@ Value *apply(Value *f, Value **actualArgs) {
 				}
 			}
 			if (currentFormalArg && car(currentFormalArg) && car(currentFormalArg)->type == variableArityType) {
+				printf("binding null to post VA variable\n");
 				bind((car(cdr(currentFormalArg)))->val.symbolValue, cons(NULL, NULL), frame);
 			}
 			 
