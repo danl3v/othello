@@ -62,15 +62,23 @@ int parseTester() {
 	return 0;
 }
 
-int evaluateTester() {
+int evaluateTester(int argc, char *argv[]) {
 	int depth = 0;
+	int count;
 	char *expression = malloc(256 * sizeof(char)); /* i dont think we need to malloc this */
 	Value **tokens = NULL;
 	Value **leftoverTokens = NULL;
 	Value **parseTree = NULL;
 	Value **value = NULL;
 	Environment *topFrame = createTopFrame();
-	/* http://www.daniweb.com/forums/thread23485.html - key up down functionality */
+	if (argc > 1) {
+		Value *load = mallocValue();
+		load->type = stringType;
+		for (count = 1; count < argc; count++) {
+			load->val.stringValue = argv[count];
+			evalLoad(cons(load, NULL), topFrame);
+		}
+	}
 	printf("> ");
 	while (fgets(expression, 255, stdin)) {
 		tokens = append(leftoverTokens, tokenize(expression));
@@ -100,6 +108,7 @@ int evaluateTester() {
 	return 0;
 }
 
+/* figure out how to abstract this */
 int main(int argc, char *argv[]) {
-	return evaluateTester();
+	return evaluateTester(argc, argv);
 }

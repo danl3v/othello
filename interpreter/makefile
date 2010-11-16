@@ -3,4 +3,4 @@ all: tester.c interpreter.c
 	
 run: tester.c interpreter.c
 	gcc -o interpreter tester.c interpreter.c -Wall -pedantic
-	./interpreter
+	./interpreter standard.ss lists.ss math.ss

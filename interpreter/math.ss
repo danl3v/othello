@@ -185,5 +185,9 @@
     (lambda (x)
         (lambdaTesterHelper x)))
         
+(define lambdaTesterHelper2
+    (lambda (x)
+        (lambdaTesterHelper2 x)))
+        
 (define lambdaTesterHelper
     (lambda (x) x))

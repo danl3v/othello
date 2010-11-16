@@ -1730,7 +1730,6 @@ Value *makePrimitiveValue(Value* (*f)(Value *)){
 
 Environment* createTopFrame() {
 	Environment *topFrame = createFrame(NULL);
-    Value *load = mallocValue();
 	bind("+", makePrimitiveValue(add), topFrame);
 	bind("-", makePrimitiveValue(subtract), topFrame);
 	bind("*", makePrimitiveValue(multiply), topFrame);
@@ -1746,13 +1745,6 @@ Environment* createTopFrame() {
 	bind("or", makePrimitiveValue(__or__), topFrame);
 	bind("null", cons(NULL, NULL), topFrame);
 	bind("pair?", makePrimitiveValue(isPair), topFrame);
-	load->type = stringType;
-	load->val.stringValue = "lists.ss";
-	evalLoad(cons(load, NULL), topFrame);
-	load->val.stringValue = "math.ss";
-	evalLoad(cons(load, NULL), topFrame);
-	load->val.stringValue = "standard.ss";
-	evalLoad(cons(load, NULL), topFrame);
 	return topFrame;
 }
 
@@ -1812,11 +1804,11 @@ int bind(char *symbol, Value *value, Environment *environment) {
 }
 
 Value **evaluate(Value **parseTree, Environment *environment) {
-	return evalTop(parseTree, environment);
+	return evalEach(parseTree, environment);
 }
 
 /* i really think we can combine this with eval each in some way */
-Value **evalTop(Value **tree, Environment *environment) {
+/*Value **evalTop(Value **tree, Environment *environment) {
 	Value **evaluated = mallocValueStarStar();
 	Value *valueStar = NULL;
 	Value *current = *tree;
@@ -1833,7 +1825,7 @@ Value **evalTop(Value **tree, Environment *environment) {
 		return evaluated;
 	}
 	return reverse(evaluated);
-}
+}*/
 
 Value **evalEach(Value **tree, Environment *environment) {
 	Value **evaluated = mallocValueStarStar();

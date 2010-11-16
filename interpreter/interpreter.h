@@ -40,7 +40,7 @@ int tokenTester();
 
 int parseTester();
 
-int evaluateTester();
+int evaluateTester(int argc, char *argv[]);
 
 /* MEMORY */
 
@@ -150,7 +150,7 @@ int bind(char *symbol, Value *value, Environment *environment);
 
 Value **evaluate(Value **parseTree, Environment *environment);
 
-Value **evalTop(Value **tree, Environment *environment);
+/*Value **evalTop(Value **tree, Environment *environment);*/
 
 Value **evalEach(Value **tree, Environment *environment);
 
