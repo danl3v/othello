@@ -2,6 +2,52 @@
 ;; math.ss
 ;; September 24, 2010
 
+(define my-not
+  (lambda (x)
+    (if x #f #t)))
+    
+(define my->
+  (lambda (x y . z)
+  	(if (and (<= y x) (my-not (= x y)))
+  	  (my->helper y z)
+  	  #f)))
+
+(define my->helper
+  (lambda (x y)
+  	(if (null? y)
+  	  #t
+      (if (and (<= (car y) x) (my-not (= x (car y))))
+        (my->helper (car y) (cdr y))
+        #f))))
+        
+(define my-<
+  (lambda (x y . z)
+  	(if (and (<= x y) (my-not (= x y)))
+  	  (my-<helper y z)
+  	  #f)))
+
+(define my-<helper
+  (lambda (x y)
+  	(if (null? y)
+  	  #t
+      (if (and (<= x (car y)) (my-not (= x (car y))))
+        (my-<helper (car y) (cdr y))
+        #f))))
+        
+(define my->=
+  (lambda (x y . z)
+  	(if (or (my-not (<= x y)) (= x y))
+  	  (my->=helper y z)
+  	  #f)))
+
+(define my->=helper
+  (lambda (x y)
+  	(if (null? y)
+  	  #t
+      (if (or (my-not (<= x (car y))) (= x (car y)))
+        (my->=helper (car y) (cdr y))
+        #f))))
+
 (define my-zero?
   (lambda (x)
     (= 0 x)))
@@ -89,7 +135,7 @@
 
 (define my-max-helper
   (lambda (x y)
-    (if (equal? y '())
+    (if (null? y)
         x
         (if (< x (car y))
             (my-max-helper (car y) (cdr y))
@@ -101,7 +147,7 @@
 
 (define my-min-helper
   (lambda (x y)
-    (if (equal? y '())
+    (if (null? y)
         x
         (if (> x (car y))
             (my-min-helper (car y) (cdr y))
@@ -113,7 +159,7 @@
 
 (define my-gcd-helper
   (lambda (x y)
-    (if (equal? y '())
+    (if (null y)
         (my-abs x)
         (if (= (my-abs x) (my-abs (car y)))
             (my-gcd-helper x (cdr y))
@@ -126,7 +172,7 @@
 
 (define my-lcm-helper
   (lambda (x y)
-    (if (equal? y '())
+    (if (null y)
         x
         (my-lcm-helper (/ (my-abs (* x (car y))) (my-gcd x (car y))) (cdr y)))))
 
