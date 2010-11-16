@@ -16,7 +16,7 @@ enum STATE_TYPE {
 
 enum TOKEN_TYPE {
 	booleanType, integerType, floatType, stringType, symbolType, openType, closeType, quoteType, 
-	pairType, closureType, primitiveType
+	pairType, closureType, primitiveType, undefinedType
 };
 
 enum SCOPE {
@@ -1127,6 +1127,7 @@ Value *evalQuote(Value *args) {
 
 Value *evalDefine(Value *args, Environment *environment) {
 	Value *value;
+	Value *howdyDoodyValue;
 	while (environment->parentFrame) {
 		environment = environment->parentFrame;
 	}
@@ -1152,7 +1153,11 @@ Value *evalDefine(Value *args, Environment *environment) {
 	/* also, problems with having to take the car all the time. talk to david about this to make it consistent */
 	value = eval(car(cdr(args)), environment);
 	bind(car(args)->val.symbolValue, value, environment);
-	return NULL;
+	howdyDoodyValue = mallocValue();
+	howdyDoodyValue->type = stringType;
+	howdyDoodyValue->val.stringValue = "Howdy Doody";
+	return howdyDoodyValue;
+	/*return NULL;*/
 }
 
 Value *evalLet(Value *args, Environment *environment) {
@@ -1169,6 +1174,33 @@ Value *evalLet(Value *args, Environment *environment) {
 			current = cdr(current);
 		}
 		
+		return eval(car(cdr(args)), frame);	/* use evalEach so we can have multiple bodies */
+	}
+	
+	printf("let: bad syntax\n");
+	return NULL;
+}
+
+Value *evalLetRec(Value *args, Environment *environment) {
+	if (args && cdr(args)) {
+		Environment *frame = createFrame(environment);
+		Value *current = car(args);
+		Value *undefined = mallocValue();
+		undefined->type = undefinedType;
+		while (current) {
+			if (car(car(current))->type != symbolType) {
+				printf("cannot bind a value to a non identifier\n");
+				/* destroy the frame */
+				return NULL;
+			}
+			bind(car(car(current))->val.symbolValue, undefined, frame);
+			current = cdr(current);
+		}
+		current = car(args);
+		while (current) {
+			bind(car(car(current))->val.symbolValue, eval(car(cdr(car(current))), frame), frame);
+			current = cdr(current);
+		}
 		return eval(car(cdr(args)), frame);	/* use evalEach so we can have multiple bodies */
 	}
 	
@@ -1378,9 +1410,8 @@ Value *eval(Value *value, Environment *environment) {
 				if (!strcmp(operator->val.symbolValue, "if")) { return evalIf(*args, environment); }
 				if (!strcmp(operator->val.symbolValue, "lambda")) { return evalLambda(*args, environment); }
 				if (!strcmp(operator->val.symbolValue, "let")) {return evalLet(*args, environment);}
-				/*
-				if (!strcmp(operator->val.symbolValue, "letrec")) {return evalLetRec(args, environment);}
-				if (!strcmp(operator->val.symbolValue, "load")) {return evalLoad(args, environment);}
+				if (!strcmp(operator->val.symbolValue, "letrec")) {return evalLetRec(*args, environment);}
+				/*if (!strcmp(operator->val.symbolValue, "load")) {return evalLoad(args, environment);}
 				if (!strcmp(operator->val.symbolValue, "'")) {return evalQuote(args, environment);}
 				*/
 				evaledOperator = eval(operator, environment);
