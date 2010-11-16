@@ -1174,11 +1174,70 @@ Value *equalContent(Value *args) { /*special form for equal? */
                     case stringType:
                         if(!strcmp(car(args)->val.stringValue, car(cdr(args))->val.stringValue)) { returnBool->val.booleanValue = 1; }
                         break;
+                    case pairType:
+						returnBool->val.booleanValue = compareValues(car(args), car(cdr(args)));
+						/*
+						Value *value = mallocValue();
+						Pair *pair = mallocPair();
+						Value *value2 = mallocValue();
+						Pair *pair2 = mallocPair();
+						value->type = pairType;
+						value->val.pairValue = pair;
+						value2->type = pairType;
+						value2->val.pairValue = pair2;
+						pair->car = car(args);
+						pair->cdr = value2;
+						pair2->car = car(cdr(args));
+						pair2->cdr = NULL;
+						if (car(pair->car)->type == car(pair->cdr)->type) {
+							return equalContent(value);
+						}
+						*/
+						break;
                  }
                  return returnBool;
         }        
         printf("equal?: expects 2 arguments\n");
         return NULL;
+}
+
+int compareValues(Value *value, Value *value2) {
+	if (!value && !value2) {
+		return 1;
+	}
+	if 
+	if(value->type != value2->type) {
+		return 0;
+	}
+	switch(car(args)->type){
+		case integerType:
+			if(value->val.integerValue == value2->val.integerValue) { return 1; }
+            break;
+		case floatType:
+			if(value->val.floatValue == value2->val.floatValue) { return 1; }
+			break;
+		case booleanType:
+			if(value->val.booleanValue == value2->val.booleanValue) { return 1; }
+			break;
+		case stringType:
+			if(!strcmp(value->val.stringValue, value2->val.stringValue)) { return 1; }
+			break;
+		case pairType:
+			
+			
+			
+	Value *pairValue1 = car(args);
+	Value *pairValue2 = car(cdr(args));
+	Value *value = mallocValue();
+	Pair *pair = mallocPair();
+	value->type = pairType;
+	value->val.pairValue = pair;
+	pair->car = pairValue1;
+	pair->cdr = pairValue2;
+	if (car(pairValue1)->type != car(pairValue2)->type) {
+		return 0;
+	}
+	return equalContent(
 }
 
 Value *equalNumber(Value *args) { /*special form for = */
@@ -1578,7 +1637,11 @@ Value *makePrimitiveValue(Value* (*f)(Value *)){
 
 Environment* createTopFrame() {
 	Environment *topFrame = createFrame(NULL);
-	/*bind("null", , topFrame);*/
+	Value* nullValue = mallocValue();
+	nullValue->type = pairType;
+	nullValue->val.pairValue = mallocPair();
+	nullValue->val.pairValue->car = NULL;
+	nullValue->val.pairValue->cdr = NULL;
 	bind("+", makePrimitiveValue(add), topFrame);
 	bind("-", makePrimitiveValue(subtract), topFrame);
 	bind("*", makePrimitiveValue(multiply), topFrame);
@@ -1592,6 +1655,7 @@ Environment* createTopFrame() {
 	bind("<=", makePrimitiveValue(lessThanEqual), topFrame);
 	bind("and", makePrimitiveValue(__and__), topFrame);
 	bind("or", makePrimitiveValue(__or__), topFrame);
+	bind("null", nullValue, topFrame);
 	return topFrame;
 }
 
