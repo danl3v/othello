@@ -277,8 +277,8 @@ void printParseTree(Value *value) {
 	printValueHelper(value);
 }
 
-void (Value *value) { /* do we want this to take in a * or **? */
-	Value *current = value;
+void printEvaluation(Value *value) { /* do we want this to take in a * or **? */ /*Is this actually printEvaluation? It didn't have a name */
+    Value *current = value;
 	while (current) {
 		printValueHelper(car(current));
 		printf("\n");
@@ -1734,6 +1734,7 @@ Value *makePrimitiveValue(Value* (*f)(Value *)){
 
 Environment* createTopFrame() {
 	Environment *topFrame = createFrame(NULL);
+    Value *load = mallocValue();
 	bind("+", makePrimitiveValue(add), topFrame);
 	bind("-", makePrimitiveValue(subtract), topFrame);
 	bind("*", makePrimitiveValue(multiply), topFrame);
@@ -1749,7 +1750,6 @@ Environment* createTopFrame() {
 	bind("or", makePrimitiveValue(__or__), topFrame);
 	bind("null", cons(NULL, NULL), topFrame);
 	bind("pair?", makePrimitiveValue(isPair), topFrame);
-	Value *load;
 	load->type = stringType;
 	load->val.stringValue = "lists.ss";
 	evalLoad(cons(load, NULL), topFrame);
@@ -1841,14 +1841,14 @@ Value **evalTop(Value **tree, Environment *environment) {
 
 Value **evalEach(Value **tree, Environment *environment) {
 	Value **evaluated = mallocValueStarStar();
-	*evaluated = NULL;
 	Value *current = *tree;
+	*evaluated = NULL;
 	while (current && car(current)) {
 		*evaluated = cons(eval(car(current), environment), *evaluated);
 		current = cdr(current);
 	}
 	printf("EvalEach: ");
-	printValue(tree);
+	printValue(*tree);
 	printf("\n");
 	printValue(*evaluated);
 	printf("\n");
@@ -1956,9 +1956,9 @@ Value *apply(Value *f, Value **actualArgs) {
 						return NULL;
 					}
 					printf("VA\n");
-					printValue((car(cdr(currentFormalArg))));
-					printValue(cons(currentActualArg, NULL)); /*cons(currentActualArg, NULL)*/
-					bind((car(cdr(currentFormalArg)))->val.symbolValue, cons(currentActualArg, NULL), frame);
+					printValue(car(cdr(currentFormalArg)));
+					printValue(currentActualArg); /*cons(currentActualArg, NULL)*/
+					bind((car(cdr(currentFormalArg)))->val.symbolValue, currentActualArg, frame); /*cons(currentActualArg, NULL) instead of currentActualArg?*/
 					currentFormalArg = NULL;
 					currentActualArg = NULL;
 					break;
