@@ -200,14 +200,10 @@
     
 (define va
     (lambda (x . z)
-        (if (null? z)
-        "done"
-        (vaHelper x z))))
+        (vaHelper x z)))
         
 (define vaHelper
-    (lambda (a b) 
-        (vaHelper a (cdr b))))
-
-(define vaHelper2
-    (lambda (g)
-        g))
+    (lambda (a b)
+      (if (null? b)
+        "done"
+        (vaHelper a (cdr b)))))

@@ -1635,7 +1635,6 @@ Value *evalIf(Value *args, Environment *environment) {
 		if (!cdr(cdr(args))) {
 			return NULL;
 		}
-		printf("IFIFIFIFIFIFIFIFIF\n");
 		return eval(car(cdr(cdr(args))), environment);
 	}
 	
@@ -1654,26 +1653,49 @@ Value *evalLambda(Value *args, Environment *environment) {
 		printf("lambda: missing formal arguments or body");
 		return NULL;
 	}
-	
-	closure = mallocValue();
-	if (closure) {
-		closure->type = closureType;
-		closure->val.closureValue = mallocClosure();
-		if (closure->val.closureValue) {
-			closure->val.closureValue->formalArguments = car(args);
-			closure->val.closureValue->body = cdr(args); /* body is a list, can have multiple bodies */
-			closure->val.closureValue->environment = environment;
-			return closure;
-		}
-		else {
-			printf("problem allocating memory for the closureValue\n");
-			return NULL;
-		}
-	}
-	else {
-		printf("problem allocating memory for the closure\n");
-		return NULL;
-	}
+	if (car(args)->type == pairType) {
+        closure = mallocValue();
+        if (closure) {
+            closure->type = closureType;
+            closure->val.closureValue = mallocClosure();
+            if (closure->val.closureValue) {
+                closure->val.closureValue->formalArguments = car(args);
+                closure->val.closureValue->body = cdr(args); /* body is a list, can have multiple bodies */
+                closure->val.closureValue->environment = environment;
+                return closure;
+            }
+            else {
+                printf("problem allocating memory for the closureValue\n");
+                return NULL;
+            }
+        }
+        else {
+            printf("problem allocating memory for the closure\n");
+            return NULL;
+        }
+    }
+    else {
+        closure = mallocValue();
+        if (closure) {
+            closure->type = closureType;
+            closure->val.closureValue = mallocClosure();
+            if (closure->val.closureValue) {
+                closure->val.closureValue->formalArguments = car(args);
+                closure->val.closureValue->body = cdr(args); /* body is a list, can have multiple bodies */
+                closure->val.closureValue->environment = environment;
+                return closure;
+            }
+            else {
+                printf("problem allocating memory for the closureValue\n");
+                return NULL;
+            }
+        }
+        else {
+            printf("problem allocating memory for the closure\n");
+            return NULL;
+        }
+        
+    }
 }
 
 Value *evalLoad(Value *args, Environment *environment) { /* think about line lengths */
@@ -1967,68 +1989,109 @@ Value *apply(Value *f, Value **actualArgs) {
 	}
 	else {
 		if (f->type == closureType) {
-			Value **val;
-			Value *result;
-			Environment *frame = createFrame(f->val.closureValue->environment);
-			Value *currentFormalArg = f->val.closureValue->formalArguments; /* maybe add some error checking */
-			Value *currentActualArg = *actualArgs;
-			printf("formal\n");
-			printValue(currentFormalArg);
-			printf("\nactual\n");
-			printValue(currentActualArg);
-			printf("\n");
-			while (currentFormalArg && currentActualArg) {
-				/*printf("currentActualArg\n");
-				printValue(currentActualArg);
-				printf("\ncurrentFormalArg\n");
-				printValue(currentFormalArg);
-				printf("\n");*/
-				if (car(currentFormalArg)->type == variableArityType) {
-				    variableArity = 1;
-					if (!cdr(currentFormalArg)) {
-						printf("error: no variable after arity\n");
-						return NULL;
-					}
-					if (cdr(cdr(currentFormalArg))) {
-						printf("error: too many variables after arity\n");
-						return NULL;
-					}
-					printf("VA\n");
-					printValue(car(cdr(currentFormalArg)));
-					printValue(currentActualArg); /*cons(currentActualArg, NULL)*/
-					bind((car(cdr(currentFormalArg)))->val.symbolValue, currentActualArg, frame); /*cons(currentActualArg, NULL) instead of currentActualArg?*/
-					currentFormalArg = NULL;
-					currentActualArg = NULL;
-					break;
-				}
-				else {
-    				bind((car(currentFormalArg))->val.symbolValue, car(currentActualArg), frame);
-					currentFormalArg = cdr(currentFormalArg);
-					currentActualArg = cdr(currentActualArg);
-				}
-			}
-			if (currentFormalArg && car(currentFormalArg) && car(currentFormalArg)->type == variableArityType) {
-				/*printf("binding null to post VA variable\n");*/
-				bind((car(cdr(currentFormalArg)))->val.symbolValue, cons(NULL, NULL), frame);
-			}
-			 
-			if (currentActualArg || (currentFormalArg && car(currentFormalArg) && car(currentFormalArg)->type != variableArityType)) {
-				printValue(car(currentFormalArg));
-				printValue(currentActualArg);
-				printf("error: wrong number of arguments\n");
-				return NULL;
-			}
-			printf("\nevaluating body:\n");
-			printParseTree(f->val.closureValue->body);
-			printf("\n");
-			val = mallocValueStarStar();
-			*val = f->val.closureValue->body;
-    	    result = car(*(evalEach(val, frame)));
-      	    printf("closure application returns: ");
-            printValue(result);
-            printf("\n");
-    	    return result;
-		} else {
+		    printf("CLOSURE actualArgs TYPE: ");
+		    printf("%d\n", car(car(*actualArgs))->type);
+		    if ((f->val.closureValue->formalArguments)->type != pairType) {
+		        Value **val;
+		        Environment *frame = createFrame(f->val.closureValue->environment);
+		        Value **variableArityList = mallocValueStarStar();
+		        Value *currentActualArg = *actualArgs;
+		        *variableArityList = cons(car(car(currentActualArg)), NULL);
+                currentActualArg = cdr(currentActualArg);
+                printf("entering while\n");
+                while (currentActualArg) {
+                    *variableArityList = cons(car(car(currentActualArg)), *variableArityList);
+                    currentActualArg = cdr(currentActualArg);
+                }
+                reverse(variableArityList);
+                printValue(*variableArityList);
+                printf("\n");
+                bind((f->val.closureValue->formalArguments)->val.symbolValue, cons(*variableArityList, NULL), frame);
+                printf("\nevaluating body:\n");
+                printParseTree(f->val.closureValue->body);
+                printf("\n");
+                val = mallocValueStarStar();
+                *val = f->val.closureValue->body;
+                result = car(*(evalEach(val, frame)));
+                printf("closure application returns: ");
+                printValue(result);
+                printf("\n");
+                return result;
+		    }
+		    else {
+                Value **val;
+                Environment *frame = createFrame(f->val.closureValue->environment);
+                Value *currentFormalArg = f->val.closureValue->formalArguments; /* maybe add some error checking */
+                Value *currentActualArg = *actualArgs;
+                printf("formal\n");
+                printValue(currentFormalArg);
+                printf("\nactual\n");
+                printValue(currentActualArg);
+                printf("\n");
+                while (currentFormalArg && currentActualArg) {
+                    /*printf("currentActualArg\n");
+                    printValue(currentActualArg);
+                    printf("\ncurrentFormalArg\n");
+                    printValue(currentFormalArg);
+                    printf("\n");*/
+                    if (car(currentFormalArg)->type == variableArityType) {
+                        Value **variableArityList = mallocValueStarStar();
+                        variableArity = 1;
+                        if (!cdr(currentFormalArg)) {
+                            printf("error: no variable after arity\n");
+                            return NULL;
+                        }
+                        if (cdr(cdr(currentFormalArg))) {
+                            printf("error: too many variables after arity\n");
+                            return NULL;
+                        }
+                        printf("VA\n");
+                        printValue(car(cdr(currentFormalArg)));
+                        printValue(currentActualArg);
+                        *variableArityList = cons(car(car(currentActualArg)), NULL);
+                        currentActualArg = cdr(currentActualArg);
+                        while (currentActualArg) {
+                            *variableArityList = cons(car(car(currentActualArg)), *variableArityList);
+                            currentActualArg = cdr(currentActualArg);
+                        }
+                        reverse(variableArityList);
+                        printf("variableArityList: ");
+                        printValue(*variableArityList);
+                        printf("\n");
+                        bind((car(cdr(currentFormalArg)))->val.symbolValue, cons(*variableArityList, NULL), frame);
+                        currentFormalArg = NULL;
+                        break;
+                    }
+                    else {
+                        bind((car(currentFormalArg))->val.symbolValue, car(currentActualArg), frame);
+                        currentFormalArg = cdr(currentFormalArg);
+                        currentActualArg = cdr(currentActualArg);
+                    }
+                }
+                if (currentFormalArg && car(currentFormalArg) && car(currentFormalArg)->type == variableArityType) {
+                    /*printf("binding null to post VA variable\n");*/
+                    bind((car(cdr(currentFormalArg)))->val.symbolValue, cons(NULL, NULL), frame);
+                }
+                 
+                if (currentActualArg || (currentFormalArg && car(currentFormalArg) && car(currentFormalArg)->type != variableArityType)) {
+                    printValue(car(currentFormalArg));
+                    printValue(currentActualArg);
+                    printf("error: wrong number of arguments\n");
+                    return NULL;
+                }
+                printf("\nevaluating body:\n");
+                printParseTree(f->val.closureValue->body);
+                printf("\n");
+                val = mallocValueStarStar();
+                *val = f->val.closureValue->body;
+                result = car(*(evalEach(val, frame)));
+                printf("closure application returns: ");
+                printValue(result);
+                printf("\n");
+                return result;
+            }
+		} 
+		else {
 			printf("procedure application: expected procedure\n");
 			return NULL;
 		}
