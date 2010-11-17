@@ -24,6 +24,70 @@ enum SCOPE {
 	localScope, globalScope
 };
 
+/* MEMORY MANAGER */
+
+Value *stealthCons(Value *value1, Value *value2) {
+	Value *result = malloc(sizeof(Value));
+	Pair *pair = malloc(sizeof(Pair));
+	pair->car = value1;
+	pair->cdr = value2;
+	result->type = pairType;
+	result->val.pairValue = pair;
+	return result;
+}
+
+void markValues(Value *value) {
+	if (value) {
+		Value *current = value;
+		while (current && current->marked == 0) {
+			current->marked = 1;
+			switch (current->type) {	
+				case pairType:			markValues(car(current)); markValues(cdr(current));					break;
+				case closureType:printf("\nmarking args\n");
+										markValues(current->val.closureValue->formalArguments);
+										printf("\nmarking body\n");
+										markValues(current->val.closureValue->body);
+										printf("\nmarking bindings\n");
+										markValues(*(current->val.closureValue->environment->bindings));printf("\ndone marking closure\n");	break;
+				default:																				break;
+			}
+			if (current->type == pairType) {
+				current = cdr(current);
+			}
+			else { current = NULL; }
+		}
+	}
+}
+
+void sweepValues() {
+	Value *current = *mallocedValues;
+	Value *previous = current;
+		printf("\n\nhere is what we have\n");
+			printValue(*mallocedValues);
+	while (current) {
+		if (!(car(current)->marked)) {
+			printf("\n\nwe do not need this\n");
+			printValue(car(current));
+			previous->val.pairValue->cdr = cdr(current);
+			printf("\ntype: %d\n", car(current)->type);
+			if (previous != current ) {freeValue(car(current));}  /*this line breaks the interpreter. i traced the segfault to reverse at the end of tokenization */
+			current = cdr(current);
+		}
+		else {
+		printf("\n\nwe need this\n");
+			printValue(car(current));
+			previous = current;
+			current->val.pairValue->car->marked = 0;
+			current = cdr(current);
+		}
+	}
+	
+	printf("\n\nhere is what we have\n");
+			printValue(*mallocedValues);
+			printf("\n");
+}
+
+
 /*
  * MEMORY FUNCTIONS
  *
@@ -33,6 +97,11 @@ enum SCOPE {
 
 Value *mallocValue() {
 	Value *value = malloc(sizeof(*value));
+	
+	if (value) {
+		printf("malloced value\n");
+		*mallocedValues = stealthCons(value, *mallocedValues);
+	}
 	return value;
 }
 
@@ -51,21 +120,58 @@ Closure *mallocClosure() {
 	return closure;
 }
 
-void freeValue(Value *value) {
-	switch (value->type) {
-	
-		case stringType:	free(value->val.stringValue);					break;
-		case symbolType:	free(value->val.symbolValue);					break;
-		case openType:		free(value->val.openValue);						break;
-	    case closeType:		free(value->val.closeValue);					break;
-	    case quoteType:		free(value->val.quoteValue);					break;
-		/*case pairType:		freeValue(car(value)); freeValue(cdr(value));	break;
-		case closureType:	freeValue(car(value)); freeValue(cdr(value));	break;
-		case primitiveType:	freeValue(car(value)); freeValue(cdr(value));	break;*/
-		default:															break;
-    }
-    free(value);
+int freeValue(Value *value) {
+	if (value) {
+		switch (value->type) {
+		
+			case stringType:	free(value->val.stringValue);					break;
+			case symbolType:	free(value->val.symbolValue);					break;
+			case openType:		free(value->val.openValue);						break;
+			case closeType:		free(value->val.closeValue);					break;
+			case quoteType:		free(value->val.quoteValue);					break;
+			case pairType:		free(value->val.pairValue);						break;
+			case closureType:	free(value->val.closureValue);					break;
+			case primitiveType:													break;
+			default:															return 1;
+		}
+		free(value);
+		return 0;
+	}
+	return 1;
 }
+
+void freePair(Pair *pair) {
+	freeValue(pair->car);
+	freeValue(pair->cdr);
+	free(pair);
+}
+
+void freeClosure(Closure *closure) {
+	freeValue(closure->formalArguments);
+	freeValue(closure->body);
+	free(closure);
+	/* we will not free the environment for now */
+}
+
+void freeEnvironment(Environment *environment) {
+	freeValue(*(environment->bindings));
+	free(environment->bindings);
+	/* we will leave the parent frame alone */
+}
+
+void freeAll() {
+	Value *current = *mallocedValues;
+	Value *previous = NULL;
+	while (current) {
+		if (freeValue(current->val.pairValue->car) == 0) {
+			current->val.pairValue->car = NULL;
+		}
+		previous = current;
+		current = cdr(current);
+		freeValue(previous);
+	}
+}
+
 
 /*
  * LIST FUNCTIONS
@@ -1477,7 +1583,6 @@ Value *evalQuote(Value *args) {
 
 Value *evalDefine(Value *args, Environment *environment) {
 	Value *value;
-	Value *howdyDoodyValue;
 	while (environment->parentFrame) {
 		environment = environment->parentFrame;
 	}
@@ -1499,19 +1604,12 @@ Value *evalDefine(Value *args, Environment *environment) {
 		return NULL;
 	}
 
-	/* we should free the first arg, or we should change bind to accept a symbolValue as its first argument */
-	/* also, problems with having to take the car all the time. talk to david about this to make it consistent */
 	value = eval(car(cdr(args)), environment);
 	bind(car(args)->val.symbolValue, value, environment);
-	howdyDoodyValue = mallocValue();
-	howdyDoodyValue->type = stringType;
-	howdyDoodyValue->val.stringValue = "Howdy Doody";
 	return howdyDoodyValue;
-	/*return NULL;*/
 }
 
 Value *evalSetBang(Value *args, Environment *currentEnvironment, Environment *callingEnvironment) {
-	Value *howdyDoodyValue;
 	Value *current;
 	
 	if (!args || !car(args) || !cdr(args)) { /* if we do not have at least two arguments */
@@ -1540,9 +1638,6 @@ Value *evalSetBang(Value *args, Environment *currentEnvironment, Environment *ca
 	while (current) {
 		if (!strcmp((car(car(current)))->val.symbolValue, car(args)->val.symbolValue)) {
 			bind(car(args)->val.symbolValue, eval(car(cdr(args)), callingEnvironment), currentEnvironment); 
-			howdyDoodyValue = mallocValue();
-			howdyDoodyValue->type = stringType;
-			howdyDoodyValue->val.stringValue = "Howdy Doody";
 			return howdyDoodyValue;
 		}
 		current = cdr(current);
@@ -1780,6 +1875,13 @@ Environment* createTopFrame() {
 	return topFrame;
 }
 
+void initHowdyDoody() {
+	char *howdyDoody = "Howdy Doody";
+	howdyDoodyValue = malloc(sizeof(Value));
+	howdyDoodyValue->type = stringType;
+	howdyDoodyValue->val.stringValue = substr(howdyDoody, 0, strlen(howdyDoody) + 1);
+}
+
 Environment* createFrame(Environment *parent) {
 	Environment *frame = malloc(sizeof(*frame));
 	frame->parentFrame = parent;
@@ -1821,7 +1923,7 @@ int bind(char *symbol, Value *value, Environment *environment) {
 		binding->type = pairType;
 		symbolValue = mallocValue();
 		symbolValue->type = symbolType;
-		symbolValue->val.symbolValue = symbol;
+		symbolValue->val.symbolValue = substr(symbol, 0, strlen(symbol) + 1);
 		binding->val.pairValue = mallocPair();
 		binding->val.pairValue->car = symbolValue;
 		binding->val.pairValue->cdr = value;
@@ -1837,26 +1939,6 @@ int bind(char *symbol, Value *value, Environment *environment) {
 Value **evaluate(Value **parseTree, Environment *environment) {
 	return evalEach(parseTree, environment);
 }
-
-/* i really think we can combine this with eval each in some way */
-/*Value **evalTop(Value **tree, Environment *environment) {
-	Value **evaluated = mallocValueStarStar();
-	Value *valueStar = NULL;
-	Value *current = *tree;
-	while (current && car(current)) {
-		if (!(*evaluated)) {
-			*evaluated = cons(eval(car(current), environment), valueStar);
-		} else {
-			*evaluated = cons(eval(car(current), environment), *evaluated);
-		}
-		current = cdr(current);
-	}
-	if (!(*evaluated)) {
-		*evaluated = NULL;
-		return evaluated;
-	}
-	return reverse(evaluated);
-}*/
 
 Value **evalEach(Value **tree, Environment *environment) {
 	Value **evaluated = mallocValueStarStar();

@@ -13,6 +13,8 @@ enum ERROR_TYPE {
 	SYNTAX_ERROR_UNTOKENIZABLE, SYNTAX_ERROR_UNTERMINATED_INPUT, SYNTAX_ERROR_TOO_MANY_CLOSE_PARENTHESES
 };
 
+Value **mallocedValues;
+
 int tokenTester() {
 	char *expression = malloc(256 * sizeof(char));
 	Value **tokens;

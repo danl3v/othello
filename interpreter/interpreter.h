@@ -1,6 +1,7 @@
 /* STRUCTS */
 
 typedef struct __Value__ {
+    int marked;
 	int type;
 	int lineNumber;
 	union {
@@ -35,12 +36,30 @@ typedef struct __Closure__{
 	Environment *environment;
 } Closure;
 
+/* GLOBAL VARIABLES */
+
+extern Value **mallocedValues;
+
+/* HOWDYDOODY -- FOR CARL */
+
+Value *howdyDoodyValue;
+
+void initHowdyDoody();
+
 /* TESTERS */
 int tokenTester();
 
 int parseTester();
 
 int evaluateTester(int argc, char *argv[]);
+
+/* MEMORY MANAGER */
+
+Value *stealthCons(Value *value1, Value *value2);
+
+void markValues(Value *value);
+
+void sweepValues();
 
 /* MEMORY */
 
@@ -52,7 +71,15 @@ Value *mallocValue();
 
 Value **mallocValueStarStar();
 
-void freeValue(Value *value);
+int freeValue(Value *value);
+
+void freePair(Pair *pair);
+
+void freeClosure(Closure *closure);
+
+void freeEnvironment(Environment *environment);
+
+void freeAll();
 
 /* LISTS */
 
@@ -149,8 +176,6 @@ Value *environmentLookup(char *symbol, Environment *environment, int local);
 int bind(char *symbol, Value *value, Environment *environment);
 
 Value **evaluate(Value **parseTree, Environment *environment);
-
-/*Value **evalTop(Value **tree, Environment *environment);*/
 
 Value **evalEach(Value **tree, Environment *environment);
 
