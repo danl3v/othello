@@ -185,9 +185,23 @@
     (lambda (x)
         (lambdaTesterHelper x)))
         
-(define lambdaTesterHelper2
+(define lambdaTesterHelper
     (lambda (x)
         (lambdaTesterHelper2 x)))
         
-(define lambdaTesterHelper
+(define lambdaTesterHelper2
     (lambda (x) x))
+    
+(define va
+    (lambda (x . z)
+        (if (null? z)
+        "done"
+        (va x (cdr z)))))
+        
+(define vaHelper
+    (lambda (a) 
+        (vaHelper2 a)))
+
+(define vaHelper2
+    (lambda (g)
+        g))

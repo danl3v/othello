@@ -96,7 +96,10 @@ int evaluateTester(int argc, char *argv[]) {
 				printParseTree(*parseTree); 
 				printf("\n");
 				value = evaluate(parseTree, topFrame);
-				printf("\nVALUE:\n"); 
+				printf("\nVALUE:\n");
+				/*printValue(cons(NULL, NULL));*/
+				/*printValue(*value);
+				printf("\n");*/
 				printEvaluation(*value);
 			}
 			else { depth = 0; }

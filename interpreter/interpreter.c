@@ -78,24 +78,36 @@ Value *car(Value *value) {
 	if (value && value->type == pairType) {
 		return value->val.pairValue->car;
 	} else {
-		printf("error: cannot take the car of a non-list: ");
+	    printf("car passed: ");
+	    printValue(value);
+	    printf("\n");
+		printf("ERROR: cannot take the car of a non-list\n");
 		/* printValue(value); */
 		return NULL;
 	}
 }
 
 Value *fakeCar(Value *value) {
-	Value *carValue = car(car(car(value)));
-	if (carValue) {
-		if (carValue->type == pairType) {
-			return cons(carValue, NULL);
-		}
-		else {
-			return carValue;
-		}
-	}
-	else {
-		return NULL;
+    if (value && value->type == pairType) {
+        if (car(value)) {
+            if (car(car(value))) {
+                if (car(car(car(value)))) {
+                    return cons(car(car(car(value))), NULL);
+                } else {
+                    printf("car: expects argument of <pair> type\n");
+                    return NULL;
+                }
+            } else {
+                printf("car: expects argument of <pair> type\n");
+                return NULL;
+            }
+        } else {
+            printf("car: expects argument of <pair> type\n");
+            return NULL;
+        }
+    } else {
+	    printf("car: expects 1 argument of <pair> type\n");
+	    return NULL;
 	}
 }
 
@@ -103,24 +115,37 @@ Value *cdr(Value *value) {
 	if (value && value->type == pairType) {
 		return value->val.pairValue->cdr;
 	} else {
-		printf("error: cannot take the cdr of a non-list: ");
+		printf("ERROR: cannot take the cdr of a non-list\n");
 		/* printValue(value);  fix error checking here */
 		return NULL;
 	}
 }
 
 Value *fakeCdr(Value *value) { /* we should not need to create a new mini parse tree to do cdr, car, cons */
-	Value *result = mallocValue();
-	Pair *pair = mallocPair();
-	pair->car = cdr(car(car(value)));
-	pair->cdr = NULL;
-	result->type = pairType;
-	result->val.pairValue = pair;
-	if (pair->car) {
-		return result;
-	}
-	else {
-		return NULL;
+	if (value && value->type == pairType) {
+	    if (car(value)) {
+            if (car(car(value))) {
+                if (car(car(value))->type == pairType) {
+                    if (cdr(car(car(value)))) {
+                        return cons(cdr(car(car(value))), NULL);
+                    } else {
+                        return cons(NULL, NULL);
+                    }
+                } else {
+                    printf("cdr: expects argument of <pair> type\n");
+                    return NULL;
+                }
+            } else {
+                printf("cdr: expects argument of <pair> type\n");
+                return NULL;
+            }
+        } else {
+            printf("cdr: expects argument of <pair> type\n");
+            return NULL;
+        }
+	} else {
+	    printf("cdr: expects 1 argument of <pair> type\n");
+	    return NULL;
 	}
 }
 
@@ -277,7 +302,7 @@ void printParseTree(Value *value) {
 	printValueHelper(value);
 }
 
-void printEvaluation(Value *value) { /* do we want this to take in a * or **? */ /*Is this actually printEvaluation? It didn't have a name */
+void printEvaluation(Value *value) { /* do we want this to take in a * or **? */
     Value *current = value;
 	while (current) {
 		printValueHelper(car(current));
@@ -925,7 +950,7 @@ Value **parse(Value **tokenList, int* depth) {
 		current = *tokenList;
 		while (current) { /* start to iterate through the tokenList */
 			if ((car(current))->type == openType) { /* if we see an open paren, push onto stack and increment depth */
-				(*parseTree) = cons(car(current), *parseTree);
+				*parseTree = cons(car(current), *parseTree);
 				(*depth)++;
 			}
 			else if ((car(current))->type == closeType) { /* if we see a close type, do something special */
@@ -1622,9 +1647,6 @@ Value *evalIf(Value *args, Environment *environment) {
 		if (!cdr(cdr(args))) {
 			return NULL;
 		}
-		printf("in if\n");
-		printValue(eval(car(cdr(cdr(args))), environment));
-		printf("\n");
 		return eval(car(cdr(cdr(args))), environment);
 	}
 	
@@ -1761,7 +1783,6 @@ Value *environmentLookup(char *symbol, Environment *environment, int global) {
 		/* if (global) { printf("error: variable not found\n"); } */
 		return NULL;
 	}
-	
 	current = *(environment->bindings);
 	while (current) {
 		if (!strcmp((car(car(current)))->val.symbolValue, symbol)) {
@@ -1832,9 +1853,7 @@ Value **evalEach(Value **tree, Environment *environment) {
     Value *valueStar = NULL;
 	Value *current = *tree;
 	Value *result;
-	/**evaluated = NULL;*/
-	/**evaluated = cons(NULL, NULL);*/
-	while (current && car(current)) {
+	while (current && current->type == pairType && car(current)) {
 	    result = eval(car(current), environment);
 	    if (result) {
 	        if (!(*evaluated)) {
@@ -1852,12 +1871,12 @@ Value **evalEach(Value **tree, Environment *environment) {
 	if(!(*evaluated)){
 	    *evaluated = cons(NULL, NULL);
 	}
-	printf("EE Type: %d\n", (*evaluated)->type);
+	/*printf("EE Type: %d\n", (*evaluated)->type);
 	printf("EvalEach: ");
 	printValue(*tree);
 	printf("\n");
 	printValue(*evaluated);
-	printf("\n");
+	printf("\n");*/
 	if (!(*evaluated)) {
 		*evaluated = NULL;
 		return evaluated;
@@ -1874,9 +1893,12 @@ Value *eval(Value *value, Environment *environment) {
 		case integerType:
 		case floatType:
 		case stringType:
-			return value;
+			return cons(value, NULL);
 		case symbolType:
 			v = environmentLookup(value->val.symbolValue, environment, globalScope);
+			/*printf("looked up %s and got",value->val.symbolValue);
+			printValue(v);
+			printf("\n");*/
 			if (v) {
 				return v;
 			} else {
@@ -1886,6 +1908,12 @@ Value *eval(Value *value, Environment *environment) {
 		case pairType:
 			operator = car(value);
 			*args = cdr(value);
+			printf("\neval operator: ");
+			printValue(operator);
+			printf("\n");
+			printf("eval args: ");
+			printValue(*args);
+			printf("\n");
 			if (operator->type == symbolType) {
 				Value *evaledOperator;
 				Value **evaledArgs;
@@ -1937,27 +1965,38 @@ Value *eval(Value *value, Environment *environment) {
 }
 
 Value *apply(Value *f, Value **actualArgs) {
+    int variableArity = 0;
+    Value *result;
 	if (f->type == primitiveType) {
-		return f->val.primitiveValue(*actualArgs);
+        printf("actual\n");
+        printValue(*actualArgs);
+        printf("\n");
+        result = f->val.primitiveValue(*actualArgs);
+        printf("application returns: ");
+        printValue(result);
+        printf("\n");
+		return result;
 	}
 	else {
 		if (f->type == closureType) {
 			Value **val;
+			/*Value *result;*/
 			Environment *frame = createFrame(f->val.closureValue->environment);
 			Value *currentFormalArg = f->val.closureValue->formalArguments; /* maybe add some error checking */
 			Value *currentActualArg = *actualArgs;
-			printf("\nformal\n");
+			printf("formal\n");
 			printValue(currentFormalArg);
 			printf("\nactual\n");
 			printValue(currentActualArg);
 			printf("\n");
 			while (currentFormalArg && currentActualArg) {
-				printf("currentActualArg\n");
+				/*printf("currentActualArg\n");
 				printValue(currentActualArg);
 				printf("\ncurrentFormalArg\n");
 				printValue(currentFormalArg);
-				printf("\n");
+				printf("\n");*/
 				if (car(currentFormalArg)->type == variableArityType) {
+				    variableArity = 1;
 					if (!cdr(currentFormalArg)) {
 						printf("error: no variable after arity\n");
 						return NULL;
@@ -1975,12 +2014,7 @@ Value *apply(Value *f, Value **actualArgs) {
 					break;
 				}
 				else {
-				    if (car(currentActualArg)->type == pairType) {
-    					bind((car(currentFormalArg))->val.symbolValue, car(car(currentActualArg)), frame);
-    				}
-    				else {
-    				    bind((car(currentFormalArg))->val.symbolValue, car(currentActualArg), frame);
-    				}
+    				bind((car(currentFormalArg))->val.symbolValue, car(currentActualArg), frame);
 					currentFormalArg = cdr(currentFormalArg);
 					currentActualArg = cdr(currentActualArg);
 				}
@@ -2001,7 +2035,29 @@ Value *apply(Value *f, Value **actualArgs) {
 			printf("\n");
 			val = mallocValueStarStar();
 			*val = f->val.closureValue->body;
-			return *(evalEach(val, frame));
+			if (variableArity) {
+			    
+			}
+			/*if (variableArity) {
+			    result = *(evalEach(val, frame));
+			    printf("application returns: ");
+			    printValue(result);
+			    printf("\n");
+			    printf("car of that is: ");
+			    printValue(car(result));
+			    printf("\n");
+			    printf("cdr of that is: ");
+			    printValue(cdr(result));
+			    printf("\n");
+			    return car(result);
+			} else {
+			    result = car(*(evalEach(val, frame)));
+                printf("application returns: ");
+			    printValue(result);
+			    printf("\n");
+    	    	return result;
+    	    }*/
+    	    return car(*(evalEach(val, frame)));
 		} else {
 			printf("procedure application: expected procedure\n");
 			return NULL;
