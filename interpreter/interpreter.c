@@ -994,17 +994,17 @@ Value *add(Value *args) {
 	result->type = integerType;
 	result->val.integerValue = 0;
 	if (!args) {
-		return result;
+		return cons(result, NULL);
 	}
 	if (args->type == pairType) {
 		while (current) { /* check our error checking. maybe not so good? (+) should be 0 */
-			switch (car(current)->type) {
+			switch (car(car(current))->type) {
 				case integerType:
 					if (result->type == integerType) {
-						result->val.integerValue = result->val.integerValue + car(current)->val.integerValue;
+						result->val.integerValue = result->val.integerValue + car(car(current))->val.integerValue;
 					}
 					else {
-						result->val.floatValue = result->val.floatValue + car(current)->val.integerValue;
+						result->val.floatValue = result->val.floatValue + car(car(current))->val.integerValue;
 					}
 					break;
 					
@@ -1013,21 +1013,19 @@ Value *add(Value *args) {
 						result->val.floatValue = result->val.integerValue;
 						result->type = floatType;
 					}
-					result->val.floatValue = result->val.floatValue + car(current)->val.floatValue;
+					result->val.floatValue = result->val.floatValue + car(car(current))->val.floatValue;
 					break;
 					
 				default:
 					printf("Error: Attempted to add non-number\n");
-					free(result);
 					return NULL;
 			}
 			current = cdr(current);
 		}
-		return result;
+		return cons(result, NULL);
 	}
 	else {
 		printf("Error: Argument not list\n");
-		free(result);
 		return NULL;
 	}
 }
@@ -1037,34 +1035,32 @@ Value *subtract(Value *args) {
 	Value *current = args;
 	if (!current) {
 		printf("-: expects at least 1 argument, given 0\n");
-		free(result);
 		return NULL;
 	}
 	if (args->type == pairType) {
 		if (cdr(current)) {
-			switch (car(current)->type) {
+			switch (car(car(current))->type) {
 				case integerType:
 					result->type = integerType;
-					result->val.integerValue = car(current)->val.integerValue;
+					result->val.integerValue = car(car(current))->val.integerValue;
 					break;
 				case floatType:
 					result->type = floatType;
-					result->val.floatValue = car(current)->val.floatValue;
+					result->val.floatValue = car(car(current))->val.floatValue;
 					break;
 				default:
 					printf("Error: Attempted to subtract non-number\n");
-					free(result);
 					return NULL;
 			}
 			current = cdr(current);
 			while (current) { /* check our error checking. maybe not so good? */
-				switch (car(current)->type) {
+				switch (car(car(current))->type) {
 					case integerType:
 						if (result->type == integerType) {
-							result->val.integerValue = result->val.integerValue - car(current)->val.integerValue;
+							result->val.integerValue = result->val.integerValue - car(car(current))->val.integerValue;
 						}
 						else {
-							result->val.floatValue = result->val.floatValue - car(current)->val.integerValue;
+							result->val.floatValue = result->val.floatValue - car(car(current))->val.integerValue;
 						}
 						break;
 						
@@ -1073,37 +1069,34 @@ Value *subtract(Value *args) {
 							result->val.floatValue = result->val.integerValue;
 							result->type = floatType;
 						}
-						result->val.floatValue = result->val.floatValue - car(current)->val.floatValue;
+						result->val.floatValue = result->val.floatValue - car(car(current))->val.floatValue;
 						break;
 						
 					default:
 						printf("Error: Attempted to subtract non-number\n");
-						free(result);
 						return NULL;
 				}
 				current = cdr(current);
 			}
 		} else {
-			switch (car(current)->type) {
+			switch (car(car(current))->type) {
 				case integerType:
 					result->type = integerType;
-					result->val.integerValue = -1 * car(current)->val.integerValue;
+					result->val.integerValue = -1 * car(car(current))->val.integerValue;
 					break;
 				case floatType:
 					result->type = floatType;
-					result->val.floatValue = -1 * car(current)->val.floatValue;
+					result->val.floatValue = -1 * car(car(current))->val.floatValue;
 					break;
 				default:
 					printf("Error: Attempted to subtract non-number\n");
-					free(result);
 					return NULL;
 			}
 		}
-		return result;
+		return cons(result, NULL);
 	}
 	else {
 		printf("Error: Argument not list\n");
-		free(result);
 		return NULL;
 	}
 }
@@ -1114,17 +1107,17 @@ Value *multiply(Value *args) {
 	result->type = integerType;
 	result->val.integerValue = 1;
 	if (!args) {
-		return result;
+		return cons(result, NULL);
 	}
 	if (args->type == pairType) {
 		while (current) { 
-			switch (car(current)->type) {
+			switch (car(car(current))->type) {
 				case integerType:
 					if (result->type == integerType) {
-						result->val.integerValue = result->val.integerValue * car(current)->val.integerValue;
+						result->val.integerValue = result->val.integerValue * car(car(current))->val.integerValue;
 					}
 					else {
-						result->val.floatValue = result->val.floatValue * car(current)->val.integerValue;
+						result->val.floatValue = result->val.floatValue * car(car(current))->val.integerValue;
 					}
 					break;
 					
@@ -1133,21 +1126,19 @@ Value *multiply(Value *args) {
 						result->val.floatValue = result->val.integerValue;
 						result->type = floatType;
 					}
-					result->val.floatValue = result->val.floatValue * car(current)->val.floatValue;
+					result->val.floatValue = result->val.floatValue * car(car(current))->val.floatValue;
 					break;
 					
 				default:
 					printf("Error: Attempted to multiply non-number\n");
-					free(result);
 					return NULL;
 			}
 			current = cdr(current);
 		}
-		return result;
+		return cons(result, NULL);
 	}
 	else {
 		printf("Error: Argument not list\n");
-		free(result);
 		return NULL;
 	}
 }
@@ -1157,67 +1148,60 @@ Value *divide(Value *args) {
 	Value *current = args;
 	if (!current) {
 		printf("/: expects at least 1 argument, given 0\n");
-		freeValue(result);
 		return NULL;
 	}
 	/* Here we check for if args is one item long, and if first item is non-number */
-	if (car(current)->type == integerType) {
+	if (car(car(current))->type == integerType) {
 		if (!cdr(current)) {
-			if (car(current)->val.integerValue == 0) {
+			if (car(car(current))->val.integerValue == 0) {
 				printf("/: division by zero\n");
-				freeValue(result);
 				return NULL;
 			}
 			else {
 				result->type = integerType;
-				result->val.integerValue = 1 / car(current)->val.integerValue;
-				return result;
+				result->val.integerValue = 1 / car(car(current))->val.integerValue;
+				return cons(result, NULL);
 			}
 		}
 	}
-	else if (car(current)->type == floatType) {
+	else if (car(car(current))->type == floatType) {
 		if (!cdr(current)) {
-			if (car(current)->val.floatValue == 0) {
+			if (car(car(current))->val.floatValue == 0) {
 				printf("/: division by zero\n");
-				freeValue(result);
 				return NULL;
 			}
 			else {
 				result->type = floatType;
-				result->val.floatValue = 1 / car(current)->val.floatValue;
-				return result;
+				result->val.floatValue = 1 / car(car(current))->val.floatValue;
+				return cons(result, NULL);
 			}
 		}
 	}
 	else {
 		printf("Error: Attempted to divide non-number\n");
-		freeValue(result);
 		return NULL;
 	}
 	/* Here we set the type of the result based upon the first arg */
 	result->type = integerType;
-	if (car(current)->type == floatType) { result->type = floatType; }
+	if (car(car(current))->type == floatType) { result->type = floatType; }
 	/* starting with the second item, we check for division by zero */
 	current = cdr(current);
 	while (current) {
-		if (car(current)->type == floatType) {
+		if (car(car(current))->type == floatType) {
 			result->type = floatType;
-			if (car(current)->val.floatValue == 0) {
+			if (car(car(current))->val.floatValue == 0) {
 				printf("/: division by zero\n");
-				freeValue(result);
 				return NULL;
 			}
 		}
-		else if (car(current)->type == integerType) {
-			if (car(current)->val.integerValue == 0) {
+		else if (car(car(current))->type == integerType) {
+			if (car(car(current))->val.integerValue == 0) {
 				printf("/: division by zero\n");
-				freeValue(result);
 				return NULL;
 			}
 		}
 		else {
 			printf("Error: Attempted to divide non-number\n");
-			freeValue(result);
 			return NULL;
 		}
 		current = cdr(current);
@@ -1225,38 +1209,38 @@ Value *divide(Value *args) {
 	/* Here we set the value of the result based upon the first item*/
 	current = args;
 	if (result->type == integerType) { 
-		result->val.integerValue = car(current)->val.integerValue; 
+		result->val.integerValue = car(car(current))->val.integerValue; 
 	}
 	else {
-		if (car(current)->type == integerType) {
-			result->val.floatValue = (float)(car(current)->val.integerValue);
+		if (car(car(current))->type == integerType) {
+			result->val.floatValue = (float)(car(car(current))->val.integerValue);
 		}
 		else {
-			result->val.floatValue = (car(current)->val.floatValue);
+			result->val.floatValue = (car(car(current))->val.floatValue);
 		}
 	}
 	/* starting again with the second item, we divide */
 	current = cdr(current);
 	while (current) {
 		if (result->type == integerType) {
-			result->val.integerValue = result->val.integerValue / car(current)->val.integerValue;
+			result->val.integerValue = result->val.integerValue / car(car(current))->val.integerValue;
 		}
 		else {
-			if (car(current)->type == integerType) { result->val.floatValue = result->val.floatValue / car(current)->val.integerValue; }
-			else { result->val.floatValue = result->val.floatValue / car(current)->val.floatValue; }
+			if (car(car(current))->type == integerType) { result->val.floatValue = result->val.floatValue / car(car(current))->val.integerValue; }
+			else { result->val.floatValue = result->val.floatValue / car(car(current))->val.floatValue; }
 		}
 		current = cdr(current);
 	}
-	return result;
+	return cons(result, NULL);
 }
 
 Value *equalPointer(Value *args) { /* special form for eq? */
         if (args && cdr(args) && !cdr(cdr(args))) {
             Value *returnBool = mallocValue();
             returnBool->type = booleanType;
-                if (car(args) == car(cdr(args))) { returnBool->val.booleanValue = 1; }
+                if (car(car(args)) == car(car(cdr(args)))) { returnBool->val.booleanValue = 1; }
                 else{ returnBool->val.booleanValue = 0; }
-                return returnBool;
+                return cons(returnBool, NULL);
         }
         printf("eq?: expects 2 arguments\n");
         return NULL;
@@ -1268,7 +1252,7 @@ Value *equalContent(Value *args) { /*special form for equal? */
            returnBool->type = booleanType;
            returnBool->val.booleanValue = 0;
                if(car(args)->type != car(cdr(args))->type) {
-                   return returnBool;
+                   return cons(returnBool, NULL);
                }
                switch(car(args)->type){
                    case integerType:
@@ -1284,10 +1268,10 @@ Value *equalContent(Value *args) { /*special form for equal? */
                        if(!strcmp(car(args)->val.stringValue, car(cdr(args))->val.stringValue)) { returnBool->val.booleanValue = 1; }
                        break;
                    case pairType:
-                                               returnBool->val.booleanValue = compareValues(car(args), car(cdr(args)));
-                                               break;
+                       returnBool->val.booleanValue = compareValues(car(args), car(cdr(args)));
+                       break;
                 }
-                return returnBool;
+                return cons(returnBool, NULL);
        }
        printf("equal?: expects 2 arguments\n");
        return NULL;
@@ -1334,15 +1318,15 @@ Value *equalNumber(Value *args) { /*special form for = */
         Value *returnBool = mallocValue();
         returnBool->type = booleanType;
         returnBool->val.booleanValue = 1;
-        while(cdr(current)){
-            switch(car(current)->type){
+        while(cdr(current) && car(car(cdr(current)))){
+            switch(car(car(current))->type){
                 case integerType:
-                    switch(car(cdr(current))->type){
+                    switch(car(car(cdr(current)))->type){
                         case integerType:
-                            if(car(current)->val.integerValue != car(cdr(current))->val.integerValue) { returnBool->val.booleanValue = 0; }
+                            if(car(car(current))->val.integerValue != car(car(cdr(current)))->val.integerValue) { returnBool->val.booleanValue = 0; }
                             break;
                         case floatType:
-                            if(car(current)->val.integerValue != car(cdr(current))->val.floatValue) { returnBool->val.booleanValue = 0; }
+                            if(car(car(current))->val.integerValue != car(car(cdr(current)))->val.floatValue) { returnBool->val.booleanValue = 0; }
                             break;
                         default:
                             printf("=: expects type <real number> as arguments\n");
@@ -1350,12 +1334,12 @@ Value *equalNumber(Value *args) { /*special form for = */
                     }
                     break;
                 case floatType:
-                    switch(car(cdr(current))->type){
+                    switch(car(car(cdr(current)))->type){
                         case integerType:
-                            if(car(current)->val.floatValue != car(cdr(current))->val.integerValue) { returnBool->val.booleanValue = 0; }
+                            if(car(car(current))->val.floatValue != car(car(cdr(current)))->val.integerValue) { returnBool->val.booleanValue = 0; }
                             break;
                         case floatType:
-                            if(car(current)->val.floatValue != car(cdr(current))->val.floatValue) { returnBool->val.booleanValue = 0; }
+                            if(car(car(current))->val.floatValue != car(car(cdr(current)))->val.floatValue) { returnBool->val.booleanValue = 0; }
                             break;
                         default:
                             printf("=: expects type <real number> as arguments\n");
@@ -1368,7 +1352,7 @@ Value *equalNumber(Value *args) { /*special form for = */
             }
             current = cdr(current);
         }
-        return returnBool;
+        return cons(returnBool, NULL);
     }
     printf("=: expects at least 2 arguments\n");
     return NULL;
@@ -1381,14 +1365,14 @@ Value *lessThanEqual(Value *args){ /*special form for <= */
         returnBool->type = booleanType;
         returnBool->val.booleanValue = 1;
         while(cdr(current)){
-            switch(car(current)->type){
+            switch(car(car(current))->type){
                 case integerType:
-                    switch(car(cdr(current))->type){
+                    switch(car(car(cdr(current)))->type){
                         case integerType:
-                            if(car(current)->val.integerValue > car(cdr(current))->val.integerValue) { returnBool->val.booleanValue = 0; }
+                            if(car(car(current))->val.integerValue > car(car(cdr(current)))->val.integerValue) { returnBool->val.booleanValue = 0; }
                             break;
                         case floatType:
-                            if(car(current)->val.integerValue > car(cdr(current))->val.floatValue) { returnBool->val.booleanValue = 0; }
+                            if(car(car(current))->val.integerValue > car(car(cdr(current)))->val.floatValue) { returnBool->val.booleanValue = 0; }
                             break;
                         default:
                             printf("<=: expects type <real number> as arguments\n");
@@ -1396,12 +1380,12 @@ Value *lessThanEqual(Value *args){ /*special form for <= */
                     }
                     break;
                 case floatType:
-                    switch(car(cdr(current))->type){
+                    switch(car(car(cdr(current)))->type){
                         case integerType:
-                            if(car(current)->val.floatValue > car(cdr(current))->val.integerValue) { returnBool->val.booleanValue = 0; }
+                            if(car(car(current))->val.floatValue > car(car(cdr(current)))->val.integerValue) { returnBool->val.booleanValue = 0; }
                             break;
                         case floatType:
-                            if(car(current)->val.floatValue > car(cdr(current))->val.floatValue) { returnBool->val.booleanValue = 0; }
+                            if(car(car(current))->val.floatValue > car(car(cdr(current)))->val.floatValue) { returnBool->val.booleanValue = 0; }
                             break;
                         default:
                             printf("<=: expects type <real number> as arguments\n");
@@ -1414,7 +1398,7 @@ Value *lessThanEqual(Value *args){ /*special form for <= */
             }
             current = cdr(current);
         }
-        return returnBool;
+        return cons(returnBool, NULL);
     }
     printf("<=: expects at least 2 arguments\n");
     return NULL;
@@ -1426,14 +1410,14 @@ Value *__and__(Value *args) {
         Value *noArgs = mallocValue();
         noArgs->type = booleanType;
         noArgs->val.booleanValue = 1;
-        return noArgs;
+        return cons(noArgs, NULL);
     }
     while(cdr(current)) {
-        if(car(current)->type == booleanType && car(current)->val.booleanValue == 0) {
+        if(car(car(current))->type == booleanType && car(car(current))->val.booleanValue == 0) {
             Value *false = mallocValue();
             false->type = booleanType;
             false->val.booleanValue = 0;
-            return false;
+            return cons(false, NULL);
         }
         current = cdr(current);
     }
@@ -1444,7 +1428,7 @@ Value *__or__(Value *args) {
     Value *current = args;
     Value *false;
     while(current){
-        if(car(current)->type != booleanType || (car(current)->type == booleanType && car(current)->val.booleanValue == 1)) {
+        if(car(car(current))->type != booleanType || (car(car(current))->type == booleanType && car(car(current))->val.booleanValue == 1)) {
             return car(current);
         }
         current = cdr(current);
@@ -1452,7 +1436,7 @@ Value *__or__(Value *args) {
     false = mallocValue();
     false->type = booleanType;
     false->val.booleanValue = 0;
-    return false;
+    return cons(false, NULL);
 }
 
 Value *isPair(Value *args) {
@@ -1592,7 +1576,7 @@ Value *evalLet(Value *args, Environment *environment) {
 		}
 		val = mallocValueStarStar();
 		*val = cdr(args);
-		return *(evalEach(val, frame));
+		return car(*(evalEach(val, frame)));
 	}
 	
 	printf("let: bad syntax\n");
@@ -1623,7 +1607,7 @@ Value *evalLetRec(Value *args, Environment *environment) {
 		}
 		val = mallocValueStarStar();
 		*val = cdr(args);
-		return *(evalEach(val, frame));
+		return car(*(evalEach(val, frame)));
 	}
 	printf("letrec: bad syntax\n");
 	return NULL;
@@ -1641,12 +1625,17 @@ Value *evalIf(Value *args, Environment *environment) {
 		return NULL;
 	}
 	testValue = eval(car(args), environment);
+	printf("If testValue value: ");
+	printValue(testValue);
+	printf("\n");
+	testValue = car(testValue);
 	
 	/* if the test result is false, then return the eval of the alternate */
 	if (testValue && testValue->type == booleanType && testValue->val.booleanValue == 0) {
 		if (!cdr(cdr(args))) {
 			return NULL;
 		}
+		printf("IFIFIFIFIFIFIFIFIF\n");
 		return eval(car(cdr(cdr(args))), environment);
 	}
 	
@@ -1677,7 +1666,6 @@ Value *evalLambda(Value *args, Environment *environment) {
 			return closure;
 		}
 		else {
-			freeValue(closure);
 			printf("problem allocating memory for the closureValue\n");
 			return NULL;
 		}
@@ -1972,7 +1960,7 @@ Value *apply(Value *f, Value **actualArgs) {
         printValue(*actualArgs);
         printf("\n");
         result = f->val.primitiveValue(*actualArgs);
-        printf("application returns: ");
+        printf("primitive application returns: ");
         printValue(result);
         printf("\n");
 		return result;
@@ -1980,7 +1968,7 @@ Value *apply(Value *f, Value **actualArgs) {
 	else {
 		if (f->type == closureType) {
 			Value **val;
-			/*Value *result;*/
+			Value *result;
 			Environment *frame = createFrame(f->val.closureValue->environment);
 			Value *currentFormalArg = f->val.closureValue->formalArguments; /* maybe add some error checking */
 			Value *currentActualArg = *actualArgs;
@@ -2020,7 +2008,7 @@ Value *apply(Value *f, Value **actualArgs) {
 				}
 			}
 			if (currentFormalArg && car(currentFormalArg) && car(currentFormalArg)->type == variableArityType) {
-				printf("binding null to post VA variable\n");
+				/*printf("binding null to post VA variable\n");*/
 				bind((car(cdr(currentFormalArg)))->val.symbolValue, cons(NULL, NULL), frame);
 			}
 			 
@@ -2035,29 +2023,11 @@ Value *apply(Value *f, Value **actualArgs) {
 			printf("\n");
 			val = mallocValueStarStar();
 			*val = f->val.closureValue->body;
-			if (variableArity) {
-			    
-			}
-			/*if (variableArity) {
-			    result = *(evalEach(val, frame));
-			    printf("application returns: ");
-			    printValue(result);
-			    printf("\n");
-			    printf("car of that is: ");
-			    printValue(car(result));
-			    printf("\n");
-			    printf("cdr of that is: ");
-			    printValue(cdr(result));
-			    printf("\n");
-			    return car(result);
-			} else {
-			    result = car(*(evalEach(val, frame)));
-                printf("application returns: ");
-			    printValue(result);
-			    printf("\n");
-    	    	return result;
-    	    }*/
-    	    return car(*(evalEach(val, frame)));
+    	    result = car(*(evalEach(val, frame)));
+      	    printf("closure application returns: ");
+            printValue(result);
+            printf("\n");
+    	    return result;
 		} else {
 			printf("procedure application: expected procedure\n");
 			return NULL;

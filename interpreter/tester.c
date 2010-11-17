@@ -98,9 +98,9 @@ int evaluateTester(int argc, char *argv[]) {
 				value = evaluate(parseTree, topFrame);
 				printf("\nVALUE:\n");
 				/*printValue(cons(NULL, NULL));*/
-				/*printValue(*value);
-				printf("\n");*/
-				printEvaluation(*value);
+				printValue(*value);
+				printf("\n");
+				/*printEvaluation(*value);*/
 			}
 			else { depth = 0; }
 			leftoverTokens = NULL;

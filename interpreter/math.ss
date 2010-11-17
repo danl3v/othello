@@ -88,10 +88,10 @@
 
 (define ceiling
   (lambda (x)
-    (define y (floor x))
-    (if (= y x)
-        x
-        (+ y 1))))
+    (let ((y (floor x)))
+        (if (= y x)
+            x
+            (+ y 1)))))
 
 (define truncate
   (lambda (x)
@@ -105,14 +105,14 @@
 
 (define round
   (lambda (x)
-    (define y (mod x 1))
-    (if (= y .5)
-        (if (even? (+ x y))
-            (+ x y)
-            (- x y))
-        (if (< y .5)
-            (floor x)
-            (ceiling x)))))
+    (let ((y (mod x 1)))
+        (if (= y .5)
+            (if (even? (+ x y))
+                (+ x y)
+                (- x y))
+            (if (< y .5)
+                (floor x)
+                (ceiling x))))))
 
 (define div
   (lambda (x y)
@@ -191,16 +191,22 @@
         
 (define lambdaTesterHelper2
     (lambda (x) x))
+
+(define vaBad
+    (lambda (x . z)
+        (if (null? z)
+        "done"
+        (vaBad x (cdr z)))))
     
 (define va
     (lambda (x . z)
         (if (null? z)
         "done"
-        (va x (cdr z)))))
+        (vaHelper x z))))
         
 (define vaHelper
-    (lambda (a) 
-        (vaHelper2 a)))
+    (lambda (a b) 
+        (vaHelper a (cdr b))))
 
 (define vaHelper2
     (lambda (g)
