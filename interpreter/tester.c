@@ -23,7 +23,6 @@ int tokenTester() {
 		tokens = tokenize(expression);
 		if (tokens) {
 			printTokens(*tokens);
-		/*destroy(tokens);*/
 		}
 	}
 	free(expression);
@@ -72,9 +71,10 @@ int evaluateTester(int argc, char *argv[]) {
 	Value **leftoverTokens = NULL;
 	Value **parseTree = NULL;
 	Value **value = NULL;
+	Environment *topFrame;
 	mallocedValues = malloc(sizeof(**mallocedValues)); /* initialize the list that holds all the mallocedValues */
 	*mallocedValues = NULL;
-	Environment *topFrame = createTopFrame();
+	topFrame = createTopFrame();
 	if (argc > 1) {
 		Value *load = mallocValue();
 		load->type = stringType;
@@ -83,8 +83,14 @@ int evaluateTester(int argc, char *argv[]) {
 			evalLoad(cons(load, NULL), topFrame);
 		}
 	}
+	printf("----------------------\n");
+	printf("INTERPRETER FOR SCHEME\n");
+	printf("type 'exit' to quit\n");
 	printf("> ");
 	while (fgets(expression, 255, stdin)) {
+		if (!strcmp(expression, "exit\n")) {
+			break;
+		}
 		tokens = append(leftoverTokens, tokenize(expression));
 		if (tokens) { printf("\nTOKENS:\n"); printTokens(*tokens); }
 

@@ -44,7 +44,7 @@ extern Value **mallocedValues;
 
 Value *howdyDoodyValue;
 
-void initHowdyDoody();
+int initHowdyDoody();
 
 /* TESTERS */
 int tokenTester();

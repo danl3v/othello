@@ -99,7 +99,7 @@ Value *mallocValue() {
 	Value *value = malloc(sizeof(*value));
 	
 	if (value) {
-		printf("malloced value\n");
+		/*printf("malloced value\n");*/
 		*mallocedValues = stealthCons(value, *mallocedValues);
 	}
 	return value;
@@ -258,11 +258,17 @@ Value *fakeCdr(Value *value) { /* we should not need to create a new mini parse 
 Value *cons(Value *value1, Value *value2) {
 	Value *result = mallocValue();
 	Pair *pair = mallocPair();
-	pair->car = value1;
-	pair->cdr = value2;
-	result->type = pairType;
-	result->val.pairValue = pair;
-	return result;
+	if (!result || !pair) {
+		printf("cons: failed to allocate memory\n");
+		return NULL;
+	}
+	else {
+		pair->car = value1;
+		pair->cdr = value2;
+		result->type = pairType;
+		result->val.pairValue = pair;
+		return result;
+	}
 }
 
 Value *fakeCons(Value *value) { /*We can probably do a lot of this with regular cons*/
@@ -280,6 +286,12 @@ Value *fakeCons(Value *value) { /*We can probably do a lot of this with regular 
 	pair1 = mallocPair();
 	value2 = mallocValue();
 	pair2 = mallocPair();
+	
+	if (!value1 || !pair1 || !value1 || !pair2) {
+		printf("fakeCons: failed to allocate memory\n");
+		return NULL;
+	}
+	
 	value1->type = pairType;
 	value1->val.pairValue = pair1;
 	value2->type = pairType;
@@ -473,6 +485,12 @@ void printValueHelper(Value *value) {
 char *substr(char *string, int start, int end) { /* copies from string from index start to end-1 */ 
 	int i;
 	char *result = malloc(sizeof(char)*(end - start + 1));
+	
+	if (!result) {
+		printf("in substr: failed to allocate memory\n");
+		return NULL;
+	}
+	
 	for (i=0;i<end-start;i++) {
 		result[i] = string[start+i];
 	}
@@ -483,6 +501,11 @@ char *substr(char *string, int start, int end) { /* copies from string from inde
 int consToken(Value **tokenList, int type, char *string, int lineNumber) {
 	Value *token = mallocValue();
 	char * str;
+	
+	if (!token) {
+		printf("consToken: failed to allocate memory\n");
+		return 0;
+	}
 	
 	if (token) {
 		token->type = type;
@@ -510,6 +533,12 @@ Value **tokenize (char *expression) {
 	int tokenStartIndex = 0;
 	int tokenCurrentIndex = 0;
 	Value **tokenList = mallocValueStarStar();
+	
+	if (!tokenList) {
+		printf("in tokenize: failed to allocate memory\n");
+		return NULL;
+	}
+	
 	if (!(*expression) || (!strcmp(expression, "\n"))) {
 		return tokenList;
 	}
@@ -1052,6 +1081,13 @@ Value **tokenize (char *expression) {
 Value **parse(Value **tokenList, int* depth) {
 	Value **parseTree = mallocValueStarStar();
 	Value *current;
+	
+	if (!parseTree) {
+		printf("in parse: failed to allocate memory\n");
+		return NULL;
+	}
+	
+
 	if (tokenList) { /* check to see if the tokenList exists */
 		current = *tokenList;
 		while (current) { /* start to iterate through the tokenList */
@@ -1097,6 +1133,11 @@ Value **parse(Value **tokenList, int* depth) {
 Value *add(Value *args) {
 	Value *result = mallocValue();
 	Value *current = args;
+	if (!result) {
+		printf("in add: failed to allocate memory\n");
+		return NULL;
+	}
+	
 	result->type = integerType;
 	result->val.integerValue = 0;
 	if (!args) {
@@ -1139,6 +1180,12 @@ Value *add(Value *args) {
 Value *subtract(Value *args) {
 	Value *result = mallocValue();
 	Value *current = args;
+	
+	if (!result) {
+		printf("in subtract: failed to allocate memory\n");
+		return NULL;
+	}
+	
 	if (!current) {
 		printf("-: expects at least 1 argument, given 0\n");
 		return NULL;
@@ -1210,6 +1257,11 @@ Value *subtract(Value *args) {
 Value *multiply(Value *args) {
 	Value *result = mallocValue();
 	Value *current = args;
+	if (!result) {
+		printf("in multiply: failed to allocate memory\n");
+		return NULL;
+	}
+	
 	result->type = integerType;
 	result->val.integerValue = 1;
 	if (!args) {
@@ -1252,6 +1304,11 @@ Value *multiply(Value *args) {
 Value *divide(Value *args) {
 	Value *result = mallocValue();
 	Value *current = args;
+	if (!result) {
+		printf("in divide: failed to allocate memory\n");
+		return NULL;
+	}
+
 	if (!current) {
 		printf("/: expects at least 1 argument, given 0\n");
 		return NULL;
@@ -1341,46 +1398,57 @@ Value *divide(Value *args) {
 }
 
 Value *equalPointer(Value *args) { /* special form for eq? */
-        if (args && cdr(args) && !cdr(cdr(args))) {
-            Value *returnBool = mallocValue();
-            returnBool->type = booleanType;
-                if (car(car(args)) == car(car(cdr(args)))) { returnBool->val.booleanValue = 1; }
-                else{ returnBool->val.booleanValue = 0; }
-                return cons(returnBool, NULL);
-        }
-        printf("eq?: expects 2 arguments\n");
-        return NULL;
+	if (args && cdr(args) && !cdr(cdr(args))) {
+		Value *returnBool = mallocValue();		
+		if (!returnBool) {
+			printf("in eq?: failed to allocate memory\n");
+			return NULL;
+		}
+		returnBool->type = booleanType;
+		if (car(car(args)) == car(car(cdr(args)))) { returnBool->val.booleanValue = 1; }
+		else { returnBool->val.booleanValue = 0; }
+		return cons(returnBool, NULL);
+	}
+	printf("eq?: expects 2 arguments\n");
+	return NULL;
 }
 
 Value *equalContent(Value *args) { /*special form for equal? */
-       if (args && cdr(args) && !cdr(cdr(args))) {
-           Value *returnBool = mallocValue();
-           returnBool->type = booleanType;
-           returnBool->val.booleanValue = 0;
-               if(car(args)->type != car(cdr(args))->type) {
-                   return cons(returnBool, NULL);
-               }
-               switch(car(args)->type){
-                   case integerType:
-                       if(car(args)->val.integerValue == car(cdr(args))->val.integerValue) { returnBool->val.booleanValue = 1; }
-                       break;
-                   case floatType:
-                       if(car(args)->val.floatValue == car(cdr(args))->val.floatValue) { returnBool->val.booleanValue = 1; }
-                       break;
-                   case booleanType:
-                       if(car(args)->val.booleanValue == car(cdr(args))->val.booleanValue) { returnBool->val.booleanValue = 1; }
-                       break;
-                   case stringType:
-                       if(!strcmp(car(args)->val.stringValue, car(cdr(args))->val.stringValue)) { returnBool->val.booleanValue = 1; }
-                       break;
-                   case pairType:
-                       returnBool->val.booleanValue = compareValues(car(args), car(cdr(args)));
-                       break;
-                }
-                return cons(returnBool, NULL);
-       }
-       printf("equal?: expects 2 arguments\n");
-       return NULL;
+	if (args && cdr(args) && !cdr(cdr(args))) {
+	   Value *returnBool = mallocValue();
+	   
+		if (!returnBool) {
+			printf("in equal?: failed to allocate memory\n");
+			return NULL;
+		}
+	   
+	   returnBool->type = booleanType;
+	   returnBool->val.booleanValue = 0;
+	   
+	   if (car(args)->type != car(cdr(args))->type) {
+		   return cons(returnBool, NULL);
+	   }
+	   switch(car(args)->type){
+		   case integerType:
+			   if(car(args)->val.integerValue == car(cdr(args))->val.integerValue) { returnBool->val.booleanValue = 1; }
+			   break;
+		   case floatType:
+			   if(car(args)->val.floatValue == car(cdr(args))->val.floatValue) { returnBool->val.booleanValue = 1; }
+			   break;
+		   case booleanType:
+			   if(car(args)->val.booleanValue == car(cdr(args))->val.booleanValue) { returnBool->val.booleanValue = 1; }
+			   break;
+		   case stringType:
+			   if(!strcmp(car(args)->val.stringValue, car(cdr(args))->val.stringValue)) { returnBool->val.booleanValue = 1; }
+			   break;
+		   case pairType:
+			   returnBool->val.booleanValue = compareValues(car(args), car(cdr(args)));
+			   break;
+		}
+		return cons(returnBool, NULL);
+	}
+	printf("equal?: expects 2 arguments\n");
+	return NULL;
 }
 
 int compareValues(Value *value, Value *value2) {
@@ -1422,6 +1490,12 @@ Value *equalNumber(Value *args) { /*special form for = */
     if(args && cdr(args)){
         Value *current = args;
         Value *returnBool = mallocValue();
+        
+		if (!returnBool) {
+			printf("in =: failed to allocate memory\n");
+			return NULL;
+		}
+        
         returnBool->type = booleanType;
         returnBool->val.booleanValue = 1;
         while(cdr(current) && car(car(cdr(current)))){
@@ -1465,13 +1539,19 @@ Value *equalNumber(Value *args) { /*special form for = */
 }
 
 Value *lessThanEqual(Value *args){ /*special form for <= */
-    if(args && cdr(args)){
+    if (args && cdr(args)){
         Value *current = args;
         Value *returnBool = mallocValue();
+        
+		if (!returnBool) {
+			printf("in <=: failed to allocate memory\n");
+			return NULL;
+		}
+        
         returnBool->type = booleanType;
         returnBool->val.booleanValue = 1;
-        while(cdr(current)){
-            switch(car(car(current))->type){
+        while (cdr(current)){
+            switch (car(car(current))->type){
                 case integerType:
                     switch(car(car(cdr(current)))->type){
                         case integerType:
@@ -1486,7 +1566,7 @@ Value *lessThanEqual(Value *args){ /*special form for <= */
                     }
                     break;
                 case floatType:
-                    switch(car(car(cdr(current)))->type){
+                    switch (car(car(cdr(current)))->type){
                         case integerType:
                             if(car(car(current))->val.floatValue > car(car(cdr(current)))->val.integerValue) { returnBool->val.booleanValue = 0; }
                             break;
@@ -1512,15 +1592,27 @@ Value *lessThanEqual(Value *args){ /*special form for <= */
 
 Value *__and__(Value *args) {
     Value *current = args;
-    if(!args){
+    if (!args){
         Value *noArgs = mallocValue();
+        
+        if (!noArgs) {
+			printf("in and: failed to allocate memory\n");
+			return NULL;
+		}
+        
         noArgs->type = booleanType;
         noArgs->val.booleanValue = 1;
         return cons(noArgs, NULL);
     }
-    while(cdr(current)) {
-        if(car(car(current))->type == booleanType && car(car(current))->val.booleanValue == 0) {
+    while (cdr(current)) {
+        if (car(car(current))->type == booleanType && car(car(current))->val.booleanValue == 0) {
             Value *false = mallocValue();
+            
+			if (!false) {
+				printf("in and: failed to allocate memory\n");
+				return NULL;
+			}
+            
             false->type = booleanType;
             false->val.booleanValue = 0;
             return cons(false, NULL);
@@ -1540,6 +1632,12 @@ Value *__or__(Value *args) {
         current = cdr(current);
     }
     false = mallocValue();
+    
+	if (!false) {
+		printf("in or: failed to allocate memory\n");
+		return NULL;
+	}
+    
     false->type = booleanType;
     false->val.booleanValue = 0;
     return cons(false, NULL);
@@ -1560,6 +1658,12 @@ Value *isPair(Value *args) {
 	}
 	printf("isPair args3\n");
 	boolean = mallocValue();
+	
+	if (!boolean) {
+		printf("in isPair: failed to allocate memory\n");
+		return NULL;
+	}
+	
     boolean->type = booleanType;
 	if (car(args) && car(args)->type == pairType && car(car(args)) && car(car(args))->type == pairType && !compareValues(car(car(args)), cons(NULL, NULL))) {
 		boolean->val.booleanValue = 1;
@@ -1605,7 +1709,10 @@ Value *evalDefine(Value *args, Environment *environment) {
 	}
 
 	value = eval(car(cdr(args)), environment);
-	bind(car(args)->val.symbolValue, value, environment);
+	if (bind(car(args)->val.symbolValue, value, environment)) {
+		printf("in define: error while binding\n");
+		return NULL;
+	}
 	return howdyDoodyValue;
 }
 
@@ -1637,7 +1744,10 @@ Value *evalSetBang(Value *args, Environment *currentEnvironment, Environment *ca
 	current = *(currentEnvironment->bindings);
 	while (current) {
 		if (!strcmp((car(car(current)))->val.symbolValue, car(args)->val.symbolValue)) {
-			bind(car(args)->val.symbolValue, eval(car(cdr(args)), callingEnvironment), currentEnvironment); 
+			if (bind(car(args)->val.symbolValue, eval(car(cdr(args)), callingEnvironment), currentEnvironment)) {
+				printf("in set!: error while binding\n");
+				return NULL;
+			}
 			return howdyDoodyValue;
 		}
 		current = cdr(current);
@@ -1665,11 +1775,18 @@ Value *evalLet(Value *args, Environment *environment) {
 			}
 			notBound = bind(car(car(current))->val.symbolValue, eval(car(cdr(car(current))), environment), frame);
 			if (notBound) {
+				printf("in let: error while binding\n");
 				return NULL;
 			}
 			current = cdr(current);
 		}
 		val = mallocValueStarStar();
+		
+		if (!val) {
+			printf("in let: failed to allocate memory\n");
+			return NULL;
+		}
+		
 		*val = cdr(args);
 		return car(*(evalEach(val, frame)));
 	}
@@ -1691,16 +1808,34 @@ Value *evalLetRec(Value *args, Environment *environment) {
 				return NULL;
 			}
 			undefined = mallocValue();
+			
+			if (!undefined) {
+				printf("in letrec: failed to allocate memory\n");
+				return NULL;
+			}
+			
 			undefined->type = undefinedType;
-			bind(car(car(current))->val.symbolValue, undefined, frame);
+			if (bind(car(car(current))->val.symbolValue, undefined, frame)) {
+				printf("in letrec: error while binding\n");
+				return NULL;
+			}
 			current = cdr(current);
 		}
 		current = car(args);
 		while (current) {
-			bind(car(car(current))->val.symbolValue, eval(car(cdr(car(current))), frame), frame);
+			if (bind(car(car(current))->val.symbolValue, eval(car(cdr(car(current))), frame), frame)) {
+				printf("in letrec: error while binding\n");
+				return NULL;
+			}
 			current = cdr(current);
 		}
 		val = mallocValueStarStar();
+		
+		if (!val) {
+			printf("in letrec: failed to allocate memory\n");
+			return NULL;
+		}
+		
 		*val = cdr(args);
 		return car(*(evalEach(val, frame)));
 	}
@@ -1750,9 +1885,11 @@ Value *evalLambda(Value *args, Environment *environment) {
 	}
 	if (car(args)->type == pairType) {
         closure = mallocValue();
+        
         if (closure) {
             closure->type = closureType;
             closure->val.closureValue = mallocClosure();
+            
             if (closure->val.closureValue) {
                 closure->val.closureValue->formalArguments = car(args);
                 closure->val.closureValue->body = cdr(args); /* body is a list, can have multiple bodies */
@@ -1760,17 +1897,18 @@ Value *evalLambda(Value *args, Environment *environment) {
                 return closure;
             }
             else {
-                printf("problem allocating memory for the closureValue\n");
+                printf("lambda: failed to allocate memory\n");
                 return NULL;
             }
         }
         else {
-            printf("problem allocating memory for the closure\n");
+            printf("lambda: failed to allocate memory\n");
             return NULL;
         }
     }
     else {
         closure = mallocValue();
+        
         if (closure) {
             closure->type = closureType;
             closure->val.closureValue = mallocClosure();
@@ -1781,12 +1919,12 @@ Value *evalLambda(Value *args, Environment *environment) {
                 return closure;
             }
             else {
-                printf("problem allocating memory for the closureValue\n");
+                printf("lambda: failed to allocate memory\n");
                 return NULL;
             }
         }
         else {
-            printf("problem allocating memory for the closure\n");
+            printf("lambda: failed to allocate memory\n");
             return NULL;
         }
         
@@ -1816,6 +1954,12 @@ Value *evalLoad(Value *args, Environment *environment) { /* think about line len
 			return NULL;
 		}
 		expression = malloc(256 * sizeof(char));
+		
+		if (!expression) {
+			printf("in load: failed to allocate memory\n");
+			return NULL;
+		}
+		
 		depth = 0;
 		tokens = NULL;
 		leftoverTokens = NULL;
@@ -1850,6 +1994,12 @@ Value *evalLoad(Value *args, Environment *environment) { /* think about line len
 
 Value *makePrimitiveValue(Value* (*f)(Value *)){
 	Value *resultValue = mallocValue();
+	
+	if (!resultValue) {
+		printf("creating primative: failed to allocate memory\n");
+		return NULL;
+	}
+	
 	resultValue->type = primitiveType;
 	resultValue->val.primitiveValue = f;
 	return resultValue;
@@ -1857,29 +2007,44 @@ Value *makePrimitiveValue(Value* (*f)(Value *)){
 
 Environment* createTopFrame() {
 	Environment *topFrame = createFrame(NULL);
-	bind("+", makePrimitiveValue(add), topFrame);
-	bind("-", makePrimitiveValue(subtract), topFrame);
-	bind("*", makePrimitiveValue(multiply), topFrame);
-	bind("/", makePrimitiveValue(divide), topFrame);
-	bind("car", makePrimitiveValue(fakeCar), topFrame);
-	bind("cdr", makePrimitiveValue(fakeCdr), topFrame);
-	bind("cons", makePrimitiveValue(fakeCons), topFrame);
-	bind("eq?", makePrimitiveValue(equalPointer), topFrame);
-	bind("equal?", makePrimitiveValue(equalContent), topFrame);
-	bind("=", makePrimitiveValue(equalNumber), topFrame);
-	bind("<=", makePrimitiveValue(lessThanEqual), topFrame);
-	bind("and", makePrimitiveValue(__and__), topFrame);
-	bind("or", makePrimitiveValue(__or__), topFrame);
-	bind("null", cons(NULL, NULL), topFrame);
-	bind("pair?", makePrimitiveValue(isPair), topFrame);
+	int i = 0;
+	
+	i = i + bind("+", makePrimitiveValue(add), topFrame);
+	i = i + bind("-", makePrimitiveValue(subtract), topFrame);
+	i = i + bind("*", makePrimitiveValue(multiply), topFrame);
+	i = i + bind("/", makePrimitiveValue(divide), topFrame);
+	i = i + bind("car", makePrimitiveValue(fakeCar), topFrame);
+	i = i + bind("cdr", makePrimitiveValue(fakeCdr), topFrame);
+	i = i + bind("cons", makePrimitiveValue(fakeCons), topFrame);
+	i = i + bind("eq?", makePrimitiveValue(equalPointer), topFrame);
+	i = i + bind("equal?", makePrimitiveValue(equalContent), topFrame);
+	i = i + bind("=", makePrimitiveValue(equalNumber), topFrame);
+	i = i + bind("<=", makePrimitiveValue(lessThanEqual), topFrame);
+	i = i + bind("and", makePrimitiveValue(__and__), topFrame);
+	i = i + bind("or", makePrimitiveValue(__or__), topFrame);
+	i = i + bind("null", cons(NULL, NULL), topFrame);
+	i = i + bind("pair?", makePrimitiveValue(isPair), topFrame);
+	i = i + initHowdyDoody();
+	if (i) {
+		printf("error in creating top frame\n");
+		return NULL;
+	}
+	
 	return topFrame;
 }
 
-void initHowdyDoody() {
+int initHowdyDoody() {
 	char *howdyDoody = "Howdy Doody";
 	howdyDoodyValue = malloc(sizeof(Value));
+	
+	if (!howdyDoodyValue) {
+		printf("in howdydoodyinit: failed to allocate memory\n");
+		return 1;
+	}
+	
 	howdyDoodyValue->type = stringType;
 	howdyDoodyValue->val.stringValue = substr(howdyDoody, 0, strlen(howdyDoody) + 1);
+	return 0;
 }
 
 Environment* createFrame(Environment *parent) {
@@ -1920,11 +2085,29 @@ int bind(char *symbol, Value *value, Environment *environment) {
 	else if (value) {
 		Value *symbolValue;
 		Value *binding = mallocValue();
+		
+		if (!binding) {
+			printf("while binding: failed to allocate memory\n");
+			return 1;
+		}
+		
 		binding->type = pairType;
 		symbolValue = mallocValue();
+		
+		if (!symbolValue) {
+			printf("in bind: failed to allocate memory\n");
+			return 1;
+		}
+		
 		symbolValue->type = symbolType;
 		symbolValue->val.symbolValue = substr(symbol, 0, strlen(symbol) + 1);
 		binding->val.pairValue = mallocPair();
+		
+		if (!binding->val.pairValue) {
+			printf("while binding: failed to allocate memory\n");
+			return 1;
+		}
+		
 		binding->val.pairValue->car = symbolValue;
 		binding->val.pairValue->cdr = value;
 		*(environment->bindings) = cons(binding, *(environment->bindings));
@@ -1942,9 +2125,15 @@ Value **evaluate(Value **parseTree, Environment *environment) {
 
 Value **evalEach(Value **tree, Environment *environment) {
 	Value **evaluated = mallocValueStarStar();
-    Value *valueStar = NULL;
+	Value *valueStar = NULL;
 	Value *current = *tree;
 	Value *result;
+
+	if (!evaluated) {
+		printf("in evalEach: failed to allocate memory\n");
+		return NULL;
+	}
+	
 	while (current && current->type == pairType && car(current)) {
 	    result = eval(car(current), environment);
 	    if (result) {
@@ -1980,6 +2169,12 @@ Value *eval(Value *value, Environment *environment) {
 	Value *operator;
 	Value **args = mallocValueStarStar();
 	Value *v;
+	
+	if (!args) {
+		printf("in eval: failed to allocate memory\n");
+		return NULL;
+	}
+	
 	switch (value->type) {
 		case booleanType:
 		case integerType:
@@ -2077,7 +2272,13 @@ Value *apply(Value *f, Value **actualArgs) {
 		        Value **val;
 		        Environment *frame = createFrame(f->val.closureValue->environment);
 		        Value **variableArityList = mallocValueStarStar();
-		        Value *currentActualArg = *actualArgs;
+				Value *currentActualArg = *actualArgs;
+
+		        if (!variableArityList) {
+					printf("in apply: failed to allocate memory\n");
+					return NULL;
+				}
+		        
 		        *variableArityList = cons(car(car(currentActualArg)), NULL);
                 currentActualArg = cdr(currentActualArg);
                 printf("entering while\n");
@@ -2088,11 +2289,20 @@ Value *apply(Value *f, Value **actualArgs) {
                 reverse(variableArityList);
                 printValue(*variableArityList);
                 printf("\n");
-                bind((f->val.closureValue->formalArguments)->val.symbolValue, cons(*variableArityList, NULL), frame);
+                if (bind((f->val.closureValue->formalArguments)->val.symbolValue, cons(*variableArityList, NULL), frame)) {
+                	printf("in apply: error while binding\n");
+                	return NULL;
+                }
                 printf("\nevaluating body:\n");
                 printParseTree(f->val.closureValue->body);
                 printf("\n");
                 val = mallocValueStarStar();
+                
+                if (!val) {
+					printf("in apply: failed to allocate memory\n");
+					return NULL;
+				}
+                
                 *val = f->val.closureValue->body;
                 result = car(*(evalEach(val, frame)));
                 printf("closure application returns: ");
@@ -2118,6 +2328,12 @@ Value *apply(Value *f, Value **actualArgs) {
                     printf("\n");*/
                     if (car(currentFormalArg)->type == variableArityType) {
                         Value **variableArityList = mallocValueStarStar();
+                        
+                        if (!variableArityList) {
+							printf("in apply: failed to allocate memory\n");
+							return NULL;
+						}
+                        
                         variableArity = 1;
                         if (!cdr(currentFormalArg)) {
                             printf("error: no variable after arity\n");
@@ -2140,19 +2356,28 @@ Value *apply(Value *f, Value **actualArgs) {
                         printf("variableArityList: ");
                         printValue(*variableArityList);
                         printf("\n");
-                        bind((car(cdr(currentFormalArg)))->val.symbolValue, cons(*variableArityList, NULL), frame);
+                        if (bind((car(cdr(currentFormalArg)))->val.symbolValue, cons(*variableArityList, NULL), frame)) {
+                        	printf("in apply: error while binding\n");
+                        	return NULL;
+                        }
                         currentFormalArg = NULL;
                         break;
                     }
                     else {
-                        bind((car(currentFormalArg))->val.symbolValue, car(currentActualArg), frame);
+                        if (bind((car(currentFormalArg))->val.symbolValue, car(currentActualArg), frame)) {
+                        	printf("in apply: error while binding\n");
+                        	return NULL;
+                        }
                         currentFormalArg = cdr(currentFormalArg);
                         currentActualArg = cdr(currentActualArg);
                     }
                 }
                 if (currentFormalArg && car(currentFormalArg) && car(currentFormalArg)->type == variableArityType) {
                     /*printf("binding null to post VA variable\n");*/
-                    bind((car(cdr(currentFormalArg)))->val.symbolValue, cons(NULL, NULL), frame);
+                    if (bind((car(cdr(currentFormalArg)))->val.symbolValue, cons(NULL, NULL), frame)) {
+						printf("in apply: error while binding\n");
+						return NULL;
+                    }
                 }
                  
                 if (currentActualArg || (currentFormalArg && car(currentFormalArg) && car(currentFormalArg)->type != variableArityType)) {
@@ -2165,6 +2390,12 @@ Value *apply(Value *f, Value **actualArgs) {
                 printParseTree(f->val.closureValue->body);
                 printf("\n");
                 val = mallocValueStarStar();
+                
+                if (!val) {
+					printf("in apply: failed to allocate memory\n");
+					return NULL;
+				}
+                
                 *val = f->val.closureValue->body;
                 result = car(*(evalEach(val, frame)));
                 printf("closure application returns: ");
