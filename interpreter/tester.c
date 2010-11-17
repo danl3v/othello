@@ -107,6 +107,7 @@ int evaluateTester(int argc, char *argv[]) {
 				printf("\n");*/
 				value = evaluate(parseTree, topFrame);
 				printEvaluation(*value);
+				
 			}
 			else { depth = 0; }
 			leftoverTokens = NULL;

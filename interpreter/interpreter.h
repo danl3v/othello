@@ -169,6 +169,8 @@ Value *evalLetRec(Value *args, Environment *environment);
 
 Value *evalLoad(Value *args, Environment *environment);
 
+Value *evalAnd(Value *args, Environment *environment);
+
 /* EVALUATE */
 
 Environment* createTopFrame();

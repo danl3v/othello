@@ -1572,6 +1572,40 @@ Value *lessThanEqual(Value *args){ /*special form for <= */
     return NULL;
 }
 
+Value *evalAnd(Value *args, Environment *environment) {
+    Value *current = args;
+    Value *evaluated;
+    if (!args){
+        Value *noArgs = mallocValue();
+        
+        if (!noArgs) {
+			printf("in and: failed to allocate memory\n");
+			return NULL;
+		}
+        
+        noArgs->type = booleanType;
+        noArgs->val.booleanValue = 1;
+        return cons(noArgs, NULL);
+    }
+    while (current) {
+    	evaluated = eval(car(current), environment);
+        if (car(evaluated)->type == booleanType && car(evaluated)->val.booleanValue == 0) {
+            Value *false = mallocValue();
+            
+			if (!false) {
+				printf("in and: failed to allocate memory\n");
+				return NULL;
+			}
+            
+            false->type = booleanType;
+            false->val.booleanValue = 0;
+            return cons(false, NULL);
+        }
+        current = cdr(current);
+    }
+    return evaluated;
+}
+
 Value *__and__(Value *args) {
     Value *current = args;
     if (!args){
@@ -1645,11 +1679,11 @@ Value *isPair(Value *args) {
     boolean->type = booleanType;
 	if (car(args) && car(args)->type == pairType && car(car(args)) && car(car(args))->type == pairType && !compareValues(car(car(args)), cons(NULL, NULL))) {
 		boolean->val.booleanValue = 1;
-		return boolean;
+		return cons(boolean, NULL);
 	}
 	else {
 		boolean->val.booleanValue = 0;
-		return boolean;
+		return cons(boolean, NULL);
 	}	
 }
 
@@ -2029,7 +2063,7 @@ Environment* createTopFrame() {
 	i = i + bind("equal?", makePrimitiveValue(equalContent), topFrame);
 	i = i + bind("=", makePrimitiveValue(equalNumber), topFrame);
 	i = i + bind("<=", makePrimitiveValue(lessThanEqual), topFrame);
-	i = i + bind("and", makePrimitiveValue(__and__), topFrame);
+	/*i = i + bind("and", makePrimitiveValue(__and__), topFrame);*/
 	i = i + bind("or", makePrimitiveValue(__or__), topFrame);
 	i = i + bind("null", cons(NULL, NULL), topFrame);
 	i = i + bind("pair?", makePrimitiveValue(isPair), topFrame);
@@ -2205,6 +2239,7 @@ Value *eval(Value *value, Environment *environment) {
 				if (!strcmp(operator->val.symbolValue, "letrec")) {return evalLetRec(*args, environment);}
 				if (!strcmp(operator->val.symbolValue, "set!")) {return evalSetBang(*args, environment, environment);}
 				if (!strcmp(operator->val.symbolValue, "load")) {return evalLoad(*args, environment);}
+				if (!strcmp(operator->val.symbolValue, "and")) {return evalAnd(*args, environment);}
 				evaledOperator = eval(operator, environment);
 				if (evaledOperator) {
 					evaledArgs = evalEach(args, environment);
@@ -2248,8 +2283,12 @@ Value *apply(Value *f, Value **actualArgs) {
 					printf("in apply: failed to allocate memory\n");
 					return NULL;
 				}
-		        
-		        *variableArityList = cons(car(car(currentActualArg)), NULL);
+				if (car(currentActualArg)) { 
+		        	*variableArityList = cons(car(car(currentActualArg)), NULL);
+		        }
+		        else { /* the case where we pass in no arguments */
+		        	*variableArityList = NULL;
+		        }
                 currentActualArg = cdr(currentActualArg);
                 while (currentActualArg) {
                     *variableArityList = cons(car(car(currentActualArg)), *variableArityList);
