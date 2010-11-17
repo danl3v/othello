@@ -72,6 +72,8 @@ int evaluateTester(int argc, char *argv[]) {
 	Value **leftoverTokens = NULL;
 	Value **parseTree = NULL;
 	Value **value = NULL;
+	mallocedValues = malloc(sizeof(**mallocedValues)); /* initialize the list that holds all the mallocedValues */
+	*mallocedValues = NULL;
 	Environment *topFrame = createTopFrame();
 	if (argc > 1) {
 		Value *load = mallocValue();
