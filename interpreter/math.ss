@@ -155,7 +155,7 @@
 
 (define gcd-helper
   (lambda (x y)
-    (if (null y)
+    (if (null? y)
         (abs x)
         (if (= (abs x) (abs (car y)))
             (gcd-helper x (cdr y))
@@ -168,7 +168,7 @@
 
 (define lcm-helper
   (lambda (x y)
-    (if (null y)
+    (if (null? y)
         x
         (lcm-helper (/ (abs (* x (car y))) (gcd x (car y))) (cdr y)))))
 

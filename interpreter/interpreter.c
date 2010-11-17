@@ -62,11 +62,11 @@ void markValues(Value *value) {
 void sweepValues() {
 	Value *current = *mallocedValues;
 	Value *previous = current;
-		printf("\n\nhere is what we have\n");
+		printf("\n\nhere are the malloced values\n");
 			printValue(*mallocedValues);
 	while (current) {
 		if (!(car(current)->marked)) {
-			printf("\n\nwe do not need this\n");
+			printf("\n\nwe do not need this value\n");
 			printValue(car(current));
 			previous->val.pairValue->cdr = cdr(current);
 			printf("\ntype: %d\n", car(current)->type);
@@ -74,7 +74,7 @@ void sweepValues() {
 			current = cdr(current);
 		}
 		else {
-		printf("\n\nwe need this\n");
+		printf("\n\nwe need this value\n");
 			printValue(car(current));
 			previous = current;
 			current->val.pairValue->car->marked = 0;
@@ -82,7 +82,7 @@ void sweepValues() {
 		}
 	}
 	
-	printf("\n\nhere is what we have\n");
+	printf("\n\nhere is what we have after garbage collection\n");
 			printValue(*mallocedValues);
 			printf("\n");
 }
@@ -1627,9 +1627,6 @@ Value *__or__(Value *args) {
 
 Value *isPair(Value *args) {
 	Value *boolean;
-	printf("isPair args: ");
-	printValue(args);
-	printf("\n");
 	if (!args) {
 		printf("pair? expects one argument, none given\n");
 		return NULL;
@@ -1638,7 +1635,6 @@ Value *isPair(Value *args) {
 		printf("pair? expects one argument, more than one given\n");
 		return NULL;
 	}
-	printf("isPair args3\n");
 	boolean = mallocValue();
 	
 	if (!boolean) {
@@ -1871,9 +1867,6 @@ Value *evalIf(Value *args, Environment *environment) {
 		return NULL;
 	}
 	testValue = eval(car(args), environment);
-	printf("If testValue value: ");
-	printValue(testValue);
-	printf("\n");
 	testValue = car(testValue);
 	
 	/* if the test result is false, then return the eval of the alternate */
@@ -2200,12 +2193,6 @@ Value *eval(Value *value, Environment *environment) {
 		case pairType:
 			operator = car(value);
 			*args = cdr(value);
-			printf("\neval operator: ");
-			printValue(operator);
-			printf("\n");
-			printf("eval args: ");
-			printValue(*args);
-			printf("\n");
 			if (operator->type == symbolType) {
 				Value *evaledOperator;
 				Value **evaledArgs;
@@ -2246,13 +2233,7 @@ Value *apply(Value *f, Value **actualArgs) {
     int variableArity = 0;
     Value *result;
 	if (f->type == primitiveType) {
-        printf("actual\n");
-        printValue(*actualArgs);
-        printf("\n");
         result = f->val.primitiveValue(*actualArgs);
-        printf("primitive application returns: ");
-        printValue(result);
-        printf("\n");
 		return result;
 	}
 	else {
@@ -2279,9 +2260,6 @@ Value *apply(Value *f, Value **actualArgs) {
                 	printf("in apply: error while binding\n");
                 	return NULL;
                 }
-                printf("\nevaluating body:\n");
-                printParseTree(f->val.closureValue->body);
-                printf("\n");
                 val = mallocValueStarStar();
                 
                 if (!val) {
@@ -2291,9 +2269,6 @@ Value *apply(Value *f, Value **actualArgs) {
                 
                 *val = f->val.closureValue->body;
                 result = car(*(evalEach(val, frame)));
-                printf("closure application returns: ");
-                printValue(result);
-                printf("\n");
                 return result;
 		    }
 		    else {
@@ -2301,11 +2276,6 @@ Value *apply(Value *f, Value **actualArgs) {
                 Environment *frame = createFrame(f->val.closureValue->environment);
                 Value *currentFormalArg = f->val.closureValue->formalArguments;
                 Value *currentActualArg = *actualArgs;
-                printf("formal\n");
-                printValue(currentFormalArg);
-                printf("\nactual\n");
-                printValue(currentActualArg);
-                printf("\n");
                 while (currentFormalArg && currentActualArg) {
                     if (car(currentFormalArg)->type == variableArityType) { /* This is the (lambda args body) variable arity case where args is of the form (x y . z) or some such */
                         Value **variableArityList = mallocValueStarStar();
@@ -2355,14 +2325,9 @@ Value *apply(Value *f, Value **actualArgs) {
                 }
                  
                 if (currentActualArg || (currentFormalArg && car(currentFormalArg) && car(currentFormalArg)->type != variableArityType)) {
-                    printValue(car(currentFormalArg));
-                    printValue(currentActualArg);
                     printf("error: wrong number of arguments\n");
                     return NULL;
                 }
-                printf("\nevaluating body:\n");
-                printParseTree(f->val.closureValue->body);
-                printf("\n");
                 val = mallocValueStarStar();
                 
                 if (!val) {
@@ -2372,9 +2337,6 @@ Value *apply(Value *f, Value **actualArgs) {
                 
                 *val = f->val.closureValue->body;
                 result = car(*(evalEach(val, frame)));
-                printf("closure application returns: ");
-                printValue(result);
-                printf("\n");
                 return result;
             }
 		} 
