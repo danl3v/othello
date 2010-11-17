@@ -1,0 +1,23 @@
+(zero? 0)
+(zero? 1)
+(positive? 1)
+(positive? -1)
+(negative? -1)
+(negative? 1)
+(even? 2)
+(even? 1)
+(odd? 1)
+(odd? 1.5)
+(odd? 2)
+(div 17 3)
+(div 17 -3)
+(div -17 3)
+(div -17 -3)
+(mod 17 3)
+
+
+
+
+
+(assp even? (quote ((1 a) (2 b) (3 c))))
+(find even? (quote (1 2 3 4 5)))
