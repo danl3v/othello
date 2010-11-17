@@ -92,7 +92,7 @@ int evaluateTester(int argc, char *argv[]) {
 			break;
 		}
 		tokens = append(leftoverTokens, tokenize(expression));
-		if (tokens) { printf("\nTOKENS:\n"); printTokens(*tokens); }
+		/*if (tokens) { printf("\nTOKENS:\n"); printTokens(*tokens); } */
 
 		parseTree = parse(tokens, &depth);
 
@@ -102,15 +102,11 @@ int evaluateTester(int argc, char *argv[]) {
 		}
 		else {
 			if (parseTree) {
-				printf("\nPARSE TREE:\n"); 
+				/*printf("\nPARSE TREE:\n"); 
 				printParseTree(*parseTree); 
-				printf("\n");
+				printf("\n");*/
 				value = evaluate(parseTree, topFrame);
-				printf("\nVALUE:\n");
-				/*printValue(cons(NULL, NULL));*/
-				printValue(*value);
-				printf("\n");
-				/*printEvaluation(*value);*/
+				printEvaluation(*value);
 			}
 			else { depth = 0; }
 			leftoverTokens = NULL;

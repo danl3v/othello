@@ -163,6 +163,10 @@ Value *evalLambda(Value *args, Environment *environment);
 
 Value *evalLet(Value *args, Environment *environment);
 
+Value *evalLetStar(Value *args, Environment *environment);
+
+Value *evalLetRec(Value *args, Environment *environment);
+
 Value *evalLoad(Value *args, Environment *environment);
 
 /* EVALUATE */

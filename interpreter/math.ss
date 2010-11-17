@@ -179,31 +179,3 @@
         (if (zero? y)
             1
             (/ (expt x (+ y 1)) x)))))
-
-;;Delete These Testers!
-(define lambdaTester
-    (lambda (x)
-        (lambdaTesterHelper x)))
-        
-(define lambdaTesterHelper
-    (lambda (x)
-        (lambdaTesterHelper2 x)))
-        
-(define lambdaTesterHelper2
-    (lambda (x) x))
-
-(define vaBad
-    (lambda (x . z)
-        (if (null? z)
-        "done"
-        (vaBad x (cdr z)))))
-    
-(define va
-    (lambda (x . z)
-        (vaHelper x z)))
-        
-(define vaHelper
-    (lambda (a b)
-      (if (null? b)
-        "done"
-        (vaHelper a (cdr b)))))

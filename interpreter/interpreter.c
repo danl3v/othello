@@ -99,7 +99,6 @@ Value *mallocValue() {
 	Value *value = malloc(sizeof(*value));
 	
 	if (value) {
-		/*printf("malloced value\n");*/
 		*mallocedValues = stealthCons(value, *mallocedValues);
 	}
 	return value;
@@ -184,11 +183,7 @@ Value *car(Value *value) {
 	if (value && value->type == pairType) {
 		return value->val.pairValue->car;
 	} else {
-	    printf("car passed: ");
-	    printValue(value);
-	    printf("\n");
-		printf("ERROR: cannot take the car of a non-list\n");
-		/* printValue(value); */
+		printf("error: cannot take the car of a non-list\n"); /*This is really good for debugging, but not good for industrial strength interpreting*/
 		return NULL;
 	}
 }
@@ -221,13 +216,12 @@ Value *cdr(Value *value) {
 	if (value && value->type == pairType) {
 		return value->val.pairValue->cdr;
 	} else {
-		printf("ERROR: cannot take the cdr of a non-list\n");
-		/* printValue(value);  fix error checking here */
+		printf("error: cannot take the cdr of a non-list\n"); /*This is really good for debugging, but not good for industrial strength interpreting*/
 		return NULL;
 	}
 }
 
-Value *fakeCdr(Value *value) { /* we should not need to create a new mini parse tree to do cdr, car, cons */
+Value *fakeCdr(Value *value) {
 	if (value && value->type == pairType) {
 	    if (car(value)) {
             if (car(car(value))) {
@@ -271,7 +265,7 @@ Value *cons(Value *value1, Value *value2) {
 	}
 }
 
-Value *fakeCons(Value *value) { /*We can probably do a lot of this with regular cons*/
+Value *fakeCons(Value *value) {
 	Value *value1;
 	Value *value2;
 	Pair *pair1;
@@ -358,7 +352,7 @@ Value **append(Value **value1, Value **value2) {
 		current->val.pairValue->cdr = *value2;
 		return value1;
 	}
-	else if (value1 && *value1) { /* might not need this */
+	else if (value1 && *value1) {
 		return value1;
 	}
 	else if (value2 && *value2) {
@@ -420,7 +414,7 @@ void printParseTree(Value *value) {
 	printValueHelper(value);
 }
 
-void printEvaluation(Value *value) { /* do we want this to take in a * or **? */
+void printEvaluation(Value *value) {
     Value *current = value;
 	while (current) {
 		printValueHelper(car(current));
@@ -623,9 +617,8 @@ Value **tokenize (char *expression) {
 						currentState = inBetween;
 						break;
 						
-					default: /* maybe transition to inbetween state? */
-						printf("error - no t or f after #\n");
-						/* destroy(tokenList); */
+					default:
+						printf("error: # not followed by t or f\n");
 						return NULL;
 				}
 			break;
@@ -1053,23 +1046,16 @@ Value **tokenize (char *expression) {
 			
 			default:
 				printf("error - current state error\n");
-				/* destroy(tokenList); */
 				return NULL;
-		}
-		
+		}		
 		tokenCurrentIndex++;
 	}
-	
 	if (currentState == inString) {
 		printf("error - unterminated string\n");
-		/* destroy(tokenList); */
 		return NULL;
 	}
-	
-	return reverse(tokenList);
-	
+	return reverse(tokenList);	
 }
-
 
 /*
  * PARSER
@@ -1107,10 +1093,6 @@ Value **parse(Value **tokenList, int* depth) {
 				(*parseTree) = cons(subTree, *parseTree); /* push the subtree onto the parseTree */
 				(*depth)--; /* decrease the depth */
 			}
-			/*else if ((car(current))->type == quoteType) {
-				Value **parseOne = parseQuote(current);
-				(*parseTree) = cons(*parseOne, *parseTree);
-			}*/
 			else { /* if regular old token, just push onto the tree */
 				(*parseTree) = cons(car(current), *parseTree);
 			}
@@ -1144,7 +1126,7 @@ Value *add(Value *args) {
 		return cons(result, NULL);
 	}
 	if (args->type == pairType) {
-		while (current) { /* check our error checking. maybe not so good? (+) should be 0 */
+		while (current) {
 			switch (car(car(current))->type) {
 				case integerType:
 					if (result->type == integerType) {
@@ -1206,7 +1188,7 @@ Value *subtract(Value *args) {
 					return NULL;
 			}
 			current = cdr(current);
-			while (current) { /* check our error checking. maybe not so good? */
+			while (current) {
 				switch (car(car(current))->type) {
 					case integerType:
 						if (result->type == integerType) {
@@ -1725,7 +1707,7 @@ Value *evalSetBang(Value *args, Environment *currentEnvironment, Environment *ca
 	}
 	
 	
-	if (car(args)->type != symbolType) { /* if if the first argument is not a symbol */
+	if (car(args)->type != symbolType) { /* if the first argument is not a symbol */
 		printf("set!: first argument not a symbol\n");
 		return NULL;
 	}
@@ -1737,7 +1719,7 @@ Value *evalSetBang(Value *args, Environment *currentEnvironment, Environment *ca
 	}
 	
 	if (!currentEnvironment || !callingEnvironment) {
-		/* if (global) { printf("error: variable not found\n"); } */
+		printf("error: cannot set variable: %s", car(args)->val.symbolValue);
 		return NULL;
 	}
 	
@@ -1770,7 +1752,6 @@ Value *evalLet(Value *args, Environment *environment) {
 		while (current) {
 			if (car(car(current))->type != symbolType) {
 				printf("cannot bind a value to a non identifier\n");
-				/* destroy the frame */
 				return NULL;
 			}
 			notBound = bind(car(car(current))->val.symbolValue, eval(car(cdr(car(current))), environment), frame);
@@ -1795,6 +1776,42 @@ Value *evalLet(Value *args, Environment *environment) {
 	return NULL;
 }
 
+Value *evalLetStar(Value *args, Environment *environment) {
+	Value **val;
+	Environment *oldFrame = environment;
+	Environment *currentFrame;
+	int notBound;
+	if (args && cdr(args)) {
+		Value *current = car(args);
+		while (current) {
+			currentFrame = createFrame(oldFrame);
+			if (car(car(current))->type != symbolType) {
+				printf("cannot bind a value to a non identifier\n");
+				return NULL;
+			}
+			notBound = bind(car(car(current))->val.symbolValue, eval(car(cdr(car(current))), currentFrame), currentFrame);
+			if (notBound) {
+				printf("in let*: error while binding\n");
+				return NULL;
+			}
+			current = cdr(current);
+			oldFrame = currentFrame;
+		}
+		val = mallocValueStarStar();
+		
+		if (!val) {
+			printf("in let*: failed to allocate memory\n");
+			return NULL;
+		}
+		
+		*val = cdr(args);
+		return car(*(evalEach(val, currentFrame)));
+	}
+	
+	printf("let*: bad syntax\n");
+	return NULL;
+}
+
 Value *evalLetRec(Value *args, Environment *environment) {
 	Value *undefined;
 	Value **val;
@@ -1804,7 +1821,6 @@ Value *evalLetRec(Value *args, Environment *environment) {
 		while (current) {
 			if (car(car(current))->type != symbolType) {
 				printf("cannot bind a value to a non identifier\n");
-				/* destroy the frame */
 				return NULL;
 			}
 			undefined = mallocValue();
@@ -1892,7 +1908,7 @@ Value *evalLambda(Value *args, Environment *environment) {
             
             if (closure->val.closureValue) {
                 closure->val.closureValue->formalArguments = car(args);
-                closure->val.closureValue->body = cdr(args); /* body is a list, can have multiple bodies */
+                closure->val.closureValue->body = cdr(args);
                 closure->val.closureValue->environment = environment;
                 return closure;
             }
@@ -1914,7 +1930,7 @@ Value *evalLambda(Value *args, Environment *environment) {
             closure->val.closureValue = mallocClosure();
             if (closure->val.closureValue) {
                 closure->val.closureValue->formalArguments = car(args);
-                closure->val.closureValue->body = cdr(args); /* body is a list, can have multiple bodies */
+                closure->val.closureValue->body = cdr(args);
                 closure->val.closureValue->environment = environment;
                 return closure;
             }
@@ -1986,7 +2002,7 @@ Value *evalLoad(Value *args, Environment *environment) { /* think about line len
 		return NULL;
 	}
 	else {
-		printf("you got some crazy shit goin' on bro. check yo syntax\n");
+		printf("you got some crazy howdy doody goin' on bro. check yo syntax\n");
 		return NULL;
 	}
 }
@@ -2057,7 +2073,6 @@ Environment* createFrame(Environment *parent) {
 Value *environmentLookup(char *symbol, Environment *environment, int global) {
 	Value *current;
 	if (!environment) {
-		/* if (global) { printf("error: variable not found\n"); } */
 		return NULL;
 	}
 	current = *(environment->bindings);
@@ -2072,7 +2087,7 @@ Value *environmentLookup(char *symbol, Environment *environment, int global) {
 		return environmentLookup(symbol, environment->parentFrame, global);
 	}
 	else {
-		return environmentLookup(symbol, NULL, global); /* maybe this is dumb, uses extra memory */
+		return environmentLookup(symbol, NULL, global);
 	}
 }
 
@@ -2113,7 +2128,6 @@ int bind(char *symbol, Value *value, Environment *environment) {
 		*(environment->bindings) = cons(binding, *(environment->bindings));
 	}
 	else {
-		printf("dont wanna seg fault! - in bind\n");
 		return 1;
 	}
 	return 0;
@@ -2152,12 +2166,6 @@ Value **evalEach(Value **tree, Environment *environment) {
 	if(!(*evaluated)){
 	    *evaluated = cons(NULL, NULL);
 	}
-	/*printf("EE Type: %d\n", (*evaluated)->type);
-	printf("EvalEach: ");
-	printValue(*tree);
-	printf("\n");
-	printValue(*evaluated);
-	printf("\n");*/
 	if (!(*evaluated)) {
 		*evaluated = NULL;
 		return evaluated;
@@ -2183,9 +2191,6 @@ Value *eval(Value *value, Environment *environment) {
 			return cons(value, NULL);
 		case symbolType:
 			v = environmentLookup(value->val.symbolValue, environment, globalScope);
-			/*printf("looked up %s and got",value->val.symbolValue);
-			printValue(v);
-			printf("\n");*/
 			if (v) {
 				return v;
 			} else {
@@ -2209,11 +2214,10 @@ Value *eval(Value *value, Environment *environment) {
 				if (!strcmp(operator->val.symbolValue, "if")) { return evalIf(*args, environment); }
 				if (!strcmp(operator->val.symbolValue, "lambda")) { return evalLambda(*args, environment); }
 				if (!strcmp(operator->val.symbolValue, "let")) {return evalLet(*args, environment);}
+				if (!strcmp(operator->val.symbolValue, "let*")) {return evalLetStar(*args, environment);}
 				if (!strcmp(operator->val.symbolValue, "letrec")) {return evalLetRec(*args, environment);}
 				if (!strcmp(operator->val.symbolValue, "set!")) {return evalSetBang(*args, environment, environment);}
 				if (!strcmp(operator->val.symbolValue, "load")) {return evalLoad(*args, environment);}
-				/*if (!strcmp(operator->val.symbolValue, "'")) {return evalQuote(*args, environment);}
-				*/
 				evaledOperator = eval(operator, environment);
 				if (evaledOperator) {
 					evaledArgs = evalEach(args, environment);
@@ -2226,19 +2230,6 @@ Value *eval(Value *value, Environment *environment) {
 				}
 				return NULL;
 			}
-			/*else if (operator->type == closureType || operator->type == primitiveType || operator->type == pairType) {
-				Value *evaledOperator = eval(operator, environment);
-				Value **evaledArgs = evalEach(args, environment);
-				printf("WHAT IN THE WORLD ARE WE DOING HERE\n");
-				if (evaledArgs) {
-					return apply(evaledOperator, evaledArgs);
-				} else {
-					printf("procedure application: expected procedure, given: ");
-					printValue(operator);
-					printf("\n");
-					return NULL;
-				}
-			}*/
 			else {
 				printf("procedure application: expected procedure, given: ");
 				printValue(operator);
@@ -2266,9 +2257,7 @@ Value *apply(Value *f, Value **actualArgs) {
 	}
 	else {
 		if (f->type == closureType) {
-		    printf("CLOSURE actualArgs TYPE: ");
-		    printf("%d\n", car(car(*actualArgs))->type);
-		    if ((f->val.closureValue->formalArguments)->type != pairType) {
+		    if ((f->val.closureValue->formalArguments)->type != pairType) { /* This is the (lambda arg body) variable arity case where arg does not have any enclosing parens */
 		        Value **val;
 		        Environment *frame = createFrame(f->val.closureValue->environment);
 		        Value **variableArityList = mallocValueStarStar();
@@ -2281,14 +2270,11 @@ Value *apply(Value *f, Value **actualArgs) {
 		        
 		        *variableArityList = cons(car(car(currentActualArg)), NULL);
                 currentActualArg = cdr(currentActualArg);
-                printf("entering while\n");
                 while (currentActualArg) {
                     *variableArityList = cons(car(car(currentActualArg)), *variableArityList);
                     currentActualArg = cdr(currentActualArg);
                 }
                 reverse(variableArityList);
-                printValue(*variableArityList);
-                printf("\n");
                 if (bind((f->val.closureValue->formalArguments)->val.symbolValue, cons(*variableArityList, NULL), frame)) {
                 	printf("in apply: error while binding\n");
                 	return NULL;
@@ -2313,7 +2299,7 @@ Value *apply(Value *f, Value **actualArgs) {
 		    else {
                 Value **val;
                 Environment *frame = createFrame(f->val.closureValue->environment);
-                Value *currentFormalArg = f->val.closureValue->formalArguments; /* maybe add some error checking */
+                Value *currentFormalArg = f->val.closureValue->formalArguments;
                 Value *currentActualArg = *actualArgs;
                 printf("formal\n");
                 printValue(currentFormalArg);
@@ -2321,12 +2307,7 @@ Value *apply(Value *f, Value **actualArgs) {
                 printValue(currentActualArg);
                 printf("\n");
                 while (currentFormalArg && currentActualArg) {
-                    /*printf("currentActualArg\n");
-                    printValue(currentActualArg);
-                    printf("\ncurrentFormalArg\n");
-                    printValue(currentFormalArg);
-                    printf("\n");*/
-                    if (car(currentFormalArg)->type == variableArityType) {
+                    if (car(currentFormalArg)->type == variableArityType) { /* This is the (lambda args body) variable arity case where args is of the form (x y . z) or some such */
                         Value **variableArityList = mallocValueStarStar();
                         
                         if (!variableArityList) {
@@ -2343,9 +2324,6 @@ Value *apply(Value *f, Value **actualArgs) {
                             printf("error: too many variables after arity\n");
                             return NULL;
                         }
-                        printf("VA\n");
-                        printValue(car(cdr(currentFormalArg)));
-                        printValue(currentActualArg);
                         *variableArityList = cons(car(car(currentActualArg)), NULL);
                         currentActualArg = cdr(currentActualArg);
                         while (currentActualArg) {
@@ -2353,9 +2331,6 @@ Value *apply(Value *f, Value **actualArgs) {
                             currentActualArg = cdr(currentActualArg);
                         }
                         reverse(variableArityList);
-                        printf("variableArityList: ");
-                        printValue(*variableArityList);
-                        printf("\n");
                         if (bind((car(cdr(currentFormalArg)))->val.symbolValue, cons(*variableArityList, NULL), frame)) {
                         	printf("in apply: error while binding\n");
                         	return NULL;
@@ -2373,7 +2348,6 @@ Value *apply(Value *f, Value **actualArgs) {
                     }
                 }
                 if (currentFormalArg && car(currentFormalArg) && car(currentFormalArg)->type == variableArityType) {
-                    /*printf("binding null to post VA variable\n");*/
                     if (bind((car(cdr(currentFormalArg)))->val.symbolValue, cons(NULL, NULL), frame)) {
 						printf("in apply: error while binding\n");
 						return NULL;

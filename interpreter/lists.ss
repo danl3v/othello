@@ -138,7 +138,7 @@
   (lambda (x L)   ;(member a '(1 2 3 a b c)) => Error
     (if (null? L)
         #f
-        (if (eq? x (car L))
+        (if (equal? x (car L))
             L
             (member x (cdr L))))))
 
@@ -146,7 +146,7 @@
   (lambda (x L)
     (if (null? L)
         #f
-        (if (eq? x (caar L))
+        (if (equal? x (caar L))
             (car L)
             (assq x (cdr L))))))
 
