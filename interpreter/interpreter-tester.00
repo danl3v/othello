@@ -42,7 +42,7 @@
 (cadar (quote ((1 2 3) (4 5 6) (7 8 9))))
 (cdddar (quote ((1 2 3 4) (4 5 6) (7 8))))
 ((list 1 2 3) (1 2 3))
-((list) ())
+(list)
 (length (quote (1 2 3 4)))
 (length (quote ()))
 (list-tail (quote (0 1 2 3 4)) 3)
