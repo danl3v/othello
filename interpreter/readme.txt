@@ -12,3 +12,4 @@ Currently not working:
 garbage collection
 syntactic sugar quote
 reserved function names
+equality has some issues
