@@ -2176,7 +2176,13 @@ Value **evalEach(Value **tree, Environment *environment) {
 	}
 	
 	while (current && current->type == pairType && car(current)) {
-	    result = eval(car(current), environment);
+		if (car(current)->type == quoteType) {
+			result = cons(car(cdr(current)), NULL);
+			current = cdr(current);
+		}
+	    else {
+	    	result = eval(car(current), environment);
+	    }
 	    if (result) {
 	        if (!(*evaluated)) {
 		        *evaluated = cons(result, valueStar);
