@@ -1073,7 +1073,6 @@ Value **parse(Value **tokenList, int* depth) {
 		return NULL;
 	}
 	
-
 	if (tokenList) { /* check to see if the tokenList exists */
 		current = *tokenList;
 		while (current) { /* start to iterate through the tokenList */
@@ -2176,7 +2175,7 @@ Value **evalEach(Value **tree, Environment *environment) {
 	}
 	
 	while (current && current->type == pairType && car(current)) {
-		if (car(current)->type == quoteType) {
+		if (car(current)->type == quoteType) { /* deal with snytactic suga */
 			result = cons(car(cdr(current)), NULL);
 			current = cdr(current);
 		}
