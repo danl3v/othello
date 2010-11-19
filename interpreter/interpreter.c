@@ -2175,13 +2175,13 @@ Value **evalEach(Value **tree, Environment *environment) {
 	}
 	
 	while (current && current->type == pairType && car(current)) {
-		if (car(current)->type == quoteType) { /* deal with snytactic suga */
+		/*if (car(current)->type == quoteType) { /* deal with snytactic suga -- but not exactly working cuz we have car and cdr issues */
 			result = cons(car(cdr(current)), NULL);
 			current = cdr(current);
 		}
-	    else {
+	    else {*/
 	    	result = eval(car(current), environment);
-	    }
+	    /*}*/
 	    if (result) {
 	        if (!(*evaluated)) {
 		        *evaluated = cons(result, valueStar);
